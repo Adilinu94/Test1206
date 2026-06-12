@@ -85,14 +85,14 @@ novamira-adrianv2/
 
 ```bash
 # 1. Plugin in WordPress installieren
-wp plugin install /pfad/zu/novamira-adrianv2.zip --activate
+ln -s /pfad/zu/novamira-adrianv2 wp-content/plugins/novamira-adrianv2
+wp plugin activate novamira-adrianv2
 
-# 2. Composer dependencies (optional)
+# 2. Composer dependencies (Dev only)
 cd wp-content/plugins/novamira-adrianv2
-composer install --no-dev
-
-# 3. PHP CodeSniffer (Dev only)
 composer install
+
+# 3. PHP CodeSniffer
 ./vendor/bin/phpcs --standard=phpcs.xml
 ```
 

@@ -11,7 +11,7 @@ $novamira_adrianv2_elementor_files = [
     __DIR__ . '/class-batch-class.php',
     __DIR__ . '/class-batch-get-content.php',
     __DIR__ . '/class-clone-element.php',
-    __DIR__ . '/class-convert-kit-to-v4.php',
+    __DIR__ . '/_deprecated/class-convert-kit-to-v4.php',
     __DIR__ . '/class-create-component.php',
     __DIR__ . '/class-detach-component.php',
     __DIR__ . '/class-duplicate-page.php',
