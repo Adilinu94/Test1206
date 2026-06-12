@@ -56,3 +56,6 @@ require_once __DIR__ . '/class-audit-helpers.php';
 
 // 11. Ability registry trait.
 require_once __DIR__ . '/trait-ability-registry.php';
+
+// 12. Elementor data helpers trait (used by Elementor/Media/A11y ability classes).
+require_once __DIR__ . '/trait-elementor-data-helpers.php';

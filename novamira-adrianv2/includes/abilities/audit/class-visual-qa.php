@@ -11,10 +11,10 @@ class Visual_Qa
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-visual-qa', [
+        wp_register_ability('novamira-adrianv2/visual-qa', [
             'label'               => 'Visual QA',
             'description'         => 'Audit a page for visual quality issues: overflow risks (fixed px widths exceeding viewport), z-index stacking conflicts, negative margins that may cause overlap, and absolute-positioned overlap risks. Checks both desktop and responsive breakpoints.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

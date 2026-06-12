@@ -121,23 +121,23 @@ class Atomic_Widgets {
     // =========================================================================
 
     private static function register_add_atomic_widget(): void {
-        $name = 'novamira-extra/add-atomic-widget';
+        $name = 'novamira-adrianv2/add-atomic-widget';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Add Atomic Widget', 'novamira-adrians-extra'),
-            'description'         => __('Adds any Elementor 4.0+ atomic widget to a container. Settings must use the $$type prop format. For simpler usage, prefer the convenience tools (add-atomic-heading, etc.).', 'novamira-adrians-extra'),
+            'label'               => __('Add Atomic Widget', 'novamira-adrianv2'),
+            'description'         => __('Adds any Elementor 4.0+ atomic widget to a container. Settings must use the $$type prop format. For simpler usage, prefer the convenience tools (add-atomic-heading, etc.).', 'novamira-adrianv2'),
             'category'            => 'elementor',
             'execute_callback'    => [self::class, 'execute_add_atomic_widget'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
-                    'post_id'     => ['type' => 'integer', 'description' => __('The post/page ID.', 'novamira-adrians-extra')],
-                    'parent_id'   => ['type' => 'string', 'description' => __('Parent container element ID.', 'novamira-adrians-extra')],
-                    'position'    => ['type' => 'integer', 'description' => __('Insert position. -1 = append.', 'novamira-adrians-extra')],
-                    'widget_type' => ['type' => 'string', 'description' => __('Atomic widget type name (e.g. e-heading, e-button).', 'novamira-adrians-extra')],
-                    'settings'    => ['type' => 'object', 'description' => __('Widget settings with $$type-wrapped values.', 'novamira-adrians-extra')],
+                    'post_id'     => ['type' => 'integer', 'description' => __('The post/page ID.', 'novamira-adrianv2')],
+                    'parent_id'   => ['type' => 'string', 'description' => __('Parent container element ID.', 'novamira-adrianv2')],
+                    'position'    => ['type' => 'integer', 'description' => __('Insert position. -1 = append.', 'novamira-adrianv2')],
+                    'widget_type' => ['type' => 'string', 'description' => __('Atomic widget type name (e.g. e-heading, e-button).', 'novamira-adrianv2')],
+                    'settings'    => ['type' => 'object', 'description' => __('Widget settings with $$type-wrapped values.', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id', 'parent_id', 'widget_type'],
             ],
@@ -165,7 +165,7 @@ class Atomic_Widgets {
         $settings    = $input['settings'] ?? [];
 
         if ($widget_type === '') {
-            return new \WP_Error('missing_widget_type', __('widget_type is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_widget_type', __('widget_type is required.', 'novamira-adrianv2'));
         }
 
         $element = self::create_atomic_widget($widget_type, $settings);
@@ -189,21 +189,21 @@ class Atomic_Widgets {
     }
 
     private static function register_update_atomic_widget(): void {
-        $name = 'novamira-extra/update-atomic-widget';
+        $name = 'novamira-adrianv2/update-atomic-widget';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Update Atomic Widget', 'novamira-adrians-extra'),
-            'description'         => __('Updates settings on an existing Elementor 4.0+ atomic widget. Performs a partial merge — only provided keys are changed.', 'novamira-adrians-extra'),
+            'label'               => __('Update Atomic Widget', 'novamira-adrianv2'),
+            'description'         => __('Updates settings on an existing Elementor 4.0+ atomic widget. Performs a partial merge — only provided keys are changed.', 'novamira-adrianv2'),
             'category'            => 'elementor',
             'execute_callback'    => [self::class, 'execute_update_atomic_widget'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
-                    'post_id'    => ['type' => 'integer', 'description' => __('The post/page ID.', 'novamira-adrians-extra')],
-                    'element_id' => ['type' => 'string', 'description' => __('The element ID to update.', 'novamira-adrians-extra')],
-                    'settings'   => ['type' => 'object', 'description' => __('Partial settings to merge ($$type-wrapped values).', 'novamira-adrians-extra')],
+                    'post_id'    => ['type' => 'integer', 'description' => __('The post/page ID.', 'novamira-adrianv2')],
+                    'element_id' => ['type' => 'string', 'description' => __('The element ID to update.', 'novamira-adrianv2')],
+                    'settings'   => ['type' => 'object', 'description' => __('Partial settings to merge ($$type-wrapped values).', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id', 'element_id', 'settings'],
             ],
@@ -270,13 +270,13 @@ class Atomic_Widgets {
         string $widget_type,
         callable $settings_fn
     ): void {
-        $full_name = 'novamira-extra/' . $name;
+        $full_name = 'novamira-adrianv2/' . $name;
         self::$ability_names[] = $full_name;
 
         $base_props = [
-            'post_id'   => ['type' => 'integer', 'description' => __('The post/page ID.', 'novamira-adrians-extra')],
-            'parent_id' => ['type' => 'string', 'description' => __('Parent container element ID (e-flexbox or e-div-block).', 'novamira-adrians-extra')],
-            'position'  => ['type' => 'integer', 'description' => __('Insert position. -1 = append.', 'novamira-adrians-extra')],
+            'post_id'   => ['type' => 'integer', 'description' => __('The post/page ID.', 'novamira-adrianv2')],
+            'parent_id' => ['type' => 'string', 'description' => __('Parent container element ID (e-flexbox or e-div-block).', 'novamira-adrianv2')],
+            'position'  => ['type' => 'integer', 'description' => __('Insert position. -1 = append.', 'novamira-adrianv2')],
         ];
 
         $all_required = array_unique(array_merge(['post_id', 'parent_id'], $required));
@@ -342,13 +342,13 @@ class Atomic_Widgets {
     private static function register_add_atomic_heading(): void {
         self::register_atomic_convenience(
             'add-atomic-heading',
-            __('Add Atomic Heading', 'novamira-adrians-extra'),
-            __('Adds an Elementor 4.0 atomic heading element. Accepts plain text and tag; $$type wrapping is handled automatically.', 'novamira-adrians-extra'),
+            __('Add Atomic Heading', 'novamira-adrianv2'),
+            __('Adds an Elementor 4.0 atomic heading element. Accepts plain text and tag; $$type wrapping is handled automatically.', 'novamira-adrianv2'),
             [
-                'title'  => ['type' => 'string', 'description' => __('Heading text content.', 'novamira-adrians-extra')],
-                'tag'    => ['type' => 'string', 'enum' => ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], 'description' => __('HTML tag. Default: h2.', 'novamira-adrians-extra')],
-                'link'   => ['type' => 'string', 'description' => __('Optional URL to link the heading.', 'novamira-adrians-extra')],
-                'css_id' => ['type' => 'string', 'description' => __('Optional CSS ID for the element.', 'novamira-adrians-extra')],
+                'title'  => ['type' => 'string', 'description' => __('Heading text content.', 'novamira-adrianv2')],
+                'tag'    => ['type' => 'string', 'enum' => ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], 'description' => __('HTML tag. Default: h2.', 'novamira-adrianv2')],
+                'link'   => ['type' => 'string', 'description' => __('Optional URL to link the heading.', 'novamira-adrianv2')],
+                'css_id' => ['type' => 'string', 'description' => __('Optional CSS ID for the element.', 'novamira-adrianv2')],
             ],
             [],
             'e-heading',
@@ -373,12 +373,12 @@ class Atomic_Widgets {
     private static function register_add_atomic_paragraph(): void {
         self::register_atomic_convenience(
             'add-atomic-paragraph',
-            __('Add Atomic Paragraph', 'novamira-adrians-extra'),
-            __('Adds an Elementor 4.0 atomic paragraph element. The content prop is named `paragraph` (not `text` or `editor`) — the correct V4 prop name.', 'novamira-adrians-extra'),
+            __('Add Atomic Paragraph', 'novamira-adrianv2'),
+            __('Adds an Elementor 4.0 atomic paragraph element. The content prop is named `paragraph` (not `text` or `editor`) — the correct V4 prop name.', 'novamira-adrianv2'),
             [
-                'content' => ['type' => 'string', 'description' => __('Paragraph text content.', 'novamira-adrians-extra')],
-                'link'    => ['type' => 'string', 'description' => __('Optional URL to link the paragraph.', 'novamira-adrians-extra')],
-                'css_id'  => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrians-extra')],
+                'content' => ['type' => 'string', 'description' => __('Paragraph text content.', 'novamira-adrianv2')],
+                'link'    => ['type' => 'string', 'description' => __('Optional URL to link the paragraph.', 'novamira-adrianv2')],
+                'css_id'  => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrianv2')],
             ],
             [],
             'e-paragraph',
@@ -405,13 +405,13 @@ class Atomic_Widgets {
     private static function register_add_atomic_button(): void {
         self::register_atomic_convenience(
             'add-atomic-button',
-            __('Add Atomic Button', 'novamira-adrians-extra'),
-            __('Adds an Elementor 4.0 atomic button element.', 'novamira-adrians-extra'),
+            __('Add Atomic Button', 'novamira-adrianv2'),
+            __('Adds an Elementor 4.0 atomic button element.', 'novamira-adrianv2'),
             [
-                'text'         => ['type' => 'string', 'description' => __('Button label text.', 'novamira-adrians-extra')],
-                'link'         => ['type' => 'string', 'description' => __('Button URL.', 'novamira-adrians-extra')],
-                'target_blank' => ['type' => 'boolean', 'description' => __('Open in new tab.', 'novamira-adrians-extra')],
-                'css_id'       => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrians-extra')],
+                'text'         => ['type' => 'string', 'description' => __('Button label text.', 'novamira-adrianv2')],
+                'link'         => ['type' => 'string', 'description' => __('Button URL.', 'novamira-adrianv2')],
+                'target_blank' => ['type' => 'boolean', 'description' => __('Open in new tab.', 'novamira-adrianv2')],
+                'css_id'       => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrianv2')],
             ],
             [],
             'e-button',
@@ -436,14 +436,14 @@ class Atomic_Widgets {
     private static function register_add_atomic_image(): void {
         self::register_atomic_convenience(
             'add-atomic-image',
-            __('Add Atomic Image', 'novamira-adrians-extra'),
-            __('Adds an Elementor 4.0 atomic image element. Provide either image_id (from media library) or image_url. Uses image-attachment-id $$type for V4 compatibility (Invariant IV: url omitted when id is set).', 'novamira-adrians-extra'),
+            __('Add Atomic Image', 'novamira-adrianv2'),
+            __('Adds an Elementor 4.0 atomic image element. Provide either image_id (from media library) or image_url. Uses image-attachment-id $$type for V4 compatibility (Invariant IV: url omitted when id is set).', 'novamira-adrianv2'),
             [
-                'image_id'  => ['type' => 'integer', 'description' => __('WordPress media library attachment ID.', 'novamira-adrians-extra')],
-                'image_url' => ['type' => 'string', 'description' => __('Image URL (if not using media library).', 'novamira-adrians-extra')],
-                'alt'       => ['type' => 'string', 'description' => __('Alt text for the image.', 'novamira-adrians-extra')],
-                'link'      => ['type' => 'string', 'description' => __('Optional link URL.', 'novamira-adrians-extra')],
-                'css_id'    => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrians-extra')],
+                'image_id'  => ['type' => 'integer', 'description' => __('WordPress media library attachment ID.', 'novamira-adrianv2')],
+                'image_url' => ['type' => 'string', 'description' => __('Image URL (if not using media library).', 'novamira-adrianv2')],
+                'alt'       => ['type' => 'string', 'description' => __('Alt text for the image.', 'novamira-adrianv2')],
+                'link'      => ['type' => 'string', 'description' => __('Optional link URL.', 'novamira-adrianv2')],
+                'css_id'    => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrianv2')],
             ],
             [],
             'e-image',
@@ -480,12 +480,12 @@ class Atomic_Widgets {
     private static function register_add_atomic_svg(): void {
         self::register_atomic_convenience(
             'add-atomic-svg',
-            __('Add Atomic SVG', 'novamira-adrians-extra'),
-            __('Adds an Elementor 4.0 atomic SVG element.', 'novamira-adrians-extra'),
+            __('Add Atomic SVG', 'novamira-adrianv2'),
+            __('Adds an Elementor 4.0 atomic SVG element.', 'novamira-adrianv2'),
             [
-                'svg_id'  => ['type' => 'integer', 'description' => __('WordPress media library SVG attachment ID.', 'novamira-adrians-extra')],
-                'svg_url' => ['type' => 'string', 'description' => __('SVG URL (if not using media library).', 'novamira-adrians-extra')],
-                'css_id'  => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrians-extra')],
+                'svg_id'  => ['type' => 'integer', 'description' => __('WordPress media library SVG attachment ID.', 'novamira-adrianv2')],
+                'svg_url' => ['type' => 'string', 'description' => __('SVG URL (if not using media library).', 'novamira-adrianv2')],
+                'css_id'  => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrianv2')],
             ],
             [],
             'e-svg',
@@ -515,11 +515,11 @@ class Atomic_Widgets {
     private static function register_add_atomic_youtube(): void {
         self::register_atomic_convenience(
             'add-atomic-youtube',
-            __('Add Atomic YouTube', 'novamira-adrians-extra'),
-            __('Adds an Elementor 4.0 atomic YouTube video element. The video URL is stored under the `source` prop (not `url`).', 'novamira-adrians-extra'),
+            __('Add Atomic YouTube', 'novamira-adrianv2'),
+            __('Adds an Elementor 4.0 atomic YouTube video element. The video URL is stored under the `source` prop (not `url`).', 'novamira-adrianv2'),
             [
-                'video_url' => ['type' => 'string', 'description' => __('YouTube video URL.', 'novamira-adrians-extra')],
-                'css_id'    => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrians-extra')],
+                'video_url' => ['type' => 'string', 'description' => __('YouTube video URL.', 'novamira-adrianv2')],
+                'css_id'    => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrianv2')],
             ],
             ['video_url'],
             'e-youtube',
@@ -542,12 +542,12 @@ class Atomic_Widgets {
     private static function register_add_atomic_video(): void {
         self::register_atomic_convenience(
             'add-atomic-video',
-            __('Add Atomic Video', 'novamira-adrians-extra'),
-            __('Adds an Elementor 4.0 atomic self-hosted video element. The video URL/video ID is stored under the `source` prop (not `url`).', 'novamira-adrians-extra'),
+            __('Add Atomic Video', 'novamira-adrianv2'),
+            __('Adds an Elementor 4.0 atomic self-hosted video element. The video URL/video ID is stored under the `source` prop (not `url`).', 'novamira-adrianv2'),
             [
-                'video_url' => ['type' => 'string', 'description' => __('Self-hosted video URL.', 'novamira-adrians-extra')],
-                'video_id'  => ['type' => 'integer', 'description' => __('Media library video attachment ID.', 'novamira-adrians-extra')],
-                'css_id'    => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrians-extra')],
+                'video_url' => ['type' => 'string', 'description' => __('Self-hosted video URL.', 'novamira-adrianv2')],
+                'video_id'  => ['type' => 'integer', 'description' => __('Media library video attachment ID.', 'novamira-adrianv2')],
+                'css_id'    => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrianv2')],
             ],
             [],
             'e-self-hosted-video',
@@ -577,10 +577,10 @@ class Atomic_Widgets {
     private static function register_add_atomic_divider(): void {
         self::register_atomic_convenience(
             'add-atomic-divider',
-            __('Add Atomic Divider', 'novamira-adrians-extra'),
-            __('Adds an Elementor 4.0 atomic divider element.', 'novamira-adrians-extra'),
+            __('Add Atomic Divider', 'novamira-adrianv2'),
+            __('Adds an Elementor 4.0 atomic divider element.', 'novamira-adrianv2'),
             [
-                'css_id' => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrians-extra')],
+                'css_id' => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrianv2')],
             ],
             [],
             'e-divider',

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -12,10 +12,10 @@ if (!defined('ABSPATH')) {
 
 class List_Elementor_Pages {
     public static function register(): void {
-        wp_register_ability('novamira/adrians-list-elementor-pages', [
+        wp_register_ability('novamira-adrianv2/list-elementor-pages', [
             'label'               => 'List Elementor Pages',
             'description'         => 'Finds pages, posts, and Elementor Library items built with Elementor. Supports filters, pagination, top-level section summaries, and lightweight v3/v4/atomic stats.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

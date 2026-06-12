@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -23,10 +23,10 @@ class Html_To_Elementor_Widget_Plan
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-html-to-elementor-widget-plan', [
+        wp_register_ability('novamira-adrianv2/html-to-elementor-widget-plan', [
             'label'       => 'HTML to Elementor Widget Plan',
             'description' => 'Analyzes HTML and creates a structured Elementor widget conversion plan. Maps tags to native v4/v3 widgets, extracts CSS/JS assets, flags unconvertible parts, estimates native widget coverage, and returns a simplified tree for building pages with Elementor widgets instead of HTML dumps.',
-            'category'    => 'adrians',
+            'category'    => 'novamira-adrianv2',
             'input_schema' => [
                 'type'       => 'object',
                 'properties' => [

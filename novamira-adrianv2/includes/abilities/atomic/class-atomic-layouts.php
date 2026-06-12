@@ -261,14 +261,14 @@ class Atomic_Layouts {
     // =========================================================================
 
     private static function register_add_flexbox(): void {
-        $name = 'novamira-extra/add-flexbox';
+        $name = 'novamira-adrianv2/add-flexbox';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Add Flexbox', 'novamira-adrians-extra'),
+            'label'               => __('Add Flexbox', 'novamira-adrianv2'),
             'description'         => __(
                 'Adds an Elementor 4.0 flexbox container. Layout (direction, justify, align, gap, wrap) and visual styles (padding, background-color, color, min-height, width, border-radius) are applied as local V4 styles automatically — not as v3 container settings. Use this instead of legacy containers for Elementor 4.0+ sites.',
-                'novamira-adrians-extra'
+                'novamira-adrianv2'
             ),
             'category'            => 'elementor',
             'execute_callback'    => [self::class, 'execute_add_flexbox'],
@@ -276,31 +276,31 @@ class Atomic_Layouts {
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
-                    'post_id'         => ['type' => 'integer', 'description' => __('The post/page ID.', 'novamira-adrians-extra')],
-                    'parent_id'       => ['type' => 'string', 'description' => __('Parent element ID. Empty for top-level.', 'novamira-adrians-extra')],
-                    'position'        => ['type' => 'integer', 'description' => __('Insert position. -1 = append.', 'novamira-adrians-extra')],
-                    'tag'             => ['type' => 'string', 'enum' => ['div', 'header', 'section', 'article', 'aside', 'footer'], 'description' => __('HTML tag. Default: div.', 'novamira-adrians-extra')],
-                    'direction'       => ['type' => 'string', 'enum' => ['row', 'column', 'row-reverse', 'column-reverse'], 'description' => __('Flex direction. Default: column.', 'novamira-adrians-extra')],
-                    'justify'         => ['type' => 'string', 'enum' => ['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'], 'description' => __('Justify content.', 'novamira-adrians-extra')],
-                    'align'           => ['type' => 'string', 'enum' => ['flex-start', 'center', 'flex-end', 'stretch', 'baseline'], 'description' => __('Align items.', 'novamira-adrians-extra')],
-                    'gap'             => ['type' => 'number', 'description' => __('Gap between children (px by default).', 'novamira-adrians-extra')],
-                    'gap_unit'        => ['type' => 'string', 'enum' => ['px', 'em', 'rem', '%', 'vw'], 'description' => __('Gap unit. Default: px.', 'novamira-adrians-extra')],
-                    'wrap'            => ['type' => 'string', 'enum' => ['nowrap', 'wrap', 'wrap-reverse'], 'description' => __('Flex wrap.', 'novamira-adrians-extra')],
-                    'css_id'          => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrians-extra')],
-                    'padding'         => ['type' => 'number', 'description' => __('Padding on all sides (px by default).', 'novamira-adrians-extra')],
-                    'padding_top'     => ['type' => 'number', 'description' => __('Padding top (px).', 'novamira-adrians-extra')],
-                    'padding_right'   => ['type' => 'number', 'description' => __('Padding right (px).', 'novamira-adrians-extra')],
-                    'padding_bottom'  => ['type' => 'number', 'description' => __('Padding bottom (px).', 'novamira-adrians-extra')],
-                    'padding_left'    => ['type' => 'number', 'description' => __('Padding left (px).', 'novamira-adrians-extra')],
-                    'margin_top'      => ['type' => 'number', 'description' => __('Margin top (px).', 'novamira-adrians-extra')],
-                    'margin_bottom'   => ['type' => 'number', 'description' => __('Margin bottom (px).', 'novamira-adrians-extra')],
-                    'background_color' => ['type' => 'string', 'description' => __('Background color (hex/rgba or e-gv-* Global Variable ID).', 'novamira-adrians-extra')],
-                    'color'           => ['type' => 'string', 'description' => __('Text color (hex/rgba or e-gv-* Global Variable ID).', 'novamira-adrians-extra')],
-                    'min_height'      => ['type' => 'number', 'description' => __('Minimum height (px by default).', 'novamira-adrians-extra')],
-                    'width'           => ['type' => 'number', 'description' => __('Element width (px by default).', 'novamira-adrians-extra')],
-                    'border_radius'   => ['type' => 'number', 'description' => __('Border radius (px).', 'novamira-adrians-extra')],
-                    'row_gap'         => ['type' => 'number', 'description' => __('Row gap (px).', 'novamira-adrians-extra')],
-                    'column_gap'      => ['type' => 'number', 'description' => __('Column gap (px).', 'novamira-adrians-extra')],
+                    'post_id'         => ['type' => 'integer', 'description' => __('The post/page ID.', 'novamira-adrianv2')],
+                    'parent_id'       => ['type' => 'string', 'description' => __('Parent element ID. Empty for top-level.', 'novamira-adrianv2')],
+                    'position'        => ['type' => 'integer', 'description' => __('Insert position. -1 = append.', 'novamira-adrianv2')],
+                    'tag'             => ['type' => 'string', 'enum' => ['div', 'header', 'section', 'article', 'aside', 'footer'], 'description' => __('HTML tag. Default: div.', 'novamira-adrianv2')],
+                    'direction'       => ['type' => 'string', 'enum' => ['row', 'column', 'row-reverse', 'column-reverse'], 'description' => __('Flex direction. Default: column.', 'novamira-adrianv2')],
+                    'justify'         => ['type' => 'string', 'enum' => ['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'], 'description' => __('Justify content.', 'novamira-adrianv2')],
+                    'align'           => ['type' => 'string', 'enum' => ['flex-start', 'center', 'flex-end', 'stretch', 'baseline'], 'description' => __('Align items.', 'novamira-adrianv2')],
+                    'gap'             => ['type' => 'number', 'description' => __('Gap between children (px by default).', 'novamira-adrianv2')],
+                    'gap_unit'        => ['type' => 'string', 'enum' => ['px', 'em', 'rem', '%', 'vw'], 'description' => __('Gap unit. Default: px.', 'novamira-adrianv2')],
+                    'wrap'            => ['type' => 'string', 'enum' => ['nowrap', 'wrap', 'wrap-reverse'], 'description' => __('Flex wrap.', 'novamira-adrianv2')],
+                    'css_id'          => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrianv2')],
+                    'padding'         => ['type' => 'number', 'description' => __('Padding on all sides (px by default).', 'novamira-adrianv2')],
+                    'padding_top'     => ['type' => 'number', 'description' => __('Padding top (px).', 'novamira-adrianv2')],
+                    'padding_right'   => ['type' => 'number', 'description' => __('Padding right (px).', 'novamira-adrianv2')],
+                    'padding_bottom'  => ['type' => 'number', 'description' => __('Padding bottom (px).', 'novamira-adrianv2')],
+                    'padding_left'    => ['type' => 'number', 'description' => __('Padding left (px).', 'novamira-adrianv2')],
+                    'margin_top'      => ['type' => 'number', 'description' => __('Margin top (px).', 'novamira-adrianv2')],
+                    'margin_bottom'   => ['type' => 'number', 'description' => __('Margin bottom (px).', 'novamira-adrianv2')],
+                    'background_color' => ['type' => 'string', 'description' => __('Background color (hex/rgba or e-gv-* Global Variable ID).', 'novamira-adrianv2')],
+                    'color'           => ['type' => 'string', 'description' => __('Text color (hex/rgba or e-gv-* Global Variable ID).', 'novamira-adrianv2')],
+                    'min_height'      => ['type' => 'number', 'description' => __('Minimum height (px by default).', 'novamira-adrianv2')],
+                    'width'           => ['type' => 'number', 'description' => __('Element width (px by default).', 'novamira-adrianv2')],
+                    'border_radius'   => ['type' => 'number', 'description' => __('Border radius (px).', 'novamira-adrianv2')],
+                    'row_gap'         => ['type' => 'number', 'description' => __('Row gap (px).', 'novamira-adrianv2')],
+                    'column_gap'      => ['type' => 'number', 'description' => __('Column gap (px).', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id'],
             ],
@@ -343,35 +343,35 @@ class Atomic_Layouts {
     // =========================================================================
 
     private static function register_add_div_block(): void {
-        $name = 'novamira-extra/add-div-block';
+        $name = 'novamira-adrianv2/add-div-block';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Add Div Block', 'novamira-adrians-extra'),
-            'description'         => __('Adds an Elementor 4.0 div-block container (block flow layout). Visual styles (padding, background-color, color, min-height, width, border-radius) are applied as local V4 styles automatically. Use for non-flex containers.', 'novamira-adrians-extra'),
+            'label'               => __('Add Div Block', 'novamira-adrianv2'),
+            'description'         => __('Adds an Elementor 4.0 div-block container (block flow layout). Visual styles (padding, background-color, color, min-height, width, border-radius) are applied as local V4 styles automatically. Use for non-flex containers.', 'novamira-adrianv2'),
             'category'            => 'elementor',
             'execute_callback'    => [self::class, 'execute_add_div_block'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
-                    'post_id'          => ['type' => 'integer', 'description' => __('The post/page ID.', 'novamira-adrians-extra')],
-                    'parent_id'        => ['type' => 'string', 'description' => __('Parent element ID. Empty for top-level.', 'novamira-adrians-extra')],
-                    'position'         => ['type' => 'integer', 'description' => __('Insert position. -1 = append.', 'novamira-adrians-extra')],
-                    'tag'              => ['type' => 'string', 'enum' => ['div', 'header', 'section', 'article', 'aside', 'footer'], 'description' => __('HTML tag. Default: div.', 'novamira-adrians-extra')],
-                    'css_id'           => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrians-extra')],
-                    'padding'          => ['type' => 'number', 'description' => __('Padding on all sides (px by default).', 'novamira-adrians-extra')],
-                    'padding_top'      => ['type' => 'number', 'description' => __('Padding top (px).', 'novamira-adrians-extra')],
-                    'padding_right'    => ['type' => 'number', 'description' => __('Padding right (px).', 'novamira-adrians-extra')],
-                    'padding_bottom'   => ['type' => 'number', 'description' => __('Padding bottom (px).', 'novamira-adrians-extra')],
-                    'padding_left'     => ['type' => 'number', 'description' => __('Padding left (px).', 'novamira-adrians-extra')],
-                    'margin_top'       => ['type' => 'number', 'description' => __('Margin top (px).', 'novamira-adrians-extra')],
-                    'margin_bottom'    => ['type' => 'number', 'description' => __('Margin bottom (px).', 'novamira-adrians-extra')],
-                    'background_color' => ['type' => 'string', 'description' => __('Background color (hex/rgba or e-gv-* Global Variable ID).', 'novamira-adrians-extra')],
-                    'color'            => ['type' => 'string', 'description' => __('Text color (hex/rgba or e-gv-* Global Variable ID).', 'novamira-adrians-extra')],
-                    'min_height'       => ['type' => 'number', 'description' => __('Minimum height (px by default).', 'novamira-adrians-extra')],
-                    'width'            => ['type' => 'number', 'description' => __('Element width (px by default).', 'novamira-adrians-extra')],
-                    'border_radius'    => ['type' => 'number', 'description' => __('Border radius (px).', 'novamira-adrians-extra')],
+                    'post_id'          => ['type' => 'integer', 'description' => __('The post/page ID.', 'novamira-adrianv2')],
+                    'parent_id'        => ['type' => 'string', 'description' => __('Parent element ID. Empty for top-level.', 'novamira-adrianv2')],
+                    'position'         => ['type' => 'integer', 'description' => __('Insert position. -1 = append.', 'novamira-adrianv2')],
+                    'tag'              => ['type' => 'string', 'enum' => ['div', 'header', 'section', 'article', 'aside', 'footer'], 'description' => __('HTML tag. Default: div.', 'novamira-adrianv2')],
+                    'css_id'           => ['type' => 'string', 'description' => __('Optional CSS ID.', 'novamira-adrianv2')],
+                    'padding'          => ['type' => 'number', 'description' => __('Padding on all sides (px by default).', 'novamira-adrianv2')],
+                    'padding_top'      => ['type' => 'number', 'description' => __('Padding top (px).', 'novamira-adrianv2')],
+                    'padding_right'    => ['type' => 'number', 'description' => __('Padding right (px).', 'novamira-adrianv2')],
+                    'padding_bottom'   => ['type' => 'number', 'description' => __('Padding bottom (px).', 'novamira-adrianv2')],
+                    'padding_left'     => ['type' => 'number', 'description' => __('Padding left (px).', 'novamira-adrianv2')],
+                    'margin_top'       => ['type' => 'number', 'description' => __('Margin top (px).', 'novamira-adrianv2')],
+                    'margin_bottom'    => ['type' => 'number', 'description' => __('Margin bottom (px).', 'novamira-adrianv2')],
+                    'background_color' => ['type' => 'string', 'description' => __('Background color (hex/rgba or e-gv-* Global Variable ID).', 'novamira-adrianv2')],
+                    'color'            => ['type' => 'string', 'description' => __('Text color (hex/rgba or e-gv-* Global Variable ID).', 'novamira-adrianv2')],
+                    'min_height'       => ['type' => 'number', 'description' => __('Minimum height (px by default).', 'novamira-adrianv2')],
+                    'width'            => ['type' => 'number', 'description' => __('Element width (px by default).', 'novamira-adrianv2')],
+                    'border_radius'    => ['type' => 'number', 'description' => __('Border radius (px).', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id'],
             ],
@@ -411,12 +411,12 @@ class Atomic_Layouts {
     // =========================================================================
 
     private static function register_detect_elementor_version(): void {
-        $name = 'novamira-extra/detect-elementor-version';
+        $name = 'novamira-adrianv2/detect-elementor-version';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Detect Elementor Version', 'novamira-adrians-extra'),
-            'description'         => __('Returns the Elementor version and whether atomic elements (v4.0+) are supported. Call this first to decide whether to use legacy tools or atomic tools.', 'novamira-adrians-extra'),
+            'label'               => __('Detect Elementor Version', 'novamira-adrianv2'),
+            'description'         => __('Returns the Elementor version and whether atomic elements (v4.0+) are supported. Call this first to decide whether to use legacy tools or atomic tools.', 'novamira-adrianv2'),
             'category'            => 'elementor',
             'execute_callback'    => static function () {
                 $core_version = defined('ELEMENTOR_VERSION') ? ELEMENTOR_VERSION : 'unknown';

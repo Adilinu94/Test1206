@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -12,10 +12,10 @@ if (!defined('ABSPATH')) {
 
 class Clone_Element {
     public static function register(): void {
-        wp_register_ability('novamira/adrians-clone-element', [
+        wp_register_ability('novamira-adrianv2/clone-element', [
             'label'               => 'Clone Element',
             'description'         => 'Copies an Elementor element and all children within or between pages. Regenerates element IDs and local style IDs, updates local class references, inserts at root or under a target parent, and clears Elementor caches.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

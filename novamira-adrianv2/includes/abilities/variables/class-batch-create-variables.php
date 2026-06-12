@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Variables;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Batch_Create_Variables
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-batch-create-variables', [
+        wp_register_ability('novamira-adrianv2/batch-create-variables', [
             'label'               => 'Batch Create Variables',
             'description'         => 'Create multiple Elementor v4 Global Variables (design tokens) at once. Supports color, font, and size types. Handles conflict resolution: skip (default), overwrite, or rename. Use this instead of calling create-variable repeatedly.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

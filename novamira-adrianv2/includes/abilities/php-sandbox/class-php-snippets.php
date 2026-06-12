@@ -54,17 +54,13 @@ class PHP_Snippets {
     private static array $ability_names = [];
 
     /**
-     * Checks whether the local V2 Store and Validator classes are available.
-     *
-     * Phase 0.5.3 (B8): Fixed — previously checked the old EMCP namespace
-     * (NickWebdesign\Adrians\*) which never exists in this codebase, causing
-     * all 6 abilities to silently skip registration.
+     * Checks whether EMCP's Store and Validator classes are available.
      *
      * @return bool
      */
     public static function is_available(): bool {
-        return class_exists(PHP_Sandbox_Validator::class)
-            && class_exists(PHP_Sandbox_Store::class);
+        return class_exists('Novamira\\AdrianV2\\Helpers\\PHP_Sandbox_Validator')
+            && class_exists('Novamira\\AdrianV2\\Helpers\\PHP_Sandbox_Store');
     }
 
     // -------------------------------------------------------------------------
@@ -156,24 +152,24 @@ class PHP_Snippets {
         return [
             'title'    => [
                 'type'        => 'string',
-                'description' => __('A label for the snippet.', 'novamira-adrians-extra'),
+                'description' => __('A label for the snippet.', 'novamira-adrianv2'),
             ],
             'code'     => [
                 'type'        => 'string',
-                'description' => __('The PHP code (no <?php tags needed). Runs inside an isolated function. Use return or echo for shortcode output.', 'novamira-adrians-extra'),
+                'description' => __('The PHP code (no <?php tags needed). Runs inside an isolated function. Use return or echo for shortcode output.', 'novamira-adrianv2'),
             ],
             'context'  => [
                 'type'        => 'string',
                 'enum'        => ['shortcode', 'hook', 'both'],
-                'description' => __('How the snippet runs: "shortcode" via [novamira_snippet id="N"], "hook" on a WordPress action, or "both". Default: shortcode.', 'novamira-adrians-extra'),
+                'description' => __('How the snippet runs: "shortcode" via [novamira_snippet id="N"], "hook" on a WordPress action, or "both". Default: shortcode.', 'novamira-adrianv2'),
             ],
             'hook'     => [
                 'type'        => 'string',
-                'description' => __('WordPress action to attach to when context is hook/both (e.g. wp_footer, init).', 'novamira-adrians-extra'),
+                'description' => __('WordPress action to attach to when context is hook/both (e.g. wp_footer, init).', 'novamira-adrianv2'),
             ],
             'priority' => [
                 'type'        => 'integer',
-                'description' => __('Hook priority (default 10).', 'novamira-adrians-extra'),
+                'description' => __('Hook priority (default 10).', 'novamira-adrianv2'),
             ],
         ];
     }
@@ -206,18 +202,18 @@ class PHP_Snippets {
     // -------------------------------------------------------------------------
 
     private static function register_validate(): void {
-        wp_register_ability('novamira-extra/validate-php-snippet', [
-            'label'               => __('Validate PHP Snippet', 'novamira-adrians-extra'),
-            'description'         => __('Statically checks PHP snippet code WITHOUT storing or running it: confirms it parses, then scans for dangerous constructs (code execution, shell, file writes, network, obfuscation, destructive SQL). Returns a report of critical (blocking) and warning findings. Use this to iterate before create-php-snippet.', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+        wp_register_ability('novamira-adrianv2/validate-php-snippet', [
+            'label'               => __('Validate PHP Snippet', 'novamira-adrianv2'),
+            'description'         => __('Statically checks PHP snippet code WITHOUT storing or running it: confirms it parses, then scans for dangerous constructs (code execution, shell, file writes, network, obfuscation, destructive SQL). Returns a report of critical (blocking) and warning findings. Use this to iterate before create-php-snippet.', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_validate'],
-            'permission_callback' => [__CLASS__, 'check_read_permission'],
+            'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
                     'code' => [
                         'type'        => 'string',
-                        'description' => __('The PHP code to validate.', 'novamira-adrians-extra'),
+                        'description' => __('The PHP code to validate.', 'novamira-adrianv2'),
                     ],
                 ],
                 'required'   => ['code'],
@@ -229,7 +225,7 @@ class PHP_Snippets {
                 'mcp'          => ['public' => true],
             ],
         ]);
-        self::$ability_names[] = 'novamira-extra/validate-php-snippet';
+        self::$ability_names[] = 'novamira-adrianv2/validate-php-snippet';
     }
 
     /**
@@ -246,12 +242,12 @@ class PHP_Snippets {
     // -------------------------------------------------------------------------
 
     private static function register_create(): void {
-        wp_register_ability('novamira-extra/create-php-snippet', [
-            'label'               => __('Create PHP Snippet (draft)', 'novamira-adrians-extra'),
-            'description'         => __('Creates a PHP snippet as an INACTIVE DRAFT. It does NOT run: a site administrator must review and activate it in Novamira Tools → Sandbox before it executes. The code is validated first and rejected if it trips a critical security finding (the findings are returned so you can fix it).', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+        wp_register_ability('novamira-adrianv2/create-php-snippet', [
+            'label'               => __('Create PHP Snippet (draft)', 'novamira-adrianv2'),
+            'description'         => __('Creates a PHP snippet as an INACTIVE DRAFT. It does NOT run: a site administrator must review and activate it in Novamira Tools → Sandbox before it executes. The code is validated first and rejected if it trips a critical security finding (the findings are returned so you can fix it).', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_create'],
-            'permission_callback' => [__CLASS__, 'check_edit_permission'],
+            'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => self::snippet_input_props(),
@@ -264,7 +260,7 @@ class PHP_Snippets {
                 'mcp'          => ['public' => true],
             ],
         ]);
-        self::$ability_names[] = 'novamira-extra/create-php-snippet';
+        self::$ability_names[] = 'novamira-adrianv2/create-php-snippet';
     }
 
     /**
@@ -281,16 +277,16 @@ class PHP_Snippets {
     // -------------------------------------------------------------------------
 
     private static function register_update(): void {
-        wp_register_ability('novamira-extra/update-php-snippet', [
-            'label'               => __('Update PHP Snippet', 'novamira-adrians-extra'),
-            'description'         => __('Updates a snippet\'s code or settings. Re-validates and rejects critical findings. If the snippet is currently active it is re-compiled (or demoted to draft if it no longer passes). Activation still requires an admin.', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+        wp_register_ability('novamira-adrianv2/update-php-snippet', [
+            'label'               => __('Update PHP Snippet', 'novamira-adrianv2'),
+            'description'         => __('Updates a snippet\'s code or settings. Re-validates and rejects critical findings. If the snippet is currently active it is re-compiled (or demoted to draft if it no longer passes). Activation still requires an admin.', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_update'],
-            'permission_callback' => [__CLASS__, 'check_edit_permission'],
+            'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => array_merge(
-                    ['snippet_id' => ['type' => 'integer', 'description' => __('The snippet ID.', 'novamira-adrians-extra')]],
+                    ['snippet_id' => ['type' => 'integer', 'description' => __('The snippet ID.', 'novamira-adrianv2')]],
                     self::snippet_input_props()
                 ),
                 'required'   => ['snippet_id'],
@@ -302,7 +298,7 @@ class PHP_Snippets {
                 'mcp'          => ['public' => true],
             ],
         ]);
-        self::$ability_names[] = 'novamira-extra/update-php-snippet';
+        self::$ability_names[] = 'novamira-adrianv2/update-php-snippet';
     }
 
     /**
@@ -312,7 +308,7 @@ class PHP_Snippets {
     public static function execute_update($input) {
         $id = isset($input['snippet_id']) ? absint($input['snippet_id']) : 0;
         if (!$id) {
-            return new \WP_Error('missing_id', __('snippet_id is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_id', __('snippet_id is required.', 'novamira-adrianv2'));
         }
         $result = PHP_Sandbox_Store::update($id, is_array($input) ? $input : []);
         return self::normalize_write_result($result, 'updated');
@@ -323,15 +319,15 @@ class PHP_Snippets {
     // -------------------------------------------------------------------------
 
     private static function register_get(): void {
-        wp_register_ability('novamira-extra/get-php-snippet', [
-            'label'               => __('Get PHP Snippet', 'novamira-adrians-extra'),
-            'description'         => __('Returns a snippet: its code, status (draft/active), run context, shortcode, and the latest validation report.', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+        wp_register_ability('novamira-adrianv2/get-php-snippet', [
+            'label'               => __('Get PHP Snippet', 'novamira-adrianv2'),
+            'description'         => __('Returns a snippet: its code, status (draft/active), run context, shortcode, and the latest validation report.', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_get'],
-            'permission_callback' => [__CLASS__, 'check_read_permission'],
+            'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
-                'properties' => ['snippet_id' => ['type' => 'integer', 'description' => __('The snippet ID.', 'novamira-adrians-extra')]],
+                'properties' => ['snippet_id' => ['type' => 'integer', 'description' => __('The snippet ID.', 'novamira-adrianv2')]],
                 'required'   => ['snippet_id'],
             ],
             'output_schema'       => self::snippet_output_schema(),
@@ -341,7 +337,7 @@ class PHP_Snippets {
                 'mcp'          => ['public' => true],
             ],
         ]);
-        self::$ability_names[] = 'novamira-extra/get-php-snippet';
+        self::$ability_names[] = 'novamira-adrianv2/get-php-snippet';
     }
 
     /**
@@ -351,7 +347,7 @@ class PHP_Snippets {
     public static function execute_get($input) {
         $id = isset($input['snippet_id']) ? absint($input['snippet_id']) : 0;
         if (!$id) {
-            return new \WP_Error('missing_id', __('snippet_id is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_id', __('snippet_id is required.', 'novamira-adrianv2'));
         }
         return PHP_Sandbox_Store::get($id);
     }
@@ -361,19 +357,19 @@ class PHP_Snippets {
     // -------------------------------------------------------------------------
 
     private static function register_list(): void {
-        wp_register_ability('novamira-extra/list-php-snippets', [
-            'label'               => __('List PHP Snippets', 'novamira-adrians-extra'),
-            'description'         => __('Lists PHP snippets with their status (draft/active), run context, and shortcode.', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+        wp_register_ability('novamira-adrianv2/list-php-snippets', [
+            'label'               => __('List PHP Snippets', 'novamira-adrianv2'),
+            'description'         => __('Lists PHP snippets with their status (draft/active), run context, and shortcode.', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_list'],
-            'permission_callback' => [__CLASS__, 'check_read_permission'],
+            'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
                     'status' => [
                         'type'        => 'string',
                         'enum'        => ['active', 'draft', 'any'],
-                        'description' => __('Filter by status. Default: any.', 'novamira-adrians-extra'),
+                        'description' => __('Filter by status. Default: any.', 'novamira-adrianv2'),
                     ],
                 ],
             ],
@@ -390,7 +386,7 @@ class PHP_Snippets {
                 'mcp'          => ['public' => true],
             ],
         ]);
-        self::$ability_names[] = 'novamira-extra/list-php-snippets';
+        self::$ability_names[] = 'novamira-adrianv2/list-php-snippets';
     }
 
     /**
@@ -413,15 +409,15 @@ class PHP_Snippets {
     // -------------------------------------------------------------------------
 
     private static function register_delete(): void {
-        wp_register_ability('novamira-extra/delete-php-snippet', [
-            'label'               => __('Delete PHP Snippet', 'novamira-adrians-extra'),
-            'description'         => __('Permanently deletes a PHP snippet and removes its sandbox file.', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+        wp_register_ability('novamira-adrianv2/delete-php-snippet', [
+            'label'               => __('Delete PHP Snippet', 'novamira-adrianv2'),
+            'description'         => __('Permanently deletes a PHP snippet and removes its sandbox file.', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_delete'],
-            'permission_callback' => [__CLASS__, 'check_edit_permission'],
+            'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
-                'properties' => ['snippet_id' => ['type' => 'integer', 'description' => __('The snippet ID.', 'novamira-adrians-extra')]],
+                'properties' => ['snippet_id' => ['type' => 'integer', 'description' => __('The snippet ID.', 'novamira-adrianv2')]],
                 'required'   => ['snippet_id'],
             ],
             'output_schema'       => [
@@ -437,7 +433,7 @@ class PHP_Snippets {
                 'mcp'          => ['public' => true],
             ],
         ]);
-        self::$ability_names[] = 'novamira-extra/delete-php-snippet';
+        self::$ability_names[] = 'novamira-adrianv2/delete-php-snippet';
     }
 
     /**
@@ -447,7 +443,7 @@ class PHP_Snippets {
     public static function execute_delete($input) {
         $id = isset($input['snippet_id']) ? absint($input['snippet_id']) : 0;
         if (!$id) {
-            return new \WP_Error('missing_id', __('snippet_id is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_id', __('snippet_id is required.', 'novamira-adrianv2'));
         }
         return PHP_Sandbox_Store::delete($id);
     }
@@ -480,7 +476,7 @@ class PHP_Snippets {
         }
 
         $result['success'] = true;
-        $result['note']    = __('Saved as an INACTIVE draft. A site administrator must activate it in Novamira Tools → Sandbox before it runs.', 'novamira-adrians-extra');
+        $result['note']    = __('Saved as an INACTIVE draft. A site administrator must activate it in Novamira Tools → Sandbox before it runs.', 'novamira-adrianv2');
         return $result;
     }
 }

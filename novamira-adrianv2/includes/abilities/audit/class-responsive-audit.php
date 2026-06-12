@@ -11,10 +11,10 @@ class Responsive_Audit
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-responsive-audit', [
+        wp_register_ability('novamira-adrianv2/responsive-audit', [
             'label'               => 'Responsive Audit',
             'description'         => 'Analyzes responsive behavior of an Elementor page: active breakpoints, per-element visibility, responsive style variants (v4), responsive settings (v3), and a breakpoint-by-breakpoint visibility tree.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

@@ -32,7 +32,6 @@ $novamira_adrianv2_elementor_files = [
     __DIR__ . '/class-remove-global-class.php',
     __DIR__ . '/class-reorder-element.php',
     __DIR__ . '/class-setup-v4-foundation.php',
-    __DIR__ . '/class-execute-build-plan.php',
 ];
 
 foreach ( $novamira_adrianv2_elementor_files as $novamira_adrianv2_elementor_file ) {
@@ -122,7 +121,4 @@ foreach ( $novamira_adrianv2_elementor_files as $novamira_adrianv2_elementor_fil
         }
         if ( class_exists( 'Novamira\AdrianV2\Abilities\Elementor\Setup_V4_Foundation' ) && method_exists( 'Novamira\AdrianV2\Abilities\Elementor\Setup_V4_Foundation', 'register' ) ) {
             Novamira\AdrianV2\Abilities\Elementor\Setup_V4_Foundation::register();
-        }
-        if ( class_exists( 'Novamira\\AdrianV2\\Abilities\\Elementor\\Execute_Build_Plan' ) && method_exists( 'Novamira\\AdrianV2\\Abilities\\Elementor\\Execute_Build_Plan', 'register' ) ) {
-            Novamira\AdrianV2\Abilities\Elementor\Execute_Build_Plan::register();
         }

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -13,10 +13,10 @@ class Remove_Global_Class
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-remove-global-class', [
+        wp_register_ability('novamira-adrianv2/remove-global-class', [
             'label'               => 'Remove Global Class',
             'description'         => 'Removes one class, several classes, or all classes from an Elementor atomic v4 element without rewriting the full element tree manually.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

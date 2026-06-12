@@ -18,10 +18,10 @@ class Variable_Audit
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-variable-audit', [
+        wp_register_ability('novamira-adrianv2/variable-audit', [
             'label'               => 'Variable Audit',
             'description'         => 'Scans Elementor pages for e-gv-* variable references. Reports usage, unused variables, and drift (references to undefined variable IDs).',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [self::class, 'execute'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [

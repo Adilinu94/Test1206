@@ -10,10 +10,10 @@ if (!defined('ABSPATH')) {
 class Batch_Get_Content {
 
     public static function register(): void {
-        wp_register_ability('novamira/adrians-batch-get-content', [
+        wp_register_ability('novamira-adrianv2/batch-get-content', [
             'label'       => 'Batch Get Elementor Content',
             'description' => 'Reads the Elementor element tree for multiple posts in one call. mode=skeleton (default) returns id/elType/widgetType/children only. mode=full returns all settings. mode=settings returns skeleton + settings for leaf widgets. Max 50 post_ids per call. Replaces N elementor-get-content calls for GV_ID_DRIFT checks, dependency graphs, and cross-page audits.',
-            'category'    => 'adrians',
+            'category'    => 'novamira-adrianv2',
             'input_schema' => [
                 'type'       => 'object',
                 'properties' => [

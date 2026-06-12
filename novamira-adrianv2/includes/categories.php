@@ -28,6 +28,10 @@ if (!defined('ABSPATH')) {
  */
 add_action('wp_abilities_api_categories_init', static function (): void {
     $categories = [
+        'novamira-adrianv2' => [
+            'label'       => __('Novamira AdrianV2', 'novamira-adrianv2'),
+            'description' => __('Umbrella category for all Novamira AdrianV2 abilities.', 'novamira-adrianv2'),
+        ],
         'adrianv2-elementor' => [
             'label'       => __('AdrianV2 — Elementor', 'novamira-adrianv2'),
             'description' => __('Core Elementor operations: read/write pages, clone, duplicate, reorder, patch styles.', 'novamira-adrianv2'),

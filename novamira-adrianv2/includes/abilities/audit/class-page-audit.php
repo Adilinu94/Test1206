@@ -11,10 +11,10 @@ class Page_Audit
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-page-audit', [
+        wp_register_ability('novamira-adrianv2/page-audit', [
             'label'               => 'Page Audit',
             'description'         => 'Audits an Elementor page for issues: empty containers, missing image alt text, broken internal links, and heading hierarchy problems.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

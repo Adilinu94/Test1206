@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -12,10 +12,10 @@ if (!defined('ABSPATH')) {
 
 class Page_Settings {
     public static function register(): void {
-        wp_register_ability('novamira/adrians-page-settings', [
+        wp_register_ability('novamira-adrianv2/page-settings', [
             'label'               => 'Page Settings',
             'description'         => 'Reads or updates Elementor page-level settings: page template, title visibility, custom CSS, body classes, and arbitrary _elementor_page_settings keys.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

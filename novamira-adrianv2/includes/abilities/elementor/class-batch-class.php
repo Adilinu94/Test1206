@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -13,10 +13,10 @@ class Batch_Class
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-batch-class', [
+        wp_register_ability('novamira-adrianv2/batch-class', [
             'label'               => 'Batch Global Class',
             'description'         => 'Applies or removes a Global Class on multiple atomic v4 elements in a single operation. Much faster than calling apply/remove for each element individually.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

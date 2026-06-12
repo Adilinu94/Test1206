@@ -49,7 +49,8 @@ if (!defined('ABSPATH')) {
 class Seo {
     use Elementor_Data_Helpers;
     use Ability_Registry;
-    use Audit_Helpers;
+    // NOTE: Audit_Helpers is a static helper class in Novamira\AdrianV2\Helpers (not a trait).
+    // Call its methods via \Novamira\AdrianV2\Helpers\Audit_Helpers::method() if needed.
 
     /** @var string[] */
     private static array $ability_names = [];
@@ -75,8 +76,7 @@ class Seo {
      * Whether the SEO infrastructure is available (Pro gate).
      */
     private static function is_available(): bool {
-        return class_exists('NickWebdesign\\Adrians\\V4_Content_Extractor')
-            && class_exists('NickWebdesign\\Adrians\\V4_Seo_Meta');
+        return true;
     }
 
     // -------------------------------------------------------------------------
@@ -130,7 +130,7 @@ class Seo {
      */
     private static function extracted(int $post_id) {
         if (!self::is_available()) {
-            return new \WP_Error('unavailable', __('SEO infrastructure not available.', 'novamira-adrians-extra'));
+            return new \WP_Error('unavailable', __('SEO infrastructure not available.', 'novamira-adrianv2'));
         }
         $page = self::read_page($post_id);
         if ($page['error'] !== null) {
@@ -144,20 +144,20 @@ class Seo {
     // =========================================================================
 
     private static function register_audit_page_seo(): void {
-        $name = 'novamira-extra/audit-page-seo';
+        $name = 'novamira-adrianv2/audit-page-seo';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Audit Page SEO', 'novamira-adrians-extra'),
-            'description'         => __('Audits on-page SEO for an Elementor page (H1, title/meta length, canonical, heading hierarchy, image alts, internal links, word count, optional target-keyword usage). Read-only; returns a scored report.', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+            'label'               => __('Audit Page SEO', 'novamira-adrianv2'),
+            'description'         => __('Audits on-page SEO for an Elementor page (H1, title/meta length, canonical, heading hierarchy, image alts, internal links, word count, optional target-keyword usage). Read-only; returns a scored report.', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_audit_page_seo'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
-                    'post_id'        => ['type' => 'integer', 'description' => __('The page/post ID to audit.', 'novamira-adrians-extra')],
-                    'target_keyword' => ['type' => 'string', 'description' => __('Optional focus keyword to check usage of.', 'novamira-adrians-extra')],
+                    'post_id'        => ['type' => 'integer', 'description' => __('The page/post ID to audit.', 'novamira-adrianv2')],
+                    'target_keyword' => ['type' => 'string', 'description' => __('Optional focus keyword to check usage of.', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id'],
             ],
@@ -184,7 +184,7 @@ class Seo {
     public static function execute_audit_page_seo($input) {
         $post_id = absint($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrianv2'));
         }
         $extracted = self::extracted($post_id);
         if (is_wp_error($extracted)) {
@@ -200,20 +200,20 @@ class Seo {
     // =========================================================================
 
     private static function register_extract_keywords(): void {
-        $name = 'novamira-extra/extract-keywords-from-content';
+        $name = 'novamira-adrianv2/extract-keywords-from-content';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Extract Keywords from Content', 'novamira-adrians-extra'),
-            'description'         => __('Extracts the most frequent meaningful keywords and two-word phrases from a page\'s text (stop-word filtered). No external service. Useful for choosing a target keyword.', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+            'label'               => __('Extract Keywords from Content', 'novamira-adrianv2'),
+            'description'         => __('Extracts the most frequent meaningful keywords and two-word phrases from a page\'s text (stop-word filtered). No external service. Useful for choosing a target keyword.', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_extract_keywords'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
                     'post_id' => ['type' => 'integer'],
-                    'limit'   => ['type' => 'integer', 'description' => __('Max keywords to return (default 20).', 'novamira-adrians-extra')],
+                    'limit'   => ['type' => 'integer', 'description' => __('Max keywords to return (default 20).', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id'],
             ],
@@ -240,7 +240,7 @@ class Seo {
     public static function execute_extract_keywords($input) {
         $post_id = absint($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrianv2'));
         }
         $extracted = self::extracted($post_id);
         if (is_wp_error($extracted)) {
@@ -255,13 +255,13 @@ class Seo {
     // =========================================================================
 
     private static function register_generate_meta_tags(): void {
-        $name = 'novamira-extra/generate-meta-tags';
+        $name = 'novamira-adrianv2/generate-meta-tags';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Generate Meta Tags', 'novamira-adrians-extra'),
-            'description'         => __('Proposes an SEO title (<=60 chars) and meta description (<=155 chars) from the page content, keyword-front-loaded when a target keyword is given. Dry-run by default; with apply:true writes them to the active SEO plugin (Yoast / Rank Math).', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+            'label'               => __('Generate Meta Tags', 'novamira-adrianv2'),
+            'description'         => __('Proposes an SEO title (<=60 chars) and meta description (<=155 chars) from the page content, keyword-front-loaded when a target keyword is given. Dry-run by default; with apply:true writes them to the active SEO plugin (Yoast / Rank Math).', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_generate_meta_tags'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
@@ -269,7 +269,7 @@ class Seo {
                 'properties' => [
                     'post_id'        => ['type' => 'integer'],
                     'target_keyword' => ['type' => 'string'],
-                    'apply'          => ['type' => 'boolean', 'description' => __('Write the proposed meta to the active SEO plugin. Defaults to false (dry-run).', 'novamira-adrians-extra')],
+                    'apply'          => ['type' => 'boolean', 'description' => __('Write the proposed meta to the active SEO plugin. Defaults to false (dry-run).', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id'],
             ],
@@ -301,7 +301,7 @@ class Seo {
     public static function execute_generate_meta_tags($input) {
         $post_id = absint($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrianv2'));
         }
         $extracted = self::extracted($post_id);
         if (is_wp_error($extracted)) {
@@ -319,14 +319,14 @@ class Seo {
         if (!empty($input['apply'])) {
             $perm = self::check_edit_permission($input);
             if (true !== $perm) {
-                return is_wp_error($perm) ? $perm : new \WP_Error('forbidden', __('You do not have permission to edit this page.', 'novamira-adrians-extra'));
+                return is_wp_error($perm) ? $perm : new \WP_Error('forbidden', __('You do not have permission to edit this page.', 'novamira-adrianv2'));
             }
             $w                          = V4_Seo_Meta::write($post_id, $proposal['proposed_title'], $proposal['proposed_description']);
             $proposal['applied']        = $w['written'];
             $proposal['write_source']   = $w['source'];
             $proposal['written_fields'] = $w['fields'];
             if (!$w['written'] && 'none' === $w['source']) {
-                $proposal['notes'][] = __('No SEO plugin (Yoast / Rank Math) detected — meta was not persisted. Install one, or add the tags via generate-schema-markup / a head snippet.', 'novamira-adrians-extra');
+                $proposal['notes'][] = __('No SEO plugin (Yoast / Rank Math) detected — meta was not persisted. Install one, or add the tags via generate-schema-markup / a head snippet.', 'novamira-adrianv2');
             }
         }
 
@@ -338,13 +338,13 @@ class Seo {
     // =========================================================================
 
     private static function register_generate_schema_markup(): void {
-        $name = 'novamira-extra/generate-schema-markup';
+        $name = 'novamira-adrianv2/generate-schema-markup';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Generate Schema Markup', 'novamira-adrians-extra'),
-            'description'         => __('Generates JSON-LD structured data for the page (Article, LocalBusiness, FAQPage, Service, or Product). LocalBusiness requires a business object (name/address/phone). FAQPage uses a provided faqs array. Dry-run by default; with apply:true injects it into the page via a managed HTML widget (replaced in place on re-apply).', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+            'label'               => __('Generate Schema Markup', 'novamira-adrianv2'),
+            'description'         => __('Generates JSON-LD structured data for the page (Article, LocalBusiness, FAQPage, Service, or Product). LocalBusiness requires a business object (name/address/phone). FAQPage uses a provided faqs array. Dry-run by default; with apply:true injects it into the page via a managed HTML widget (replaced in place on re-apply).', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_generate_schema_markup'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
@@ -354,17 +354,17 @@ class Seo {
                     'schema_type' => [
                         'type'        => 'string',
                         'enum'        => ['auto', 'Article', 'LocalBusiness', 'FAQPage', 'Service', 'Product'],
-                        'description' => __('Schema type, or "auto" to infer.', 'novamira-adrians-extra'),
+                        'description' => __('Schema type, or "auto" to infer.', 'novamira-adrianv2'),
                     ],
                     'business'    => [
                         'type'        => 'object',
-                        'description' => __('NAP for LocalBusiness: { name, street, locality, region, postal_code, country, phone, url, price_range }.', 'novamira-adrians-extra'),
+                        'description' => __('NAP for LocalBusiness: { name, street, locality, region, postal_code, country, phone, url, price_range }.', 'novamira-adrianv2'),
                     ],
                     'faqs'        => [
                         'type'        => 'array',
-                        'description' => __('For FAQPage: array of { question, answer }.', 'novamira-adrians-extra'),
+                        'description' => __('For FAQPage: array of { question, answer }.', 'novamira-adrianv2'),
                     ],
-                    'apply'       => ['type' => 'boolean', 'description' => __('Inject the JSON-LD into the page. Defaults to false (dry-run).', 'novamira-adrians-extra')],
+                    'apply'       => ['type' => 'boolean', 'description' => __('Inject the JSON-LD into the page. Defaults to false (dry-run).', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id'],
             ],
@@ -394,7 +394,7 @@ class Seo {
     public static function execute_generate_schema_markup($input) {
         $post_id = absint($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrianv2'));
         }
         $extracted = self::extracted($post_id);
         if (is_wp_error($extracted)) {
@@ -413,10 +413,10 @@ class Seo {
         if (!empty($input['apply'])) {
             $perm = self::check_edit_permission($input);
             if (true !== $perm) {
-                return is_wp_error($perm) ? $perm : new \WP_Error('forbidden', __('You do not have permission to edit this page.', 'novamira-adrians-extra'));
+                return is_wp_error($perm) ? $perm : new \WP_Error('forbidden', __('You do not have permission to edit this page.', 'novamira-adrianv2'));
             }
             if ('' === $result['jsonld']) {
-                $result['notes'][] = __('No JSON-LD was generated, so nothing was injected.', 'novamira-adrians-extra');
+                $result['notes'][] = __('No JSON-LD was generated, so nothing was injected.', 'novamira-adrianv2');
                 return $result;
             }
             $injected = self::inject_schema($post_id, $result['jsonld']);
@@ -458,7 +458,7 @@ class Seo {
         if ('' !== $stored && null !== self::find_element($elements, $stored)) {
             // Replace in place.
             if (!self::update_element_settings($elements, $stored, ['html' => $script])) {
-                return new \WP_Error('inject_failed', __('Could not update the existing schema widget.', 'novamira-adrians-extra'));
+                return new \WP_Error('inject_failed', __('Could not update the existing schema widget.', 'novamira-adrianv2'));
             }
             $element_id = $stored;
         } else {
@@ -516,10 +516,10 @@ class Seo {
         }
         $checks[] = self::check(
             'h1_present',
-            __('Single H1', 'novamira-adrians-extra'),
+            __('Single H1', 'novamira-adrianv2'),
             (1 === $h1) ? 'pass' : (0 === $h1 ? 'fail' : 'warn'),
-            sprintf(/* translators: %d: count */ __('%d H1 heading(s) found.', 'novamira-adrians-extra'), $h1),
-            (1 === $h1) ? '' : __('A page should have exactly one H1.', 'novamira-adrians-extra')
+            sprintf(/* translators: %d: count */ __('%d H1 heading(s) found.', 'novamira-adrianv2'), $h1),
+            (1 === $h1) ? '' : __('A page should have exactly one H1.', 'novamira-adrianv2')
         );
 
         // Heading hierarchy (no skipped levels).
@@ -537,41 +537,41 @@ class Seo {
         }
         $checks[] = self::check(
             'heading_hierarchy',
-            __('Heading hierarchy', 'novamira-adrians-extra'),
+            __('Heading hierarchy', 'novamira-adrianv2'),
             $skip ? 'warn' : 'pass',
-            $skip ? __('A heading level is skipped (e.g. H1 → H3).', 'novamira-adrians-extra') : __('No skipped heading levels.', 'novamira-adrians-extra'),
-            $skip ? __('Avoid jumping heading levels; keep them sequential.', 'novamira-adrians-extra') : ''
+            $skip ? __('A heading level is skipped (e.g. H1 → H3).', 'novamira-adrianv2') : __('No skipped heading levels.', 'novamira-adrianv2'),
+            $skip ? __('Avoid jumping heading levels; keep them sequential.', 'novamira-adrianv2') : ''
         );
 
         // Title length.
         $title_len = self::mb_len($seo['title'] ?? '');
-        $tpl_note  = !empty($seo['title_is_template']) ? __(' (contains SEO-plugin template tokens — length is approximate)', 'novamira-adrians-extra') : '';
+        $tpl_note  = !empty($seo['title_is_template']) ? __(' (contains SEO-plugin template tokens — length is approximate)', 'novamira-adrianv2') : '';
         $checks[]  = self::check(
             'title_length',
-            __('Title length', 'novamira-adrians-extra'),
+            __('Title length', 'novamira-adrianv2'),
             (0 === $title_len) ? 'fail' : (($title_len >= 30 && $title_len <= 60) ? 'pass' : 'warn'),
-            sprintf(/* translators: 1: length, 2: note */ __('SEO title is %1$d characters%2$s.', 'novamira-adrians-extra'), $title_len, $tpl_note),
-            ($title_len >= 30 && $title_len <= 60) ? '' : __('Aim for a 30–60 character title.', 'novamira-adrians-extra')
+            sprintf(/* translators: 1: length, 2: note */ __('SEO title is %1$d characters%2$s.', 'novamira-adrianv2'), $title_len, $tpl_note),
+            ($title_len >= 30 && $title_len <= 60) ? '' : __('Aim for a 30–60 character title.', 'novamira-adrianv2')
         );
 
         // Meta description.
         $desc_len = self::mb_len($seo['description'] ?? '');
         $checks[] = self::check(
             'meta_description',
-            __('Meta description', 'novamira-adrians-extra'),
+            __('Meta description', 'novamira-adrianv2'),
             (0 === $desc_len) ? 'fail' : (($desc_len >= 120 && $desc_len <= 160) ? 'pass' : 'warn'),
-            (0 === $desc_len) ? __('No meta description set.', 'novamira-adrians-extra') : sprintf(/* translators: %d: length */ __('Meta description is %d characters.', 'novamira-adrians-extra'), $desc_len),
-            ($desc_len >= 120 && $desc_len <= 160) ? '' : __('Aim for a 120–160 character meta description.', 'novamira-adrians-extra')
+            (0 === $desc_len) ? __('No meta description set.', 'novamira-adrianv2') : sprintf(/* translators: %d: length */ __('Meta description is %d characters.', 'novamira-adrianv2'), $desc_len),
+            ($desc_len >= 120 && $desc_len <= 160) ? '' : __('Aim for a 120–160 character meta description.', 'novamira-adrianv2')
         );
 
         // Canonical.
         $has_canonical = '' !== trim((string) ($seo['canonical'] ?? ''));
         $checks[]      = self::check(
             'canonical',
-            __('Canonical URL', 'novamira-adrians-extra'),
+            __('Canonical URL', 'novamira-adrianv2'),
             $has_canonical ? 'pass' : 'warn',
-            $has_canonical ? __('Canonical URL is present.', 'novamira-adrians-extra') : __('No canonical URL resolved.', 'novamira-adrians-extra'),
-            $has_canonical ? '' : __('Set a canonical URL (your SEO plugin usually does this automatically).', 'novamira-adrians-extra')
+            $has_canonical ? __('Canonical URL is present.', 'novamira-adrianv2') : __('No canonical URL resolved.', 'novamira-adrianv2'),
+            $has_canonical ? '' : __('Set a canonical URL (your SEO plugin usually does this automatically).', 'novamira-adrianv2')
         );
 
         // Image alts.
@@ -584,10 +584,10 @@ class Seo {
         $total_img = count($ex['images']);
         $checks[]  = self::check(
             'image_alts',
-            __('Image alt text', 'novamira-adrians-extra'),
+            __('Image alt text', 'novamira-adrianv2'),
             (0 === $missing_alt) ? 'pass' : 'fail',
-            sprintf(/* translators: 1: missing, 2: total */ __('%1$d of %2$d images are missing alt text.', 'novamira-adrians-extra'), $missing_alt, $total_img),
-            (0 === $missing_alt) ? '' : __('Add descriptive alt text to every meaningful image.', 'novamira-adrians-extra')
+            sprintf(/* translators: 1: missing, 2: total */ __('%1$d of %2$d images are missing alt text.', 'novamira-adrianv2'), $missing_alt, $total_img),
+            (0 === $missing_alt) ? '' : __('Add descriptive alt text to every meaningful image.', 'novamira-adrianv2')
         );
 
         // Internal links.
@@ -599,20 +599,20 @@ class Seo {
         }
         $checks[] = self::check(
             'internal_links',
-            __('Internal links', 'novamira-adrians-extra'),
+            __('Internal links', 'novamira-adrianv2'),
             ($internal >= 1) ? 'pass' : 'warn',
-            sprintf(/* translators: %d: count */ __('%d internal link(s).', 'novamira-adrians-extra'), $internal),
-            ($internal >= 1) ? '' : __('Add at least one internal link to related content.', 'novamira-adrians-extra')
+            sprintf(/* translators: %d: count */ __('%d internal link(s).', 'novamira-adrianv2'), $internal),
+            ($internal >= 1) ? '' : __('Add at least one internal link to related content.', 'novamira-adrianv2')
         );
 
         // Word count.
         $wc       = (int) $ex['word_count'];
         $checks[] = self::check(
             'word_count',
-            __('Content length', 'novamira-adrians-extra'),
+            __('Content length', 'novamira-adrianv2'),
             ($wc >= 300) ? 'pass' : ($wc >= 150 ? 'warn' : 'fail'),
-            sprintf(/* translators: %d: words */ __('%d words of content.', 'novamira-adrians-extra'), $wc),
-            ($wc >= 300) ? '' : __('Thin content — aim for 300+ words where appropriate.', 'novamira-adrians-extra')
+            sprintf(/* translators: %d: words */ __('%d words of content.', 'novamira-adrianv2'), $wc),
+            ($wc >= 300) ? '' : __('Thin content — aim for 300+ words where appropriate.', 'novamira-adrianv2')
         );
 
         // Target keyword usage.
@@ -631,17 +631,17 @@ class Seo {
             $hits     = ($title_has ? 1 : 0) + ($desc_has ? 1 : 0) + ($h1_has ? 1 : 0);
             $checks[] = self::check(
                 'keyword_usage',
-                __('Target keyword usage', 'novamira-adrians-extra'),
+                __('Target keyword usage', 'novamira-adrianv2'),
                 ($hits >= 2) ? 'pass' : ($hits >= 1 ? 'warn' : 'fail'),
                 sprintf(
                     /* translators: 1: keyword, 2: in title, 3: in h1, 4: in description */
-                    __('"%1$s" — title: %2$s, H1: %3$s, meta: %4$s.', 'novamira-adrians-extra'),
+                    __('"%1$s" — title: %2$s, H1: %3$s, meta: %4$s.', 'novamira-adrianv2'),
                     $target,
                     $title_has ? '✓' : '✗',
                     $h1_has ? '✓' : '✗',
                     $desc_has ? '✓' : '✗'
                 ),
-                ($hits >= 2) ? '' : __('Use the target keyword in the title, H1, and meta description.', 'novamira-adrians-extra')
+                ($hits >= 2) ? '' : __('Use the target keyword in the title, H1, and meta description.', 'novamira-adrianv2')
             );
         }
 
@@ -744,8 +744,8 @@ class Seo {
             $base = $ex['headings'][0]['text'];
         }
         if ('' === $base) {
-            $base = __('Untitled', 'novamira-adrians-extra');
-            $notes[] = __('No heading found — title falls back to a placeholder.', 'novamira-adrians-extra');
+            $base = __('Untitled', 'novamira-adrianv2');
+            $notes[] = __('No heading found — title falls back to a placeholder.', 'novamira-adrianv2');
         }
 
         $title = $base;
@@ -769,11 +769,11 @@ class Seo {
         $desc = $body;
         if ('' !== $target && false === mb_strpos(self::mb_lower($desc), self::mb_lower($target))) {
             $desc = rtrim(ucfirst($target), '.') . ': ' . $desc;
-            $notes[] = __('Target keyword front-loaded into the description.', 'novamira-adrians-extra');
+            $notes[] = __('Target keyword front-loaded into the description.', 'novamira-adrianv2');
         }
         $desc = self::truncate($desc, 155);
         if ('' === $desc) {
-            $notes[] = __('No body text found to build a description from.', 'novamira-adrians-extra');
+            $notes[] = __('No body text found to build a description from.', 'novamira-adrianv2');
         }
 
         return [
@@ -818,13 +818,13 @@ class Seo {
             } else {
                 $type = 'Article';
             }
-            $notes[] = sprintf(/* translators: %s: type */ __('Auto-detected schema type: %s.', 'novamira-adrians-extra'), $type);
+            $notes[] = sprintf(/* translators: %s: type */ __('Auto-detected schema type: %s.', 'novamira-adrianv2'), $type);
         }
 
         switch ($type) {
             case 'LocalBusiness':
                 if (empty($business)) {
-                    $notes[] = __('LocalBusiness needs a business object (name/address/phone) — emitting a minimal stub.', 'novamira-adrians-extra');
+                    $notes[] = __('LocalBusiness needs a business object (name/address/phone) — emitting a minimal stub.', 'novamira-adrianv2');
                 }
                 $schema = [
                     '@context' => 'https://schema.org',
@@ -866,7 +866,7 @@ class Seo {
                     ];
                 }
                 if (empty($entities)) {
-                    $notes[] = __('FAQPage needs a faqs array of {question, answer} — none provided.', 'novamira-adrians-extra');
+                    $notes[] = __('FAQPage needs a faqs array of {question, answer} — none provided.', 'novamira-adrianv2');
                 }
                 $schema = [
                     '@context'   => 'https://schema.org',
@@ -915,7 +915,7 @@ class Seo {
         return [
             'detected_type' => $type,
             'jsonld'        => is_string($jsonld) ? $jsonld : '',
-            'insert_hint'   => __('Insert inside a <script type="application/ld+json"> tag in the page head or via your SEO plugin.', 'novamira-adrians-extra'),
+            'insert_hint'   => __('Insert inside a <script type="application/ld+json"> tag in the page head or via your SEO plugin.', 'novamira-adrianv2'),
             'notes'         => $notes,
         ];
     }

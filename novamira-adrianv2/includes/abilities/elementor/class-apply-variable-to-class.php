@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Apply_Variable_To_Class
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-apply-variable-to-class', [
+        wp_register_ability('novamira-adrianv2/apply-variable-to-class', [
             'label'               => 'Apply Variable to Class',
             'description'         => 'Set a CSS property on a Global Class variant to reference a v4 Variable (design token) instead of a hardcoded value. Stores the variable reference as var(--e-global-<type>-<id>) so that changing the variable automatically updates all classes that reference it. This is the critical binding that makes v4 a true design-token system.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

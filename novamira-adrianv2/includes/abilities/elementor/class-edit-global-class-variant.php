@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Edit_Global_Class_Variant
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-edit-global-class-variant', [
+        wp_register_ability('novamira-adrianv2/edit-global-class-variant', [
             'label'               => 'Edit Class Variant',
             'description'         => 'Edit an existing variant on a Global Class. Target by variant index (0-based) or by breakpoint+state combination. Supports merge (default) or replace mode. Use list-class-variants first to discover indices.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

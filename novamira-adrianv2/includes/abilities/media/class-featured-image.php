@@ -11,10 +11,10 @@ class Featured_Image
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-featured-image', [
+        wp_register_ability('novamira-adrianv2/featured-image', [
             'label'               => 'Featured Image',
             'description'         => 'Reads, sets, or removes a post featured image. Validates attachment existence and image MIME type before setting.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

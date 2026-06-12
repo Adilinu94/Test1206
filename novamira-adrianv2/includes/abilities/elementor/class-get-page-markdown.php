@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Get_Page_Markdown
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-get-page-markdown', [
+        wp_register_ability('novamira-adrianv2/get-page-markdown', [
             'label'               => 'Get Page Markdown',
             'description'         => 'Returns the Markdown version of any Elementor page, including YAML frontmatter. Requires Elementor 4.1+ with the markdown_rendering experiment enabled.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

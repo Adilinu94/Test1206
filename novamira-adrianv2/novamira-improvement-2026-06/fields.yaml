@@ -1,0 +1,220 @@
+# Field-Framework für Novamira-Improvement-Audit
+# Generiert: 2026-06-10 (fresh start, kein Merge)
+# Topic: Verbesserungspotenzial framer-v4-pipeline-v2 + Novamira AdrianV2 Plugin
+
+field_categories:
+
+  # F1: Architecture & Code Quality
+  - id: "F1"
+    name: "Architecture & Code Quality"
+    detail_level: "detailed"
+    description: >
+      Struktur, Modularität, Separation-of-Concerns, DRY, Naming-Konventionen,
+      Coupling/Cohesion, Layer-Boundaries, Boilerplate-Patterns.
+    what_to_look_for:
+      - "Konsistenter Bootstrap-Pfad über 57 Abilities"
+      - "Wiederverwendung von Traits (trait-ability-registry, trait-elementor-data-helpers)"
+      - "Helper-Layer-Duplikation (z.B. v4-* Helpers — sind das zusammengehörige Module?)"
+      - "Konventionen für Ability-Naming, Property-Schema, Fehler-Responses"
+    output_format: "Liste konkreter Findings mit Code-Pfad + Zeile + Severity (high/med/low)"
+
+  # F2: Security
+  - id: "F2"
+    name: "Security"
+    detail_level: "detailed"
+    description: >
+      Input-Validation, Capability-Checks, Escaping, Nonce, PHP-Sandbox-Isolation,
+      Token-Handling, Credential-Storage, Path-Traversal-Schutz.
+    what_to_look_for:
+      - "permission_callback: hard-coded 'novamira_permission_callback' ohne eigene Definition (harte Runtime-Dependency)"
+      - "PHP-Sandbox: eval vs include vs Subprocess, disabled functions, User-Privileg"
+      - "Custom-Code: XSS-Risiko in JS/CSS-Injection"
+      - "Media-Upload: Dateityp-Whitelist, Pfad-Traversal"
+      - "MCP-Credentials: .env vs hardcoded vs gitignored"
+    output_format: "Security-Issue-Liste mit CVE-Klasse (falls zutreffend), Angriffsvektor, Mitigations-Vorschlag"
+
+  # F3: Performance
+  - id: "F3"
+    name: "Performance"
+    detail_level: "detailed"
+    description: >
+      Caching, Batching, Parallel-Execution, Lazy-Loading, Discovery-Overhead,
+      Memory-Profile, Network-Roundtrips.
+    what_to_look_for:
+      - "MCP-Discovery bei jedem Call vs Cache (TTL)"
+      - "Atomic-Widget-Loops: 1-Call-pro-Widget vs batch-build-page (Faktor 20-50x)"
+      - "Visual-QA: Browser-basiert (~45s) vs server-side MCP-Audit (~3s)"
+      - "Helper-Calls: doppelte Schema-Validierung?"
+    output_format: "Quantifizierte Bottleneck-Liste mit messbarem Speedup-Potenzial"
+
+  # F4: Reliability & Error Handling
+  - id: "F4"
+    name: "Reliability & Error Handling"
+    detail_level: "detailed"
+    description: >
+      Retry-Logik, Backoff, Checkpoint/Resume, strukturiertes Error-Schema,
+      korrupte-State-Toleranz, Transactional-Safety.
+    what_to_look_for:
+      - "12 Validation-Guards: strukturiertes Error-Format (code/severity/fixHint/autoFixable)?"
+      - "qa-report.json: 11 anonymous issues oder gruppiert?"
+      - "Checkpoint: atomic-write + Schema-Validation implementiert? (Phase 1.1 ja)"
+      - "Retry-Strategie für MCP-Calls (Phase 1.2 offen)"
+      - "Failure-Recovery: was passiert bei Plugin-Update mid-build?"
+    output_format: "Fehlerklassen-Liste + Verbesserungs-Hooks mit Aufwandschätzung"
+
+  # F5: Testing & Coverage
+  - id: "F5"
+    name: "Testing & Coverage"
+    detail_level: "moderate"
+    description: >
+      Unit/Integration/E2E/Visual-Regression Tests, CI-Bindung, Mock-Setup,
+      Coverage-Metriken, Test-Stability.
+    what_to_look_for:
+      - "Tests vorhanden (23/23 für checkpoint.js grün)"
+      - "CI-Pipeline in .github/workflows/?"
+      - "Mock-Server für novamira-solar-local"
+      - "Visual-Regression-Toleranz"
+    output_format: "Test-Gap-Matrix: was ist getestet, was fehlt?"
+
+  # F6: Documentation
+  - id: "F6"
+    name: "Documentation"
+    detail_level: "moderate"
+    description: >
+      API-Docs, Inline-Comments, Examples, README-Struktur, Changelog, Doku-Drift.
+    what_to_look_for:
+      - "Doku-Drift: 4 Markdown-Files (README, BLUEPRINT, INTEGRATION-PLAN, SESSION-STATE) — aktuell?"
+      - "Inline-PHPDoc auf Ability-Klassen?"
+      - "OpenAPI/JSON-Schema für Abilities exportiert?"
+      - "Onboarding-Pfad für neue Ability-Entwickler?"
+    output_format: "Doc-Gap-Liste + Drift-Befunde"
+
+  # F7: Maintainability
+  - id: "F7"
+    name: "Maintainability"
+    detail_level: "moderate"
+    description: >
+      Dependencies, Upgrade-Path, Technical-Debt, Refactoring-Indikatoren,
+      Version-Drift, Code-Complexity.
+    what_to_look_for:
+      - "Versionsdrift 0.3.1 vs 0.6.0 (Phase 0.1 offen)"
+      - "Klassen mit > 500 Zeilen → Splitting-Indikator"
+      - "Hardcoded Strings (CSS, Property-Names) — Magic-String-Risiko"
+      - "Outdated npm-Dependencies (npm audit)"
+    output_format: "Refactoring-Kandidaten-Liste mit Priorität"
+
+  # F8: DX / UX / API Design
+  - id: "F8"
+    name: "DX / UX / API Design"
+    detail_level: "moderate"
+    description: >
+      API-Design-Konsistenz, Error-Messages-Qualität, CLI-Ergonomie,
+      Naming-Konventionen, Help-Output.
+    what_to_look_for:
+      - "Ability-Response-Format: einheitlich oder 57 Varianten?"
+      - "Error-Messages: actionable oder 'build failed'?"
+      - "CLI: Help-Output, Tab-Completion, Progress-Indikatoren"
+      - "Naming-Konventionen: snake_case vs camelCase, Präfix-Konsistenz"
+    output_format: "DX-Verbesserungs-Vorschläge mit Aufwandschätzung"
+
+  # F9: Observability
+  - id: "F9"
+    name: "Observability"
+    detail_level: "moderate"
+    description: >
+      Logging, Metrics, Tracing, Audit-Trails, Debug-Output, Error-Context.
+    what_to_look_for:
+      - "Strukturiertes Logging (JSON) oder Plain-Text?"
+      - "Build-Artefakte: was wird persistiert, was ist verfügbar nach Crash?"
+      - "Error-Context: reicht der Stack-Trace für Bug-Repros?"
+      - "Audit-Trail für destructive Operations (delete-media, php-snippet-create)"
+    output_format: "Observability-Gaps + Verbesserungs-Vorschläge"
+
+  # F10: Standards Compliance
+  - id: "F10"
+    name: "Standards Compliance"
+    detail_level: "brief"
+    description: >
+      WP-Coding-Standards, PSR-12, ESLint, TypeScript, JSON-Schema-Validation,
+      Semver, Conventional Commits.
+    what_to_look_for:
+      - "PHPCS/PHPCompatibility aktiv?"
+      - "ESLint aktiv im Pipeline-Projekt?"
+      - "JSON-Schema-Validation beim Lesen/Schreiben"
+      - "Semver-Konformität (Versionsdrift-Verletzung)"
+    output_format: "Compliance-Checkliste"
+
+  # F11: Dependency Management
+  - id: "F11"
+    name: "Dependency Management"
+    detail_level: "detailed"
+    description: >
+      Runtime-Dependencies (z.B. Novamira 1.6.0 als Pflicht), npm-Versionen,
+      semver-Range, vendored vs external, breaking-change-Risiko.
+    what_to_look_for:
+      - "V2-Plugin benötigt Novamira 1.6.0 zur Laufzeit (kann nicht deaktiviert werden) → harte Runtime-Dependency"
+      - "npm-Dependencies: sind sie minimal gehalten, gibt es Alternativen?"
+      - "engines-Feld im package.json — Pinning-Strategie?"
+      - "Lockfiles (package-lock.json, composer.lock)"
+    output_format: "Dependency-Map + Hard-Dependencies + Upgrade-Risk-Liste"
+
+  # F12: Integration & Interop
+  - id: "F12"
+    name: "Integration & Interop"
+    detail_level: "detailed"
+    description: >
+      Layer-Boundaries, Contract-Stability, Schema-Evolution, Backward-Compatibility,
+      Cross-System-Error-Semantics.
+    what_to_look_for:
+      - "Schema-Sharing: Pipeline ↔ V2-Plugin — wer ist Source-of-Truth?"
+      - "MCP-Contract: Schema-Versioning, Backward-Compat-Strategie"
+      - "Plugin-Updates: Abwärtskompatibilität für existierende Abilities?"
+      - "Cross-Layer Error-Propagation: Pipeline-Fail → MCP-Response → Plugin-PHP-Exception"
+    output_format: "Integration-Issue-Map + Stabilitäts-Risiken"
+
+  # F13: Schema Integrity (Supplementary)
+  - id: "F13"
+    name: "Schema Integrity"
+    detail_level: "detailed"
+    description: >
+      Version-Kompatibilität zwischen CLI-generierten Modellen und Plugin-erforderlichen
+      Schemas. Drift-Detection. Source-of-Truth-Patterns.
+    what_to_look_for:
+      - "v4-prop-type-schema.json (Pipeline) ↔ class-v4-props.php (V2-Plugin) — Drift-Messung"
+      - "Schema-Versioning: gibt es Version-Felder in den Schemas?"
+      - "Source-of-Truth: klar definiert?"
+    output_format: "Drift-Risiko-Matrix"
+
+  # F14: Execution Context (Supplementary)
+  - id: "F14"
+    name: "Execution Context"
+    detail_level: "detailed"
+    description: >
+      Wo laufen gefährliche Tasks (PHP-Sandbox, Visual-QA)?
+      Im selben Prozess? Isoliert? Welche Privilegien?
+    what_to_look_for:
+      - "PHP-Sandbox: läuft im WP-Main-Process oder Subprocess/Sidecar?"
+      - "Visual-QA: läuft Playwright auf User-Maschine oder Server?"
+      - "MCP-Server: lokale Node-Process vs Remote-Service?"
+    output_format: "Execution-Context-Diagramm + Sicherheits-Implikationen"
+
+  # F15: Token Usage / Limits (Supplementary)
+  - id: "F15"
+    name: "Token Usage & Limits"
+    detail_level: "moderate"
+    description: >
+      AI-mediated Abilities: wie viele Tokens werden verbraucht?
+      Throttling? Cost-Optimization? Rate-Limits?
+    what_to_look_for:
+      - "Werden LLM-Tokens pro Ability-Invocation geloggt?"
+      - "Gibt es Throttling für teure Abilities (z.B. visual-qa)?"
+      - "Cost-Optimization: batched calls vs einzelne Calls?"
+    output_format: "Token-Usage-Profile + Throttling-Empfehlungen"
+
+# Reserved for deep-phase auto-fill
+uncertain: []
+
+# Metadata
+generated_by: "Buffy (Codebuff)"
+generated_at: "2026-06-10"
+research_project: "novamira-improvement-2026-06"

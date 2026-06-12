@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Create_Component
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-create-component', [
+        wp_register_ability('novamira-adrianv2/create-component', [
             'label'               => 'Create Component',
             'description'         => 'Extract elements from a page and save them as a new container template (component) in the Elementor library. Elements are located by their IDs and extracted with their full subtree.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

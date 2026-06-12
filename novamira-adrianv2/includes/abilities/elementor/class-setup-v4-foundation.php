@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -13,10 +13,10 @@ class Setup_V4_Foundation
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-setup-v4-foundation', [
+        wp_register_ability('novamira-adrianv2/setup-v4-foundation', [
             'label'       => 'Setup V4 Foundation',
             'description' => 'Run this BEFORE batch-build-page. Ensures e-flexbox-base and e-div-block-base global classes exist (padding: 0), then returns a complete context object with all variable IDs grouped by type and all global class IDs with labels. Use the returned IDs directly in batch-build-page settings. Solves the default Flexbox padding problem documented in Elementor GitHub Discussion #32154.',
-            'category'    => 'adrians',
+            'category'    => 'novamira-adrianv2',
             'input_schema' => [
                 'type' => 'object',
                 'properties' => [

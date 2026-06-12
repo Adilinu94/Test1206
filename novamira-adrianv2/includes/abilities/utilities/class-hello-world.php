@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Utilities;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -19,10 +19,10 @@ class Hello_World
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-greet', [
+        wp_register_ability('novamira-adrianv2/greet', [
             'label'               => 'Hello World Greet',
             'description'         => 'Returns a greeting message. Accepts an optional name parameter.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

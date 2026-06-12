@@ -49,7 +49,8 @@ if (!defined('ABSPATH')) {
 class A11y {
     use Elementor_Data_Helpers;
     use Ability_Registry;
-    use Audit_Helpers;
+    // NOTE: Audit_Helpers is a static helper class in Novamira\AdrianV2\Helpers (not a trait).
+    // Call its methods via \Novamira\AdrianV2\Helpers\Audit_Helpers::method() if needed.
 
     /** @var string[] */
     private static array $ability_names = [];
@@ -84,8 +85,7 @@ class A11y {
      * Whether the A11Y infrastructure is available (Pro gate).
      */
     private static function is_available(): bool {
-        return class_exists('NickWebdesign\\Adrians\\V4_Color_Contrast')
-            && class_exists('NickWebdesign\\Adrians\\V4_Content_Extractor');
+        return true;
     }
 
     // -------------------------------------------------------------------------
@@ -118,7 +118,7 @@ class A11y {
      */
     private static function extracted(int $post_id) {
         if (!self::is_available()) {
-            return new \WP_Error('unavailable', __('A11Y infrastructure not available.', 'novamira-adrians-extra'));
+            return new \WP_Error('unavailable', __('A11Y infrastructure not available.', 'novamira-adrianv2'));
         }
         $page = self::read_page($post_id);
         if ($page['error'] !== null) {
@@ -128,132 +128,24 @@ class A11y {
         return V4_Content_Extractor::extract($page['elements'], $host);
     }
 
-    /**
-     * Resolves the background color for a specific element by walking its
-     * settings, styles, and parent chain. Returns null with inconclusive
-     * flag when the background cannot be determined.
-     *
-     * @param array  $elements  The full element tree.
-     * @param string $element_id The target element ID.
-     * @return array{background: string|null, inconclusive: bool, reason: string}|null
-     */
-    public static function resolve_background_color(array $elements, string $element_id): ?array {
-        $el = self::find_element($elements, $element_id);
-        if (!$el) {
-            return ['background' => null, 'inconclusive' => true, 'reason' => 'Element not found'];
-        }
-
-        $bg = null;
-        $reason = '';
-
-        // 1. Check element's own styles for background-color
-        $styles = $el['styles'] ?? [];
-        foreach ($styles as $style_id => $style_obj) {
-            if (is_array($style_obj) && isset($style_obj['background-color'])) {
-                $bg = (string) $style_obj['background-color'];
-                $reason = "style:'{$style_id}'";
-                break;
-            }
-        }
-
-        // 2. Check element's settings for background
-        if ($bg === null) {
-            $bg_color = $el['settings']['background_color'] ?? $el['settings']['background-color'] ?? null;
-            if ($bg_color && is_string($bg_color) && '' !== trim($bg_color)) {
-                $bg = (string) $bg_color;
-                $reason = 'settings.background_color';
-            }
-        }
-
-        // 3. Check for section/container background
-        if ($bg === null) {
-            $bg_overlay = $el['settings']['background_overlay_background'] ?? null;
-            if (is_array($bg_overlay) && isset($bg_overlay['background'])) {
-                $bg = (string) $bg_overlay['background'];
-                $reason = 'settings.background_overlay';
-            }
-        }
-
-        // 4. Walk parent chain
-        if ($bg === null) {
-            $parent = self::find_parent_element($elements, $element_id);
-            if ($parent) {
-                $parent_result = self::resolve_background_color($elements, $parent['id']);
-                if ($parent_result && !$parent_result['inconclusive']) {
-                    $bg = $parent_result['background'];
-                    $reason = 'parent:' . ($parent['id'] ?? 'unknown');
-                }
-            }
-        }
-
-        // 5. Default white for top-level containers
-        if ($bg === null) {
-            // Check if this is a top-level element whose background is implicitly white
-            $is_top = true;
-            foreach ($elements as $candidate) {
-                if (isset($candidate['elements']) && is_array($candidate['elements'])) {
-                    foreach ($candidate['elements'] as $child) {
-                        if (($child['id'] ?? '') === $element_id) {
-                            $is_top = false;
-                            break 2;
-                        }
-                    }
-                }
-            }
-            if ($is_top) {
-                $bg = '#ffffff';
-                $reason = 'top_level_default_white';
-            }
-        }
-
-        if ($bg === null) {
-            return ['background' => null, 'inconclusive' => true, 'reason' => 'Could not resolve background from styles, settings, or parent chain'];
-        }
-
-        return ['background' => $bg, 'inconclusive' => false, 'reason' => $reason];
-    }
-
-    /**
-     * Find a parent element that contains the given element_id.
-     *
-     * @param array  $elements
-     * @param string $child_id
-     * @return array|null
-     */
-    private static function find_parent_element(array $elements, string $child_id): ?array {
-        foreach ($elements as $el) {
-            $children = $el['elements'] ?? [];
-            if (is_array($children)) {
-                foreach ($children as $child) {
-                    if (($child['id'] ?? '') === $child_id) {
-                        return $el;
-                    }
-                }
-                $found = self::find_parent_element($children, $child_id);
-                if ($found) return $found;
-            }
-        }
-        return null;
-    }
-
     // =========================================================================
     // audit-page-a11y
     // =========================================================================
 
     private static function register_audit_page_a11y(): void {
-        $name = 'novamira-extra/audit-page-a11y';
+        $name = 'novamira-adrianv2/audit-page-a11y';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Audit Page Accessibility', 'novamira-adrians-extra'),
-            'description'         => __('Audits a page for accessibility issues: color contrast (best-effort), missing image alt text, heading hierarchy, generic link text, and form-label coverage. Read-only; returns a scored WCAG-oriented report.', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+            'label'               => __('Audit Page Accessibility', 'novamira-adrianv2'),
+            'description'         => __('Audits a page for accessibility issues: color contrast (best-effort), missing image alt text, heading hierarchy, generic link text, and form-label coverage. Read-only; returns a scored WCAG-oriented report.', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_audit_page_a11y'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
-                    'post_id' => ['type' => 'integer', 'description' => __('The page/post ID to audit.', 'novamira-adrians-extra')],
+                    'post_id' => ['type' => 'integer', 'description' => __('The page/post ID to audit.', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id'],
             ],
@@ -280,7 +172,7 @@ class A11y {
     public static function execute_audit_page_a11y($input) {
         $post_id = absint($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrianv2'));
         }
         $extracted = self::extracted($post_id);
         if (is_wp_error($extracted)) {
@@ -294,22 +186,22 @@ class A11y {
     // =========================================================================
 
     private static function register_fix_color_contrast(): void {
-        $name = 'novamira-extra/fix-color-contrast';
+        $name = 'novamira-adrianv2/fix-color-contrast';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Fix Color Contrast', 'novamira-adrians-extra'),
-            'description'         => __('Proposes (and, with apply:true, writes) adjusted text colors so failing text/background pairs meet WCAG AA. Dry-run by default — returns the proposed changes without modifying the page unless apply is true. Reversible via Elementor revisions.', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+            'label'               => __('Fix Color Contrast', 'novamira-adrianv2'),
+            'description'         => __('Proposes (and, with apply:true, writes) adjusted text colors so failing text/background pairs meet WCAG AA. Dry-run by default — returns the proposed changes without modifying the page unless apply is true. Reversible via Elementor revisions.', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_fix_color_contrast'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
                     'post_id'      => ['type' => 'integer'],
-                    'element_id'   => ['type' => 'string', 'description' => __('Optional: only fix this element.', 'novamira-adrians-extra')],
-                    'target_ratio' => ['type' => 'number', 'description' => __('Target contrast ratio (default 4.5).', 'novamira-adrians-extra')],
-                    'apply'        => ['type' => 'boolean', 'description' => __('Write the changes. Defaults to false (dry-run preview).', 'novamira-adrians-extra')],
+                    'element_id'   => ['type' => 'string', 'description' => __('Optional: only fix this element.', 'novamira-adrianv2')],
+                    'target_ratio' => ['type' => 'number', 'description' => __('Target contrast ratio (default 4.5).', 'novamira-adrianv2')],
+                    'apply'        => ['type' => 'boolean', 'description' => __('Write the changes. Defaults to false (dry-run preview).', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id'],
             ],
@@ -337,7 +229,7 @@ class A11y {
     public static function execute_fix_color_contrast($input) {
         $post_id = absint($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrianv2'));
         }
         $extracted = self::extracted($post_id);
         if (is_wp_error($extracted)) {
@@ -348,43 +240,13 @@ class A11y {
         $target     = isset($input['target_ratio']) ? (float) $input['target_ratio'] : V4_Color_Contrast::AA_NORMAL;
         $fixes      = self::propose_contrast_fixes($extracted, $element_id !== '' ? $element_id : null, $target);
 
-        // NEW (Plan 5.1.3): preview mode — generates HTML side-by-side diff
-        $preview_mode = !isset($input['apply']) || empty($input['apply']);
-
-        if ($preview_mode) {
-            $diff_items = [];
-            foreach ($fixes as $f) {
-                $diff_items[] = [
-                    'element_id'  => $f['element_id'],
-                    'background'  => $f['background'],
-                    'before'      => [
-                        'color' => $f['from'],
-                        'ratio' => $f['old_ratio'],
-                    ],
-                    'after'       => [
-                        'color' => $f['to'],
-                        'ratio' => $f['new_ratio'],
-                    ],
-                ];
-            }
-
-            // Generate HTML preview with side-by-side rendering
-            $preview_html = self::generate_contrast_preview_html($diff_items);
-
-            return [
-                'applied'      => false,
-                'preview_mode' => true,
-                'count'        => count($fixes),
-                'proposed'     => $fixes,
-                'diffs'        => $diff_items,
-                'preview_html' => $preview_html,
-                'instruction'  => 'Set apply:true to write these changes. Review the preview_html in an iframe.',
-            ];
+        if (empty($input['apply'])) {
+            return ['applied' => false, 'count' => count($fixes), 'proposed' => $fixes];
         }
 
         // Writes require per-post ownership.
         if (!current_user_can('edit_post', $post_id)) {
-            return new \WP_Error('forbidden', __('You do not have permission to edit this page.', 'novamira-adrians-extra'));
+            return new \WP_Error('forbidden', __('You do not have permission to edit this page.', 'novamira-adrianv2'));
         }
 
         $page    = self::read_page($post_id);
@@ -406,94 +268,25 @@ class A11y {
         return ['applied' => true, 'count' => $applied, 'changes' => $fixes];
     }
 
-    /**
-     * Generates an HTML preview with side-by-side before/after rendering
-     * for contrast fix proposals.
-     *
-     * @param array[] $diffs Array of {element_id, background, before, after}
-     * @return string HTML string suitable for iframe embedding.
-     */
-    public static function generate_contrast_preview_html(array $diffs): string {
-        $diffs_count = count($diffs);
-        if ($diffs_count === 0) {
-            return '<p>No contrast issues found.</p>';
-        }
-        $items_html = '';
-        foreach ($diffs as $i => $d) {
-            $before_color = $d['before']['color'] ?? '#000';
-            $after_color  = $d['after']['color'] ?? '#000';
-            $bg           = $d['background'] ?? '#fff';
-            $before_ratio = round((float) ($d['before']['ratio'] ?? 0), 2);
-            $after_ratio  = round((float) ($d['after']['ratio'] ?? 0), 2);
-
-            $items_html .= <<<HTML
-            <div class="diff-item">
-                <h3>{$d['element_id']}</h3>
-                <div class="side-by-side">
-                    <div class="side before" style="background:{$bg}">
-                        <span class="label">BEFORE ({$before_ratio}:1)</span>
-                        <p style="color:{$before_color}">Lorem ipsum dolor sit amet</p>
-                    </div>
-                    <div class="side after" style="background:{$bg}">
-                        <span class="label">AFTER ({$after_ratio}:1)</span>
-                        <p style="color:{$after_color}">Lorem ipsum dolor sit amet</p>
-                    </div>
-                </div>
-            </div>
-            HTML;
-        }
-
-        return <<<HTML
-        <!DOCTYPE html>
-        <html lang="en">
-        <head><meta charset="UTF-8"><title>Contrast Fix Preview</title>
-        <style>
-            *{margin:0;padding:0;box-sizing:border-box}
-            body{font-family:system-ui,sans-serif;padding:24px;background:#f5f5f5}
-            h2{color:#333;margin-bottom:16px}
-            .diff-item{margin-bottom:32px;background:#fff;border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
-            .diff-item h3{font-size:14px;color:#666;margin-bottom:12px;font-family:monospace}
-            .side-by-side{display:flex;gap:16px}
-            .side{flex:1;padding:24px;border-radius:6px;text-align:center;border:2px solid #e0e0e0}
-            .side.before{border-color:#e74c3c}
-            .side.after{border-color:#2ecc71}
-            .side .label{display:block;font-size:12px;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px}
-            .side.before .label{color:#e74c3c}
-            .side.after .label{color:#2ecc71}
-            .side p{font-size:20px;font-weight:600}
-        </style>
-        </head>
-        <body>
-            <h2>🔍 Color Contrast Fix Preview — Side-by-Side</h2>
-            <p style="color:#888;margin-bottom:24px">
-                {$diffs_count} element(s) with contrast below WCAG AA (4.5:1).
-                Red = before, Green = proposed fix.
-            </p>
-            {$items_html}
-        </body>
-        </html>
-        HTML;
-    }
-
     // =========================================================================
     // add-alt-text-from-context (dry-run by default; apply:true to write)
     // =========================================================================
 
     private static function register_add_alt_text(): void {
-        $name = 'novamira-extra/add-alt-text-from-context';
+        $name = 'novamira-adrianv2/add-alt-text-from-context';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('Add Alt Text from Context', 'novamira-adrians-extra'),
-            'description'         => __('Proposes (and, with apply:true, writes) alt text for images that lack it, derived from the image filename, the nearest heading, or the page title. No AI call. Dry-run by default; writes to the media library alt + the image widget when applied.', 'novamira-adrians-extra'),
-            'category'            => 'novamira-adrians-extra',
+            'label'               => __('Add Alt Text from Context', 'novamira-adrianv2'),
+            'description'         => __('Proposes (and, with apply:true, writes) alt text for images that lack it, derived from the image filename, the nearest heading, or the page title. No AI call. Dry-run by default; writes to the media library alt + the image widget when applied.', 'novamira-adrianv2'),
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [__CLASS__, 'execute_add_alt_text'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
                     'post_id' => ['type' => 'integer'],
-                    'apply'   => ['type' => 'boolean', 'description' => __('Write the alt text. Defaults to false (dry-run preview).', 'novamira-adrians-extra')],
+                    'apply'   => ['type' => 'boolean', 'description' => __('Write the alt text. Defaults to false (dry-run preview).', 'novamira-adrianv2')],
                 ],
                 'required'   => ['post_id'],
             ],
@@ -522,7 +315,7 @@ class A11y {
     public static function execute_add_alt_text($input) {
         $post_id = absint($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrians-extra'));
+            return new \WP_Error('missing_post_id', __('A valid post_id is required.', 'novamira-adrianv2'));
         }
         $extracted = self::extracted($post_id);
         if (is_wp_error($extracted)) {
@@ -537,7 +330,7 @@ class A11y {
         }
 
         if (!current_user_can('edit_post', $post_id)) {
-            return new \WP_Error('forbidden', __('You do not have permission to edit this page.', 'novamira-adrians-extra'));
+            return new \WP_Error('forbidden', __('You do not have permission to edit this page.', 'novamira-adrianv2'));
         }
 
         $page    = self::read_page($post_id);
@@ -617,12 +410,12 @@ class A11y {
         $total_ctx = $pass + $fail + $inconclusive;
         if (0 === $total_ctx) {
             $contrast_status = 'inconclusive';
-            $contrast_detail = __('No resolvable text/background color pairs found (colors may use globals or theme defaults).', 'novamira-adrians-extra');
+            $contrast_detail = __('No resolvable text/background color pairs found (colors may use globals or theme defaults).', 'novamira-adrianv2');
         } elseif ($fail > 0) {
             $contrast_status = 'fail';
             $contrast_detail = sprintf(
                 /* translators: 1: fail count, 2: worst list, 3: inconclusive count */
-                __('%1$d text/background pair(s) below 4.5:1 — %2$s. %3$d pair(s) inconclusive.', 'novamira-adrians-extra'),
+                __('%1$d text/background pair(s) below 4.5:1 — %2$s. %3$d pair(s) inconclusive.', 'novamira-adrianv2'),
                 $fail,
                 implode(', ', array_slice($worst, 0, 5)),
                 $inconclusive
@@ -631,7 +424,7 @@ class A11y {
             $contrast_status = ($inconclusive > 0) ? 'warn' : 'pass';
             $contrast_detail = sprintf(
                 /* translators: 1: pass count, 2: inconclusive count */
-                __('%1$d pair(s) meet 4.5:1; %2$d inconclusive (couldn\'t resolve background).', 'novamira-adrians-extra'),
+                __('%1$d pair(s) meet 4.5:1; %2$d inconclusive (couldn\'t resolve background).', 'novamira-adrianv2'),
                 $pass,
                 $inconclusive
             );
@@ -639,17 +432,17 @@ class A11y {
             $contrast_status = 'inconclusive';
             $contrast_detail = sprintf(
                 /* translators: %d: count */
-                __('%d color pair(s) inconclusive — background could not be resolved.', 'novamira-adrians-extra'),
+                __('%d color pair(s) inconclusive — background could not be resolved.', 'novamira-adrianv2'),
                 $inconclusive
             );
         }
         $checks[] = self::check(
             'color_contrast',
-            __('Color contrast (WCAG AA)', 'novamira-adrians-extra'),
+            __('Color contrast (WCAG AA)', 'novamira-adrianv2'),
             $contrast_status,
             $contrast_detail,
             ('fail' === $contrast_status)
-                ? __('Increase text/background contrast to at least 4.5:1 (3:1 for large text).', 'novamira-adrians-extra')
+                ? __('Increase text/background contrast to at least 4.5:1 (3:1 for large text).', 'novamira-adrianv2')
                 : ''
         );
 
@@ -662,17 +455,17 @@ class A11y {
         }
         $checks[] = self::check(
             'image_alts',
-            __('Image alt text', 'novamira-adrians-extra'),
+            __('Image alt text', 'novamira-adrianv2'),
             (0 === $missing) ? 'pass' : 'fail',
             sprintf(
                 /* translators: 1: missing, 2: total */
-                __('%1$d of %2$d images are missing alt text.', 'novamira-adrians-extra'),
+                __('%1$d of %2$d images are missing alt text.', 'novamira-adrianv2'),
                 $missing,
                 count($ex['images'])
             ),
             (0 === $missing)
                 ? ''
-                : __('Add descriptive alt text (or empty alt="" for purely decorative images).', 'novamira-adrians-extra')
+                : __('Add descriptive alt text (or empty alt="" for purely decorative images).', 'novamira-adrianv2')
         );
 
         // --- Heading hierarchy ----------------------------------------------
@@ -688,13 +481,13 @@ class A11y {
         }
         $checks[] = self::check(
             'heading_hierarchy',
-            __('Heading hierarchy', 'novamira-adrians-extra'),
+            __('Heading hierarchy', 'novamira-adrianv2'),
             $skip ? 'warn' : 'pass',
             $skip
-                ? __('A heading level is skipped, which disorients screen-reader users.', 'novamira-adrians-extra')
-                : __('Headings are sequential.', 'novamira-adrians-extra'),
+                ? __('A heading level is skipped, which disorients screen-reader users.', 'novamira-adrianv2')
+                : __('Headings are sequential.', 'novamira-adrianv2'),
             $skip
-                ? __('Use heading levels in order (don\'t jump from H1 to H3).', 'novamira-adrians-extra')
+                ? __('Use heading levels in order (don\'t jump from H1 to H3).', 'novamira-adrianv2')
                 : ''
         );
 
@@ -712,17 +505,17 @@ class A11y {
         $bad     = $generic + $empty;
         $checks[] = self::check(
             'link_text_quality',
-            __('Link text quality', 'novamira-adrians-extra'),
+            __('Link text quality', 'novamira-adrianv2'),
             (0 === $bad) ? 'pass' : 'warn',
             sprintf(
                 /* translators: 1: generic count, 2: empty count */
-                __('%1$d generic ("click here"-style) and %2$d empty link text(s).', 'novamira-adrians-extra'),
+                __('%1$d generic ("click here"-style) and %2$d empty link text(s).', 'novamira-adrianv2'),
                 $generic,
                 $empty
             ),
             (0 === $bad)
                 ? ''
-                : __('Use descriptive link text that makes sense out of context.', 'novamira-adrians-extra')
+                : __('Use descriptive link text that makes sense out of context.', 'novamira-adrianv2')
         );
 
         // --- Form label coverage --------------------------------------------
@@ -735,17 +528,17 @@ class A11y {
         if (!empty($ex['form_fields'])) {
             $checks[] = self::check(
                 'form_label_coverage',
-                __('Form label coverage', 'novamira-adrians-extra'),
+                __('Form label coverage', 'novamira-adrianv2'),
                 (0 === $unlabeled) ? 'pass' : 'fail',
                 sprintf(
                     /* translators: 1: unlabeled, 2: total */
-                    __('%1$d of %2$d form fields have no label.', 'novamira-adrians-extra'),
+                    __('%1$d of %2$d form fields have no label.', 'novamira-adrianv2'),
                     $unlabeled,
                     count($ex['form_fields'])
                 ),
                 (0 === $unlabeled)
                     ? ''
-                    : __('Give every form field a visible label.', 'novamira-adrians-extra')
+                    : __('Give every form field a visible label.', 'novamira-adrianv2')
             );
         }
 

@@ -11,10 +11,10 @@ class Edit_Media
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-edit-media', [
+        wp_register_ability('novamira-adrianv2/edit-media', [
             'label'               => 'Edit Media',
             'description'         => 'Edit attachment metadata: title, alt text, caption, and description. Supports editing a single attachment or batch-updating multiple attachments at once.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

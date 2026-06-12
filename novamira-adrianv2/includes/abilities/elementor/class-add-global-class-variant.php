@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Add_Global_Class_Variant
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-add-global-class-variant', [
+        wp_register_ability('novamira-adrianv2/add-global-class-variant', [
             'label'               => 'Add Class Variant',
             'description'         => 'Add a responsive or state variant to an existing v4 Global Class. Each variant defines CSS properties for a specific breakpoint (desktop, tablet, mobile) and/or state (hover, focus, active). This is how v4 classes achieve responsive styling that v3 typography presets cannot.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

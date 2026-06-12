@@ -11,10 +11,10 @@ class Media_Usage
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-media-usage', [
+        wp_register_ability('novamira-adrianv2/media-usage', [
             'label'               => 'Media Usage',
             'description'         => 'Find where an attachment is used across the site: Elementor pages, featured images, post content. Also supports finding unused attachments (orphaned media). Use this before deleting to understand impact, or to audit your media library.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

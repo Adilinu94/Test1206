@@ -25,10 +25,10 @@ class Layout_Audit
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-layout-audit', [
+        wp_register_ability('novamira-adrianv2/layout-audit', [
             'label'       => 'Layout Audit',
             'description' => 'Audits an Elementor V4 page for unnecessary container nesting and layout anti-patterns. Detects: containers nested deeper than max_depth (default 3), single-child wrapper containers without own styles, background-only wrapper elements (bg-layer pattern), flexbox containers suitable for CSS grid conversion (2D layout with multiple column children), pass-through containers without any styles or settings, and redundant kicker-row wrappers (SVG+Heading in a separate row-flex that could live on the parent). Returns element IDs, depth, and actionable fix suggestions for each issue. Run before and after V3->V4 conversion.',
-            'category'    => 'adrians',
+            'category'    => 'novamira-adrianv2',
             'input_schema' => [
                 'type'       => 'object',
                 'properties' => [

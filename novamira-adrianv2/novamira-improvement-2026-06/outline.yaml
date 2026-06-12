@@ -1,0 +1,611 @@
+topic: "Verbesserungspotenzial framer-v4-pipeline-v2 + Novamira AdrianV2 Plugin"
+topic_slug: "novamira-improvement-2026-06"
+created_at: "2026-06-10"
+created_by: "Buffy (Codebuff)"
+
+# =========================================================================
+# SCOPE
+# =========================================================================
+scope:
+  primary_targets:
+    - name: "framer-v4-pipeline-v2"
+      path: "/tmp/framer-v4-pipeline-v2"
+      type: "Node.js CLI Pipeline (Framer → Elementor V4 Atomic)"
+      mcp_dependency: "novamira-solar-local via @automattic/mcp-wordpress-remote@latest"
+    - name: "novamira-adrianv2"
+      path: "./novamira-adrianv2 (C:\\Users\\adini\\Desktop\\Umbau\\novamira-adrianv2)"
+      type: "WordPress Plugin (57 Abilities, Elementor V4 focus)"
+      mcp_dependency: "uses novamira_permission_callback from official novamira 1.6.0"
+  secondary_targets:
+    - name: "novamira 1.6.0 (official plugin, active on solar.local)"
+      role: "Provides shared permission_callback + 52 novamira/* Abilities"
+    - name: "Elementor Pro 3.22.0 + Elementor 4.1.1"
+      role: "Runtime for V4 atomic widgets, provider of e-divblock/e-flexbox primitives"
+
+# =========================================================================
+# RESEARCH ITEMS (OBJECTS)
+# =========================================================================
+items:
+
+  # ---------- BLOCK A: framer-v4-pipeline-v2 ----------
+  - id: "A1"
+    name: "wizard.js — 18-Phasen-Orchestrator"
+    block: "A-Pipeline"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/wizard.js"
+    key_questions:
+      - "Wie robust ist die Phase-zu-Phase-Steuerung?"
+      - "Gibt es Idempotenz-Garantien pro Step?"
+      - "Wie wird mit partiellen Fehlern umgegangen?"
+      - "Resume-Logik deckt welche Failure-Modes ab?"
+    current_state: "Phase 1.1 Checkpoint-System implementiert, weitere Phasen offen"
+
+  - id: "A2"
+    name: "scripts/framer-pre-build-validate.js — 12 Guards"
+    block: "A-Pipeline"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/scripts/framer-pre-build-validate.js"
+    key_questions:
+      - "Welche 12 Guards existieren konkret? Was prüfen sie?"
+      - "Ist das 85%-Threshold-Logik hartkodiert oder konfigurierbar?"
+      - "Welche Guard-Fehler sind auto-fixbar?"
+      - "Wie aggregiert qa-report.json die Ergebnisse?"
+
+  - id: "A3"
+    name: "scripts/visual-qa.js — Browser-basiertes Visual QA"
+    block: "A-Pipeline"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/scripts/visual-qa.js"
+    key_questions:
+      - "Welche 3 Breakpoints werden getestet?"
+      - "Pixelmatch-Toleranz konfigurierbar?"
+      - "Performance-Profil (Zeit pro Run)?"
+      - "CI-tauglich (Chromium-Deps, Headless-Setup)?"
+
+  - id: "A4"
+    name: "scripts/lib/ — Utilities (rollback, mcp-bridge, checkpoint)"
+    block: "A-Pipeline"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/scripts/lib/rollback.js"
+      - "/tmp/framer-v4-pipeline-v2/scripts/lib/mcp-bridge.js"
+      - "/tmp/framer-v4-pipeline-v2/scripts/lib/checkpoint.js"
+    key_questions:
+      - "Rollback: Welche Operationen sind abgedeckt?"
+      - "mcp-bridge: Wie wird Auth/Credential gehandhabt?"
+      - "checkpoint: Reicht atomic-write + Schema-Validierung?"
+
+  - id: "A5"
+    name: "tests/ — Pipeline-Tests"
+    block: "A-Pipeline"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/tests/"
+    key_questions:
+      - "Welche Test-Suites (unit, integration, e2e, visual-regression)?"
+      - "CI-Bindung vorhanden?"
+      - "Mock-Server für novamira-solar-local?"
+      - "Coverage-Metriken?"
+
+  - id: "A6"
+    name: "Schemas + qa-report.json + tasks/"
+    block: "A-Pipeline"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/schemas/"
+      - "/tmp/framer-v4-pipeline-v2/qa-report.json"
+      - "/tmp/framer-v4-pipeline-v2/tasks/"
+    key_questions:
+      - "v4-prop-type-schema.json — ist es eine Pipeline-Kopie oder Source-of-Truth?"
+      - "qa-report.json: Welche Struktur? Welche 11 Layout-Issues?"
+      - "tasks/: Was ist offen?"
+
+  - id: "A7"
+    name: "package.json + Versionsdrift"
+    block: "A-Pipeline"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/package.json"
+    key_questions:
+      - "Versionsdrift 0.3.1 (package.json) vs 0.6.0 (SESSION-STATE.md) — Status?"
+      - "Welche npm-Dependencies sind veraltet/sicherheitskritisch?"
+      - "engines-Feld: Node-Mindestversion?"
+
+  - id: "A8"
+    name: "Dokumentation (README, BLUEPRINT, INTEGRATION-PLAN, SESSION-STATE)"
+    block: "A-Pipeline"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/README.md"
+      - "/tmp/framer-v4-pipeline-v2/BLUEPRINT.md"
+      - "/tmp/framer-v4-pipeline-v2/INTEGRATION-PLAN.md"
+      - "/tmp/framer-v4-pipeline-v2/SESSION-STATE.md"
+    key_questions:
+      - "Welche Doku ist aktuell, welche stale?"
+      - "Onboarding-Pfad für neue Entwickler klar?"
+      - "Architecture-Diagrams vorhanden?"
+
+  # ---------- BLOCK B: Novamira AdrianV2 Plugin ----------
+  - id: "B1"
+    name: "novamira-adrianv2.php — Main Bootstrap"
+    block: "B-V2-Plugin"
+    paths:
+      - "./novamira-adrianv2.php"
+    key_questions:
+      - "Wie wird novamira_permission_callback resolved? (Bekannt: nicht im V2-Code definiert)"
+      - "Aktivierungs-/Deaktivierungs-Hooks?"
+      - "Requires-Plugins-Header?"
+
+  - id: "B2"
+    name: "includes/bootstrap.php + categories.php"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/bootstrap.php"
+      - "./categories.php"
+    key_questions:
+      - "Wie werden 57 Abilities registriert? (Lazy-Load? Eager?)"
+      - "Kategorien-Registry: Konsistenz, fehlende Einträge?"
+
+  - id: "B3"
+    name: "includes/helpers/ — Shared Helpers"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/helpers/"
+    key_questions:
+      - "DRY zwischen Helpers und Abilities?"
+      - "v4-color-contrast, v4-content-extractor, v4-seo-meta — sind das duplizierte Utilities?"
+      - "trait-ability-registry + trait-elementor-data-helpers: wo werden sie genutzt?"
+
+  - id: "B4"
+    name: "includes/abilities/atomic/ — Atomic Widgets"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/abilities/atomic/class-atomic-widgets.php"
+      - "./includes/abilities/atomic/class-atomic-layouts.php"
+    key_questions:
+      - "Wie werden e-heading/e-paragraph/e-button/e-image/e-svg erzeugt?"
+      - "Responsive-Varianten korrekt gehandhabt?"
+      - "Fehlerbehandlung bei ungültigen Props?"
+
+  - id: "B5"
+    name: "includes/abilities/elementor/ — 28 Elementor-Klassen"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/abilities/elementor/"
+    key_questions:
+      - "Welche Fähigkeiten sind überlappend (z.B. elementor-get-content vs batch-get-content)?"
+      - "Wie konsistent ist die Fehlerbehandlung über 28 Klassen hinweg?"
+      - "Validierung der Eingabe-Parameter?"
+
+  - id: "B6"
+    name: "includes/abilities/audit/ — Audits (a11y, layout, page, responsive, variable, visual-qa)"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/abilities/audit/"
+    key_questions:
+      - "Welche Audit-Standards werden konkret geprüft (WCAG-Level, axe-core-Version)?"
+      - "Performance-Charakteristik der Audits (Zeit pro Run)?"
+      - "Output-Struktur: maschinenlesbar?"
+
+  - id: "B7"
+    name: "includes/abilities/media/ — Media-Management"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/abilities/media/"
+    key_questions:
+      - "Upload-Pattern (chunked? direct?)"
+      - "Sicherheit: Dateityp-Validierung, Pfad-Traversal-Schutz?"
+
+  - id: "B8"
+    name: "includes/abilities/php-sandbox/ — Isolierte PHP-Ausführung"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/abilities/php-sandbox/class-php-snippets.php"
+      - "./includes/helpers/class-php-sandbox-store.php"
+      - "./includes/helpers/class-php-sandbox-validator.php"
+    key_questions:
+      - "Wie wird PHP-Code tatsächlich ausgeführt? eval? include? Subprocess?"
+      - "Welche Funktionen sind disabled?"
+      - "Validator: Whitelist oder Blacklist?"
+      - "Sicherheit: Konkret welche Angriffsvektoren sind mitigiert?"
+
+  - id: "B9"
+    name: "includes/abilities/custom-code/ — Custom JS/CSS/Snippets"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/abilities/custom-code/class-custom-code.php"
+    key_questions:
+      - "Output-Escaping (XSS-Risiko in custom-CSS/JS)?"
+
+  - id: "B10"
+    name: "includes/abilities/seo/ — SEO-Generation"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/abilities/seo/class-seo.php"
+    key_questions:
+      - "extract-keywords, generate-meta, generate-schema — Qualität der Outputs?"
+
+  - id: "B11"
+    name: "includes/abilities/global-classes/ + variables/"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/abilities/global-classes/class-global-classes.php"
+      - "./includes/abilities/variables/class-batch-create-variables.php"
+    key_questions:
+      - "Naming-Konventionen, Konflikt-Detection?"
+
+  - id: "B12"
+    name: "includes/abilities/utilities/ — Sonstige"
+    block: "B-V2-Plugin"
+    paths:
+      - "./includes/abilities/utilities/class-hello-world.php"
+    key_questions:
+      - "Hello-World als Template für eigene Abilities — gut dokumentiert?"
+
+  # ---------- BLOCK C: Cross-Cutting ----------
+  - id: "C1"
+    name: "MCP-Communication-Patterns (Auth, Transport, Errors)"
+    block: "C-Cross-Cutting"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/scripts/lib/mcp-bridge.js"
+    key_questions:
+      - "Basic-Auth vs Token-Auth? (siehe Phase 4.6 im Plan)"
+      - "Retry-Strategie bei MCP-Calls?"
+      - "Wie werden Errors aus dem Plugin zurück propagiert?"
+
+  - id: "C2"
+    name: "Schema-Sharing (v4-prop-type-schema.json ↔ class-v4-props.php)"
+    block: "C-Cross-Cutting"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/schemas/v4-prop-type-schema.json"
+      - "./includes/helpers/class-v4-props.php"
+    key_questions:
+      - "Wer ist Source-of-Truth? Wer ist Konsument?"
+      - "Drift-Risiko konkret messbar?"
+
+  - id: "C3"
+    name: "Error-Handling-Chain über 3 Layer"
+    block: "C-Cross-Cutting"
+    paths: []
+    key_questions:
+      - "Pipeline wirft Error → MCP-Response → Plugin-PHP-Exception → Ability-Result: welche Schichten fehlen/fail?"
+
+  # ---------- Supplementary Items (from web research 2026-06) ----------
+  - id: "C4"
+    name: "[Supplementary] Schema-Registry-Service"
+    block: "C-Cross-Cutting"
+    paths: []
+    key_questions:
+      - "Sollten V4-Schema in shared npm-package + PHP-via-WP-Plugin-Endpoint konsumiert werden?"
+      - "Vorschlag aus Web-Recherche: zentrales, versioniertes Schema-Repo"
+
+  - id: "C5"
+    name: "[Supplementary] Isolated-PHP-Sidecar"
+    block: "C-Cross-Cutting"
+    paths: []
+    key_questions:
+      - "Sollte PHP-Sandbox aus WordPress-Prozess ausgelagert werden in Sidecar-Container?"
+      - "Trade-offs: Komplexität vs Sicherheit"
+
+  - id: "C6"
+    name: "[Supplementary] SQLite-Ledger statt JSON-Files"
+    block: "C-Cross-Cutting"
+    paths: []
+    key_questions:
+      - "Sollte .pipeline-state.json + qa-report.json durch SQLite ersetzt werden für ACID-Queries?"
+
+  # ---------- BLOCK D: Security Audit (konkrete Klassen) ----------
+  - id: "S1"
+    name: "SAST-Integration (PHPStan/Psalm/Semgrep) für V2-Plugin"
+    block: "D-Security"
+    paths:
+      - "./novamira-adrianv2.php"
+      - "./includes/"
+    key_questions:
+      - "Existiert phpstan.neon, psalm.xml, .semgrep.yml? (Stand 2026-06-10: 0 Treffer)"
+      - "Welches Tool passt am besten? (Psalm mit Taint-Analysis für XSS/SQLi)"
+      - "CI-Integration über GitHub Actions"
+    existing_state: "GAP: Keine statische Analyse konfiguriert. 67 Ability-Klassen ungeprüft."
+
+  - id: "S2"
+    name: "SAST-Integration (ESLint security + Semgrep) für Pipeline"
+    block: "D-Security"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/package.json"
+      - "/tmp/framer-v4-pipeline-v2/wizard.js"
+    key_questions:
+      - "Existieren eslint, eslint-plugin-security, .semgrep.yml? (Stand 2026-06-10: 0 Treffer)"
+      - "Credential-Handling im Code (.env? hardcoded?)"
+      - "Path-Traversal-Risiko bei Datei-Operationen"
+    existing_state: "GAP: Keine Lint/SAST-Tools im Pipeline-Projekt"
+
+  - id: "S3"
+    name: "Audit-Ability-Suite — Konsolidierung der 6 bestehenden Audits"
+    block: "D-Security"
+    paths:
+      - "./includes/abilities/audit/class-class-audit.php"
+      - "./includes/abilities/audit/class-layout-audit.php"
+      - "./includes/abilities/audit/class-page-audit.php"
+      - "./includes/abilities/audit/class-responsive-audit.php"
+      - "./includes/abilities/audit/class-variable-audit.php"
+      - "./includes/abilities/audit/class-visual-qa.php"
+    key_questions:
+      - "Konsistente Output-Struktur über 6 Audit-Klassen?"
+      - "Severity-Schema (critical/warning/info) einheitlich?"
+      - "Auto-Aggregation in qa-report.json?"
+    existing_state: "6 Audit-Klassen existieren (a11y, class, layout, page, responsive, variable, visual-qa) — Konsistenz offen"
+
+  - id: "S4"
+    name: "PHP-Sandbox-Security-Audit (Validator + Runtime)"
+    block: "D-Security"
+    paths:
+      - "./includes/helpers/class-php-sandbox-validator.php"
+      - "./includes/helpers/class-php-sandbox-store.php"
+      - "./includes/abilities/php-sandbox/class-php-snippets.php"
+    key_questions:
+      - "Validator: Whitelist oder Blacklist? (Stand: Blacklist mit 100+ Functions)"
+      - "Variable-Function-Detection vorhanden (Line 273)?"
+      - "Welche Runtime-Disable-Maßnahmen? (disable_functions, open_basedir, Subprocess?)"
+      - "Angriffsvektoren: RCE via eval, file-write, network-call, info-disclosure"
+    existing_state: "Validator existiert (100+ Zeilen, Taint-Analysis-lite), Runtime-Execution-Mechanismus offen"
+
+  - id: "S5"
+    name: "Capability-Eskalations-Audit über 67 permission_callbacks"
+    block: "D-Security"
+    paths: []
+    key_questions:
+      - "Welche Capabilities werden via 'novamira_permission_callback' tatsächlich geprüft?"
+      - "Gibt es Abilities mit niedrigeren Capabilities (z.B. edit_posts statt manage_options)?"
+      - "Nonce-Prüfung pro Ability?"
+    existing_state: "67 Stellen nutzen 'novamira_permission_callback' — hängt von Novamira 1.6.0 ab"
+
+  - id: "S6"
+    name: "Path-Traversal + File-Upload-Audit (Media, Custom-Code, PHP-Snippets)"
+    block: "D-Security"
+    paths:
+      - "./includes/abilities/media/class-media-upload.php"
+      - "./includes/abilities/media/class-batch-media-upload.php"
+      - "./includes/abilities/custom-code/class-custom-code.php"
+    key_questions:
+      - "Dateityp-Whitelist für Media-Upload?"
+      - "Pfad-Validation bei File-Schreiboperationen?"
+      - "Filename-Sanitization?"
+    existing_state: "Unbekannt — benötigt Code-Audit"
+
+  - id: "S7"
+    name: "WordPress-Vulnerability-Scanner (Patchstack / WPScan) — CI-Integration"
+    block: "D-Security"
+    paths: []
+    key_questions:
+      - "Werden V2-Plugin + 16 aktive Plugins auf bekannte CVEs geprüft?"
+      - "Patchstack CLI oder WPScan in CI?"
+      - "composer.lock / package-lock.json scannen?"
+    existing_state: "GAP: Keine automatisierte CVE-Überwachung"
+
+  # ---------- BLOCK E: Performance Profiling (Skripte) ----------
+  - id: "P1"
+    name: "Node.js-Pipeline-Profiler (Clinic.js / --inspect)"
+    block: "E-Performance"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/wizard.js"
+    key_questions:
+      - "Welcher der 18 Schritte braucht wie lange?"
+      - "Event-Loop-Latenzen? Memory-Leaks?"
+      - "Clinic.js Doctor + Flame + Bubbleprof einsetzen?"
+    existing_state: "GAP: Keine Profiling-Tools im Pipeline-Projekt"
+
+  - id: "P2"
+    name: "PHP-Bottleneck-Profiler (Xdebug / Blackfire / Tideways) für V2-Plugin"
+    block: "E-Performance"
+    paths:
+      - "./includes/abilities/"
+      - "./includes/helpers/class-diagnostics.php"
+    key_questions:
+      - "Welche Ability ist am langsamsten? (atomic-widgets? visual-qa? layout-audit?)"
+      - "Diagnostics::record() existiert — was wird gemessen?"
+      - "Xdebug-Profile, Tideways-Profile, oder Blackfire-Traces?"
+    existing_state: "Diagnostics-Helper existiert (sieht 'record()' in bootstrap.php Line 95) — Ausbau möglich"
+
+  - id: "P3"
+    name: "MCP-Roundtrip-Latency-Profiler (Pipeline ↔ V2-Plugin)"
+    block: "E-Performance"
+    paths: []
+    key_questions:
+      - "Wie viele MCP-Roundtrips pro Build? (Ziel: minimieren)"
+      - "Latenz pro Ability (avg/p95/p99)?"
+      - "Connection-Pooling? HTTP/2-Multiplexing?"
+    existing_state: "GAP: Kein Latency-Tracking"
+
+  - id: "P4"
+    name: "Atomic-Widget-Build-Benchmark (Batched vs Single Call)"
+    block: "E-Performance"
+    paths: []
+    key_questions:
+      - "Vergleich: 30 einzelne add-atomic-widget Calls vs 1 batch-build-page Call"
+      - "Speedup-Faktor messen (Ziel: 20-50x laut Phase 2.1)"
+      - "Token-Verbrauch AI-seitig parallel messen"
+    existing_state: "Konzept aus IMPROVEMENT-PLAN Phase 2.1 — noch nicht implementiert"
+
+  - id: "P5"
+    name: "Elementor-Meta-Query-Profiler (DB-Optimierung)"
+    block: "E-Performance"
+    paths: []
+    key_questions:
+      - "get_post_meta-Calls in list-elementor-pages / list-global-classes: N+1-Problem?"
+      - "Query-Monitor-Output für 23 Elementor-Pages?"
+      - "Object-Cache (Redis/Memcached) für Meta-Reads?"
+    existing_state: "Unbekannt — benötigt Query-Monitor-Analyse"
+
+  - id: "P6"
+    name: "Memory-Profiler für lang laufende Builds (Pipeline + Build-Artefakte)"
+    block: "E-Performance"
+    paths: []
+    key_questions:
+      - "Memory-Footprint pro Phase?"
+      - "Heap-Snapshots bei Crash?"
+      - "Stream-Processing für große Elementor-Trees?"
+    existing_state: "GAP: Kein Memory-Tracking"
+
+  # ---------- BLOCK F: A11y Test-Integration ----------
+  - id: "F1"
+    name: "axe-core-Integration in Visual-QA-Pipeline"
+    block: "F-A11y"
+    paths:
+      - "/tmp/framer-v4-pipeline-v2/scripts/visual-qa.js"
+    key_questions:
+      - "Wird axe-core in Playwright/Puppeteer-Tests injected?"
+      - "JSON-Output-Schema kompatibel mit audit-page-a11y?"
+      - "Welche axe-rules sind aktiv (wcag2a, wcag2aa, wcag21a, wcag22aa)?"
+    existing_state: "GAP: axe-core 0 Treffer im Pipeline-Projekt"
+
+  - id: "F2"
+    name: "WCAG-2.2-Konformitäts-Check (aktuell: 2.1 in V4_Color_Contrast)"
+    block: "F-A11y"
+    paths:
+      - "./includes/helpers/class-v4-color-contrast.php"
+    key_questions:
+      - "Erkennt Code WCAG-2.2-spezifische Regeln (z.B. Target Size 2.5.8, Focus Appearance 2.4.11)?"
+      - "Upgrade auf 2.2-Konstanten?"
+      - "Differenz-Report: was ändert sich von 2.1 → 2.2?"
+    existing_state: "Helper nutzt WCAG 2.1 (siehe Line 12, 32-41) — 2.2-Update offen"
+
+  - id: "F3"
+    name: "A11y-CI-Regression-Tests (pa11y-ci oder axe-CI)"
+    block: "F-A11y"
+    paths: []
+    key_questions:
+      - "Werden nach jedem Build alle Pages gegen axe geprüft?"
+      - "JSON-Report + HTML-Report für Diff-Visualisierung?"
+      - "Severity-Threshold (z.B. 0 critical, max 5 serious)?"
+    existing_state: "GAP: Keine CI-gebundenen A11y-Tests"
+
+  - id: "F4"
+    name: "A11y-Audit-Ability verbessern (von 'best-effort contrast' zu echtem axe-Check)"
+    block: "F-A11y"
+    paths:
+      - "./includes/abilities/a11y/class-a11y.php"
+    key_questions:
+      - "audit-page-a11y nutzt 'best-effort contrast' (Line 141) — wie wird das geprüft?"
+      - "Heading-Hierarchy, alt-Text, link-text Checks: implementiert oder nur Stubs?"
+      - "Server-seitiger axe-Lauf? (Knot/Playwright im WP-Container?)"
+    existing_state: "A11y-Ability existiert (audit-page-a11y, fix-color-contrast) — Tiefe offen"
+
+  - id: "F5"
+    name: "Keyboard-Navigation-Tests (Tab-Order, Focus-Visible, Skip-Links)"
+    block: "F-A11y"
+    paths: []
+    key_questions:
+      - "Werden Focus-Trap und Skip-Links geprüft?"
+      - "Test gegen Framer→Elementor-Konversionen?"
+    existing_state: "GAP: Nicht implementiert"
+
+  - id: "F6"
+    name: "Screen-Reader-ARIA-Semantik-Validierung"
+    block: "F-A11y"
+    paths: []
+    key_questions:
+      - "ARIA-Roles, aria-labels, aria-describedby korrekt?"
+      - "Live-Regions für dynamische Inhalte?"
+      - "Form-Field-Labeling?"
+    existing_state: "GAP: Nicht implementiert"
+
+  - id: "F7"
+    name: "Color-Contrast-Validierung (V4_Color_Contrast) — auf 2.2 erweitern + UI-Diff"
+    block: "F-A11y"
+    paths:
+      - "./includes/helpers/class-v4-color-contrast.php"
+      - "./includes/abilities/a11y/class-a11y.php"
+    key_questions:
+      - "WCAG 2.1 → 2.2 Migration (Target Size, Focus Appearance)"
+      - "fix-color-contrast: dry-run vs apply (existiert)"
+      - "Vorher/Nachher-Screenshot-Diff?"
+    existing_state: "Helper existiert (WCAG 2.1), Ability existiert (fix-color-contrast mit apply:true)"
+
+# =========================================================================
+# EXECUTION CONFIG (updated: 2026-06-10 nach research-add-items)
+# =========================================================================
+execution:
+  batch_size: 8            # Erhöht von 6 → 8 (jetzt 39 Items, mehr Parallelisierung sinnvoll)
+  items_per_agent: 3       # Items pro Agent
+  output_dir: "./novamira-improvement-2026-06/results"
+  evidence_required: true  # Jeder Befund muss mit Code-Pfad:Line oder Quelle belegt sein
+  format: "markdown"
+  language: "de"
+  total_items: 46          # Korrektur: 8 (Block A) + 12 (Block B) + 6 (Block C) + 7 (Block D Security) + 6 (Block E Performance) + 7 (Block F A11y) = 46
+  # Hinweis: A11y-Items wurden von A1-A7 → F1-F7 umbenannt (ID-Kollision mit Block A vermieden)
+
+# =========================================================================
+# REFERENCES (aus Web-Recherche 2026-06-10)
+# =========================================================================
+references:
+  best_practices:
+    - title: "WordPress Abilities API — Permission Patterns"
+      url: "https://make.wordpress.org/ai/2025/07/17/abilities-api/"
+      key_takeaway: "Explizite Schema-Registrierung, kryptografisch signierte Payloads für MCP-triggered calls"
+    - title: "Elementor 4.0 — Atomic Foundation"
+      url: "https://elementor.com/blog/editor-40-atomic-forms-pro-interactions/"
+      key_takeaway: "Strikte Verwendung von Global Variables/Classes, Prop-Schema-Validation am Server"
+    - title: "MCP Server Security 2026 (Obot.ai)"
+      url: "https://obot.ai/resources/learning-center/mcp-security/"
+      key_takeaway: "Defense-in-Depth, Gateway-Pattern für Auth, strikte Schema-Validation"
+    - title: "State of WordPress Security 2026 (Patchstack)"
+      url: "https://patchstack.com/whitepaper/state-of-wordpress-security-in-2026/"
+      key_takeaway: "PHP-Sandbox als isolierter Sidecar, niedrig-privilegierter User, disabled functions"
+    - title: "Node.js CLI Apps Best Practices"
+      url: "https://github.com/lirantal/nodejs-cli-apps-best-practices"
+      key_takeaway: "SQLite für persistent state (statt JSON-Files) bei lang laufenden CLIs"
+  known_pitfalls:
+    - "Schema-Drift zwischen Client-/Server-Repos → silent failures"
+    - "Implizite Permission-Callbacks → Attack-Surface für AI-Agents"
+    - "Unrestricted Sandbox-PHP → primärer RCE-Vektor in WP-Plugins"
+    - "Fehlende SAST-Config in WP-Plugins → CVEs unentdeckt vor Release"
+    - "Browser-basierte Visual-QA ohne axe-core → nur visuelles, kein A11y-Testing"
+    - "Keine Memory/Latency-Profiler → Performance-Regressionen unentdeckt"
+
+  # =========================================================================
+  # SUPPLEMENTARY TOOLS (aus Web-Recherche 2026-06-10, ergänzt nach add-items)
+  # =========================================================================
+  supplementary_tools:
+    security:
+      - name: "PHPStan"
+        url: "https://phpstan.org/"
+        use: "Tiefe Type-Checks + Bug-Detection für V2-Plugin"
+      - name: "Psalm"
+        url: "https://psalm.dev/"
+        use: "Taint-Analysis für XSS/SQLi (mit --taint-analysis)"
+      - name: "Semgrep"
+        url: "https://semgrep.org/"
+        use: "Sprachagnostisch, perfekt für Node+PHP-Monorepos (semgrep-action GitHub-Action)"
+      - name: "Patchstack CLI"
+        url: "https://patchstack.com/"
+        use: "WP-Vulnerability-Intelligence, scannt composer.lock + plugin-dir"
+      - name: "WP-CLI (security commands)"
+        url: "https://wp-cli.org/"
+        use: "wp core verify-checksums, mass-updates in CI"
+    performance:
+      - name: "Clinic.js"
+        url: "https://clinicjs.org/"
+        use: "Node.js Doctor + Flame + Bubbleprof (Event-Loop, Memory, Flame-Graphs)"
+      - name: "Blackfire.io"
+        url: "https://blackfire.io/"
+        use: "PHP-Execution-Path-Profiling + DB-Query-Visualization"
+      - name: "Tideways"
+        url: "https://tideways.com/"
+        use: "APM + Slow-Query-Detection für WP-Production"
+      - name: "Query Monitor"
+        url: "https://querymonitor.com/"
+        use: "WP-Plugin für Echtzeit-DB-Query-Visualization + Hook-Analyse"
+      - name: "Node --inspect + Chrome DevTools"
+        url: "https://nodejs.org/en/learn/getting-started/debugging"
+        use: "Native Heap-Snapshots + CPU-Profile ohne extra Deps"
+    a11y:
+      - name: "axe-core (Deque)"
+        url: "https://github.com/dequelabs/axe-core"
+        use: "Industrie-Standard, low-false-positive, Playwright-Integration"
+      - name: "Lighthouse CLI"
+        url: "https://github.com/GoogleChrome/lighthouse"
+        use: "Google-A11y-Audit + Performance + SEO in einem Run"
+      - name: "Pa11y-CI"
+        url: "https://github.com/pa11y/pa11y-ci"
+        use: "Multi-URL-A11y-Test, JSON/HTML-Report für CI"
+      - name: "eslint-plugin-jsx-a11y"
+        url: "https://github.com/jsx-eslint/eslint-plugin-jsx-a11y"
+        use: "Static-Analysis für React/JSX-A11y"
+      - name: "Accessibility Checker (WP-Plugin)"
+        url: "https://wordpress.org/plugins/accessibility-checker/"
+        use: "Site-wide A11y-Monitoring im WP-Dashboard (für Content-Editoren)"

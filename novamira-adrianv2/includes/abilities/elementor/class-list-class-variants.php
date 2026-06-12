@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
+use Novamira\AdrianV2\Helpers;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -13,10 +13,10 @@ class List_Class_Variants
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-list-class-variants', [
+        wp_register_ability('novamira-adrianv2/list-class-variants', [
             'label'               => 'List Class Variants',
             'description'         => 'List all variants for a specific Global Class, showing breakpoints, states, and CSS properties. Also supports listing all classes with their variant counts. Use this to inspect what responsive breakpoints a class has before editing.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

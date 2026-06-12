@@ -23,10 +23,10 @@ class Batch_Media_Upload
 
     public static function register(): void
     {
-        \wp_register_ability('novamira/adrians-batch-media-upload', [
+        \wp_register_ability('novamira-adrianv2/batch-media-upload', [
             'label'               => 'Batch Media Upload',
             'description'         => 'Uploads multiple media files to the WordPress Media Library in one call. Accepts base64-encoded content. Max 30 files, max 10MB each. Replaces N sequential adrians-media-upload calls.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'execute_callback'    => [self::class, 'execute'],
             'permission_callback' => 'novamira_permission_callback',
             'input_schema'        => [

@@ -11,10 +11,10 @@ class Convert_Kit_To_V4
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-convert-kit-to-v4', [
+        wp_register_ability('novamira-adrianv2/convert-kit-to-v4', [
             'label'               => 'Convert Kit v3 to v4 (Legacy)',
             'description'         => 'DEPRECATED: Superseded by novamira/adrians-kit-convert-v3-to-v4 which provides full 4-phase orchestration with e_global_class post type support and responsive variants. This ability is kept for reference only.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => ['type' => 'object', 'properties' => []],
             'output_schema'       => ['type' => 'object'],
             'execute_callback'    => [self::class, 'execute'],

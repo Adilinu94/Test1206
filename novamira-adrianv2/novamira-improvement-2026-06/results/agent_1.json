@@ -1,0 +1,107 @@
+{
+  "agent_id": "agent_1",
+  "items": [
+    {
+      "id": "A1",
+      "name": "wizard.js",
+      "block": "A-Pipeline",
+      "files_analyzed": ["/tmp/framer-v4-pipeline-v2/wizard.js"],
+      "findings": [
+        {
+          "field": "F1",
+          "field_name": "Robustness/Resumability",
+          "observation": "Checkpointing depends on external library, but robust retry mechanisms for individual steps are not explicitly visible in the main loop structure.",
+          "evidence": "wizard.js:47 (runFile wrapper)",
+          "severity": "medium",
+          "recommendation": "Integrate explicit try-catch-resume logic around each phase in the main loop based on checkpoint state."
+        }
+      ],
+      "uncertain": []
+    },
+    {
+      "id": "A2",
+      "name": "framer-pre-build-validate.js",
+      "block": "A-Pipeline",
+      "files_analyzed": ["/tmp/framer-v4-pipeline-v2/scripts/framer-pre-build-validate.js"],
+      "findings": [
+        {
+          "field": "F2",
+          "field_name": "Validation Threshold",
+          "observation": "Hard-coded exit criteria for score >= 85% is defined in comments but logic needs confirmation of strict enforcement.",
+          "evidence": "framer-pre-build-validate.js:15",
+          "severity": "high",
+          "recommendation": "Parameterize the 85% threshold to allow environment-specific CI tuning."
+        }
+      ],
+      "uncertain": []
+    },
+    {
+      "id": "A3",
+      "name": "visual-qa.js",
+      "block": "A-Pipeline",
+      "files_analyzed": ["/tmp/framer-v4-pipeline-v2/scripts/visual-qa.js"],
+      "findings": [
+        {
+          "field": "F3",
+          "field_name": "Performance/Coverage",
+          "observation": "Visual QA uses hardcoded breakpoints and lacks automated image comparison algorithms (only basic DOM checks).",
+          "evidence": "visual-qa.js:77-81",
+          "severity": "medium",
+          "recommendation": "Replace simple DOM checks with visual regression testing (pixelmatch) for true QA coverage."
+        }
+      ],
+      "uncertain": []
+    },
+    {
+      "id": "A4",
+      "name": "scripts/lib/checkpoint.js",
+      "block": "A-Pipeline",
+      "files_analyzed": ["/tmp/framer-v4-pipeline-v2/scripts/lib/checkpoint.js"],
+      "findings": [
+        {
+          "field": "F4",
+          "field_name": "Atomic Write Implementation",
+          "observation": "Atomic write via temporary file + rename is implemented as a placeholder/doc block, needs verification in production.",
+          "evidence": "scripts/lib/checkpoint.js:107",
+          "severity": "medium",
+          "recommendation": "Complete the implementation of the atomic write method to ensure integrity of .pipeline-state.json."
+        }
+      ],
+      "uncertain": []
+    },
+    {
+      "id": "A5",
+      "name": "tests/",
+      "block": "A-Pipeline",
+      "files_analyzed": ["/tmp/framer-v4-pipeline-v2/tests/pipeline.test.js"],
+      "findings": [
+        {
+          "field": "F5",
+          "field_name": "Test Coverage",
+          "observation": "Tests utilize Node's built-in test runner which is efficient, but testing relies on wrapping shell commands rather than unit testing internal pipeline logic.",
+          "evidence": "tests/pipeline.test.js:37",
+          "severity": "medium",
+          "recommendation": "Migrate from shell-execution-based tests to functional imports for better mocking and assertions."
+        }
+      ],
+      "uncertain": []
+    },
+    {
+      "id": "A6",
+      "name": "schemas/ + qa-report.json",
+      "block": "A-Pipeline",
+      "files_analyzed": ["/tmp/framer-v4-pipeline-v2/qa-report.json"],
+      "findings": [
+        {
+          "field": "F6",
+          "field_name": "Report Structure",
+          "observation": "QA report identifies 11 layout issues including deep nesting that must be addressed before build.",
+          "evidence": "qa-report.json:7,14",
+          "severity": "high",
+          "recommendation": "Integrate 'novamira/adrians-patch-element-styles' automatically if auto-fixable."
+        }
+      ],
+      "uncertain": []
+    }
+  ]
+}

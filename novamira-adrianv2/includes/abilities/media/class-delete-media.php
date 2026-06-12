@@ -11,10 +11,10 @@ class Delete_Media
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-delete-media', [
+        wp_register_ability('novamira-adrianv2/delete-media', [
             'label'               => 'Delete Media',
             'description'         => 'Delete one or more attachments from the media library. By default runs a safety check that reports which Elementor pages reference each attachment. Pass force=true to bypass the check and delete permanently. Pass permanent=true to skip trash.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

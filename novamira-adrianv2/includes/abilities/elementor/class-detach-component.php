@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Detach_Component
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-detach-component', [
+        wp_register_ability('novamira-adrianv2/detach-component', [
             'label'               => 'Detach Component',
             'description'         => 'Detach a global widget or template instance from its source, converting it to regular elements. Operates on elements with a templateID reference (global widget instances). Also works on nested template containers by recursively detaching all referenced instances.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

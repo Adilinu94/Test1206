@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Insert_Component
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-insert-component', [
+        wp_register_ability('novamira-adrianv2/insert-component', [
             'label'               => 'Insert Component',
             'description'         => 'Insert a saved container template (component) into a page. Supports before/after/inside a target element, or append to the end. Element IDs are regenerated to avoid conflicts.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

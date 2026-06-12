@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -12,10 +12,10 @@ if (!defined('ABSPATH')) {
 
 class Duplicate_Page {
     public static function register(): void {
-        wp_register_ability('novamira/adrians-duplicate-page', [
+        wp_register_ability('novamira-adrianv2/duplicate-page', [
             'label'               => 'Duplicate Page',
             'description'         => 'Creates a full copy of a page including Elementor data, page settings, featured image, and optionally regenerates element IDs to avoid CSS conflicts.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

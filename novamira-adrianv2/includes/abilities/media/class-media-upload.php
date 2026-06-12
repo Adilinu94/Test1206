@@ -11,10 +11,10 @@ class Media_Upload
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-media-upload', [
+        wp_register_ability('novamira-adrianv2/media-upload', [
             'label'               => 'Media Upload',
             'description'         => 'Uploads a file directly to the WordPress media library via base64-encoded content. Returns attachment ID, URL, and thumbnail URLs.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
@@ -81,14 +81,6 @@ class Media_Upload
         $description    = $input['description'] ?? '';
         $parent_post_id = $input['parent_post_id'] ?? 0;
 
-        // ============================================================
-        // Phase 0.5.6 (D6): Sanitize filename + extension whitelist
-        // ============================================================
-        $filename = self::guard_filename($filename);
-        if (is_array($filename)) {
-            return $filename; // Error result
-        }
-
         // Validate filename has an extension
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         if (!$ext) {
@@ -124,24 +116,6 @@ class Media_Upload
         $mime_type   = $wp_filetype['type'];
         if (!$mime_type) {
             return ['success' => false, 'error' => "Unrecognized file extension: .$ext"];
-        }
-
-        // ============================================================
-        // Phase 0.5.2 (B7) [Magic-bytes]: Format-specific header check
-        // ============================================================
-        $magic_error = self::guard_file_content($file_content, $ext);
-        if ($magic_error !== null) {
-            return ['success' => false, 'error' => $magic_error];
-        }
-
-        // ============================================================
-        // Phase 0.5.2 (B7) [finfo_buffer]: libmagic cross-check
-        // Catches generic MIME mismatches that the magic-bytes check
-        // might miss (polyglot files, exotic formats, future additions).
-        // ============================================================
-        $finfo_error = self::guard_mime_buffer($file_content, $ext);
-        if ($finfo_error !== null) {
-            return ['success' => false, 'error' => $finfo_error];
         }
 
         // Prepare upload
@@ -211,150 +185,6 @@ class Media_Upload
                 'is_image'       => $is_image,
             ],
         ];
-    }
-
-    /**
-     * Phase 0.5.6 (D6): Filename sanitization + extension whitelist.
-     *
-     * Returns the sanitized filename on success, or an error-result array
-     * on rejection. Strips path traversal sequences, rejects empty / dot /
-     * hidden filenames, and enforces a strict extension whitelist.
-     *
-     * Audit evidence: novamira-improvement-2026-06/report.md, item D6.
-     */
-    private static function guard_filename(string $filename): string|array {
-        $sanitized = sanitize_file_name($filename);
-        if ($sanitized === '' || $sanitized === '.') {
-            return ['success' => false, 'error' => 'Invalid filename after sanitization.'];
-        }
-        // After sanitize_file_name, no path separators should remain. Defense in depth.
-        if (str_contains($sanitized, '/') || str_contains($sanitized, '\\')) {
-            return ['success' => false, 'error' => 'Filename contains invalid path components.'];
-        }
-        // Reject leading dot (hidden files like .htaccess).
-        if (str_starts_with($sanitized, '.')) {
-            return ['success' => false, 'error' => 'Filename cannot start with a dot.'];
-        }
-        // Extension whitelist — stricter than WP's default mime-types list.
-        $ext = strtolower(pathinfo($sanitized, PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf', 'ico'];
-        if (!in_array($ext, $allowed, true)) {
-            return ['success' => false, 'error' => "File extension '.$ext' is not allowed. Allowed: " . implode(', ', $allowed)];
-        }
-        return $sanitized;
-    }
-
-    /**
-     * Phase 0.5.2 (B7) [finfo_buffer]: libmagic MIME cross-check.
-     *
-     * Defense-in-depth alongside `guard_file_content()`. Uses PHP's
-     * `finfo_buffer()` (libmagic) to detect the actual MIME type from
-     * file content, then cross-checks it against the set of acceptable
-     * MIMEs for the claimed extension.
-     *
-     * - `guard_file_content()` is precise: checks exact magic bytes for
-     *   known formats (jpeg/png/gif/webp/pdf/ico) + regex for svg.
-     * - `guard_mime_buffer()` is generic: catches any MIME/extension
-     *   mismatch even for formats not in the hardcoded list, plus
-     *   polyglot files where a valid header is followed by a different
-     *   payload (e.g. JPEG header + appended PHP code).
-     *
-     * Both layers run; if either rejects, the upload is blocked.
-     *
-     * Returns null on success or when libmagic is unavailable, error
-     * string on MIME mismatch.
-     *
-     * Audit evidence: novamira-improvement-2026-06/report.md, item B7.
-     */
-    private static function guard_mime_buffer(string $content, string $claimed_ext): ?string {
-        if (!function_exists('finfo_open')) {
-            return null; // libmagic not available — skip silently
-        }
-        $finfo = @finfo_open(FILEINFO_MIME_TYPE);
-        if ($finfo === false) {
-            return null; // Could not init — fail open
-        }
-        $detected_mime = @finfo_buffer($finfo, $content);
-        @finfo_close($finfo);
-        if ($detected_mime === false || $detected_mime === '') {
-            return null; // Detection failed — fail open (magic-bytes still runs)
-        }
-
-        // Map claimed extension -> acceptable finfo MIMEs.
-        // Multiple entries cover platform/finfo-version variations.
-        $expected_mimes = [
-            'jpg'  => ['image/jpeg'],
-            'jpeg' => ['image/jpeg'],
-            'png'  => ['image/png'],
-            'gif'  => ['image/gif'],
-            'webp' => ['image/webp'],
-            // SVG: libmagic returns different MIMEs depending on version;
-            // accept all common variants to avoid false positives.
-            'svg'  => ['image/svg+xml', 'application/xml', 'text/xml', 'text/plain'],
-            'pdf'  => ['application/pdf'],
-            'ico'  => ['image/x-icon', 'image/vnd.microsoft.icon', 'image/ico'],
-        ];
-
-        if (!isset($expected_mimes[$claimed_ext])) {
-            return null; // No mapping — skip
-        }
-
-        foreach ($expected_mimes[$claimed_ext] as $expected) {
-            if ($detected_mime === $expected || str_starts_with($detected_mime, $expected . ';')) {
-                return null; // Match
-            }
-        }
-
-        return sprintf(
-            "MIME type mismatch: claimed extension '.%s' expects one of [%s], but finfo detected '%s' (possible MIME-spoofing).",
-            $claimed_ext,
-            implode(', ', $expected_mimes[$claimed_ext]),
-            $detected_mime
-        );
-    }
-
-    /**
-     * Phase 0.5.2 (B7): Magic-bytes validation against claimed extension.
-     *
-     * Returns null on success (file content matches claimed MIME), or an
-     * error message string on rejection (possible MIME-spoofing).
-     *
-     * The earlier "get MIME from extension" check (wp_check_filetype) trusts
-     * the extension; this layer verifies the actual file header bytes match
-     * what the extension claims.
-     *
-     * Audit evidence: novamira-improvement-2026-06/report.md, item B7.
-     */
-    private static function guard_file_content(string $content, string $ext): ?string {
-        $signatures = [
-            'jpg'  => ["\xFF\xD8\xFF"],
-            'jpeg' => ["\xFF\xD8\xFF"],
-            'png'  => ["\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"],
-            'gif'  => ["\x47\x49\x46\x38\x37\x61", "\x47\x49\x46\x38\x39\x61"], // GIF87a, GIF89a
-            'webp' => ["\x52\x49\x46\x46"], // RIFF...WEBP (RIFF is the first 4 bytes)
-            'pdf'  => ["\x25\x50\x44\x46"], // %PDF
-            'ico'  => ["\x00\x00\x01\x00"],
-        ];
-        if (isset($signatures[$ext])) {
-            $matched = false;
-            foreach ($signatures[$ext] as $sig) {
-                if (str_starts_with($content, $sig)) {
-                    $matched = true;
-                    break;
-                }
-            }
-            if (!$matched) {
-                return "File content does not match claimed extension '.$ext' (possible MIME-spoofing).";
-            }
-        }
-        // SVG is text-based: check for <svg or <?xml header.
-        if ($ext === 'svg') {
-            $prefix = substr(ltrim($content), 0, 200);
-            if (!preg_match('/<svg[\s>]/i', $prefix) && !preg_match('/<\?xml/i', $prefix)) {
-                return "File content does not appear to be valid SVG.";
-            }
-        }
-        return null;
     }
 }
 

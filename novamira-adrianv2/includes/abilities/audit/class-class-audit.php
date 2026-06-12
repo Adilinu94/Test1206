@@ -11,10 +11,10 @@ class Class_Audit
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-class-audit', [
+        wp_register_ability('novamira-adrianv2/class-audit', [
             'label'               => 'Class Usage Audit',
             'description'         => 'Cross-references defined Global Classes with actual usage across Elementor pages. Finds unused classes, shows per-page usage, and identifies classes referenced but not defined.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

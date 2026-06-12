@@ -11,10 +11,10 @@ class List_Media
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-list-media', [
+        wp_register_ability('novamira-adrianv2/list-media', [
             'label'               => 'List Media',
             'description'         => 'Search, filter, and paginate through the WordPress media library. Returns metadata including dimensions, file size, alt text, and URLs. Supports filtering by MIME type, search query, date range, and sorting.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

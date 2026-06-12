@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Import_Design_System
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-import-design-system', [
+        wp_register_ability('novamira-adrianv2/import-design-system', [
             'label'               => 'Import Design System',
             'description'         => 'Import a design system from JSON. Supports conflict resolution strategies: "skip" (keep existing), "overwrite" (replace existing), "rename" (add numeric suffix). Handles colors, typography, and global classes.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

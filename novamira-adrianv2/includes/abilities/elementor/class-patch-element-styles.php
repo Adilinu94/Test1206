@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Patch_Element_Styles
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-patch-element-styles', [
+        wp_register_ability('novamira-adrianv2/patch-element-styles', [
             'label'       => 'Patch Element Styles',
             'description' => 'Surgically patches styles, settings, or custom_css of specific Elementor elements on an existing page by element ID. Use this instead of rebuilding the full page when fixing individual element appearance. Supports updating style props per breakpoint/state, adding custom_css, changing widget settings (title, svg, classes), and adding new style classes. Much faster than batch-build-page for incremental fixes. Always clears Elementor CSS cache after patching.',
-            'category'    => 'adrians',
+            'category'    => 'novamira-adrianv2',
             'input_schema' => [
                 'type' => 'object',
                 'properties' => [

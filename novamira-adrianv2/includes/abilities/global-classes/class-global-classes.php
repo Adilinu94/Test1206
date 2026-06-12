@@ -81,14 +81,14 @@ class Global_Classes {
     // =========================================================================
 
     private static function register_list_global_classes(): void {
-        $name = 'novamira-extra/list-global-classes';
+        $name = 'novamira-adrianv2/list-global-classes';
         self::$ability_names[] = $name;
 
         wp_register_ability($name, [
-            'label'               => __('List Global Classes', 'novamira-adrians-extra'),
+            'label'               => __('List Global Classes', 'novamira-adrianv2'),
             'description'         => __(
                 'Resolves Elementor Class Manager (Global Classes) entries. Maps the opaque "g-" class IDs that appear on elements back to their human-readable names and the CSS properties they define, per breakpoint/state. Use it to understand what styling a g- class applies. Pass class_ids to resolve specific IDs, or omit to list them all. Read-only.',
-                'novamira-adrians-extra'
+                'novamira-adrianv2'
             ),
             'category'            => 'elementor',
             'execute_callback'    => [self::class, 'execute_list_global_classes'],
@@ -99,7 +99,7 @@ class Global_Classes {
                     'class_ids' => [
                         'type'        => 'array',
                         'items'       => ['type' => 'string'],
-                        'description' => __('Optional list of g- class IDs to resolve (e.g. ["g-037bb9c"]). Omit to return every global class.', 'novamira-adrians-extra'),
+                        'description' => __('Optional list of g- class IDs to resolve (e.g. ["g-037bb9c"]). Omit to return every global class.', 'novamira-adrianv2'),
                     ],
                 ],
             ],
@@ -138,7 +138,7 @@ class Global_Classes {
         if (!self::is_available()) {
             return new \WP_Error(
                 'unavailable',
-                __('Global Classes are not available — Elementor 4.0+ is required.', 'novamira-adrians-extra')
+                __('Global Classes are not available — Elementor 4.0+ is required.', 'novamira-adrianv2')
             );
         }
 

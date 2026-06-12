@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -13,10 +13,10 @@ class Edit_Interaction
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-edit-interaction', [
+        wp_register_ability('novamira-adrianv2/edit-interaction', [
             'label'               => 'Edit Interaction',
             'description'         => 'Updates an existing interaction on an atomic v4 element by zero-based index. Partial updates preserve unspecified fields.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [

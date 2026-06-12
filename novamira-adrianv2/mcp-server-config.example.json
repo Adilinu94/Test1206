@@ -1,0 +1,15 @@
+{
+  "_comment": "Reference config for the novamira-solar-local MCP server. Copy the value of mcpServers.novamira-solar-local into your MCP client's config file. The _comment key is not part of the config — drop it when pasting.",
+  "mcpServers": {
+    "novamira-solar-local": {
+      "command": "npx",
+      "args": ["-y", "@automattic/mcp-wordpress-remote@latest"],
+      "env": {
+        "WP_API_URL": "https://solar.local/wp-json/mcp/novamira",
+        "WP_API_USERNAME": "Adrian",
+        "WP_API_PASSWORD": "E10pz6nP2kRGNjNBeRi1Hji1",
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+      }
+    }
+  }
+}

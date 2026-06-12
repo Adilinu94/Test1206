@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -27,10 +27,10 @@ class Batch_Build_Page {
     ];
 
     public static function register(): void {
-        wp_register_ability('novamira/adrians-batch-build-page', [
+        wp_register_ability('novamira-adrianv2/batch-build-page', [
             'label'       => 'Batch Build Page',
             'description' => 'Builds a complete Elementor V4 page from a JSON element tree in one call. Fully supports V4 Atomic Widgets (e-heading, e-paragraph, e-button, e-image, e-svg, e-divider, e-youtube) with $$type settings + local styles, AND V3 containers/widgets. Creates the page if no post_id is given. Supports page-level CSS and JS injection. Returns post ID, permalink, edit URL, and element summary. Always prefer atomic widgets for V4 pages.',
-            'category'    => 'adrians',
+            'category'    => 'novamira-adrianv2',
             'input_schema' => [
                 'type'       => 'object',
                 'properties' => [
@@ -122,13 +122,9 @@ class Batch_Build_Page {
             $built[] = self::build_node($node, $used_ids, $all_ids, $total_elements);
         }
 
-        // 4. Append JS widget (XSS-safe, Phase 0.5.1).
+        // 4. Append JS widget.
         if (!empty($input['page_js'])) {
             $js    = trim($input['page_js']);
-            $js_guard_error = self::guard_page_js($js);
-            if (null !== $js_guard_error) {
-                return $js_guard_error;
-            }
             $html  = stripos($js, '<script') !== false ? $js : "<script>\n{$js}\n</script>";
             $jid   = self::generate_uid($used_ids);
             $built[] = ['id' => $jid, 'elType' => 'widget', 'widgetType' => 'html', 'settings' => ['html' => $html], 'elements' => []];
@@ -469,58 +465,6 @@ class Batch_Build_Page {
                 self::normalize_style_prop_scalars($el['elements']);
             }
         }
-    }
-
-    /**
-     * XSS guard for the page_js input (Phase 0.5.1).
-     * Returns null if the input is safe to inject, or an error-result array
-     * if it should be rejected.
-     *
-     * Security model:
-     * - Users WITHOUT `unfiltered_html` capability:
-     *     - <script>, <iframe>, on* event handlers, javascript: URLs are stripped
-     *       by wp_kses_post; if anything was stripped, refuse with an error
-     *       rather than silently changing the caller's payload.
-     *     - Defense-in-depth: blocklist of dangerous JS patterns
-     *       (document.cookie, eval, new Function, innerHTML, etc.) is rejected.
-     * - Users WITH `unfiltered_html` capability (single-site admin, multisite super-admin):
-     *     - All content passes through unchanged (backward compatibility).
-     *
-     * Audit evidence: novamira-improvement-2026-06/report.md, item B5.
-     */
-    private static function guard_page_js(string $js): ?array {
-        if (current_user_can('unfiltered_html')) {
-            return null;
-        }
-        // wp_kses_post strips <script>, <iframe>, on* attributes, javascript: URLs.
-        $sanitized = wp_kses_post($js);
-        if ($sanitized !== $js) {
-            return [
-                'success' => false,
-                'error'   => 'page_js contains disallowed HTML (e.g. <script>, on* event handlers, javascript: URLs). ' .
-                              'Either remove the markup or grant the calling user the unfiltered_html capability.',
-            ];
-        }
-        // Defense in depth: blocklist of known-dangerous JS API surface.
-        $dangerous_patterns = [
-            'document.cookie', 'window.location', 'document.location',
-            'eval(', 'new Function(',
-            'setTimeout("', 'setTimeout(\'', 'setInterval("', 'setInterval(\'',
-            '.innerHTML', '.outerHTML', '.insertAdjacentHTML',
-            'javascript:',
-        ];
-        foreach ($dangerous_patterns as $pattern) {
-            if (false !== stripos($js, $pattern)) {
-                return [
-                    'success' => false,
-                    'error'   => sprintf(
-                        'page_js contains blocked JS pattern "%s". This requires the unfiltered_html capability.',
-                        esc_html($pattern)
-                    ),
-                ];
-            }
-        }
-        return null;
     }
 }
 

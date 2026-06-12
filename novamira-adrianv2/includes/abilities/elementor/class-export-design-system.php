@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Novamira\AdrianV2\Abilities\Elementor;
 
-use Novamira\Adrians\Helpers;
-use Novamira\Adrians\Guards;
+use Novamira\AdrianV2\Helpers;
+use Novamira\AdrianV2\Guards;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -14,10 +14,10 @@ class Export_Design_System
 {
     public static function register(): void
     {
-        wp_register_ability('novamira/adrians-export-design-system', [
+        wp_register_ability('novamira-adrianv2/export-design-system', [
             'label'               => 'Export Design System',
             'description'         => 'Export the complete Elementor design system as structured JSON. Includes global colors, typography, global classes (with styles), and optional kit layout settings. Use for backups, migration, or cross-site design syncing.',
-            'category'            => 'adrians',
+            'category'            => 'novamira-adrianv2',
             'input_schema'        => [
                 'type'       => 'object',
                 'properties' => [
