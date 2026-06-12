@@ -11,7 +11,7 @@ use Novamira\AdrianV2\Abilities\Elementor\Setup_V4_Foundation;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversNothing — initialer Smoke-Test, keine Unit-Logik geprueft
+ * Initialer Smoke-Test — prueft Klassen- und Methoden-Existenz.
  */
 #[CoversClass(Setup_V4_Foundation::class)]
 class SetupV4FoundationTest extends TestCase
