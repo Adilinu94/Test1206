@@ -2,7 +2,8 @@
 slug: framer-v4-pipeline
 title: Framer V4 Pipeline Workflow
 description: Vollstaendiger Workflow fuer die Konvertierung einer Framer-Seite nach Elementor V4 mit dem framer-v4-pipeline-v2 Repository. Enthaelt alle 18 Schritte, Entscheidungslogik, kritische Invarianten und Fehlerbehandlung. Aktualisiert fuer Novamira Adrians Extra v1.0.0.
-version: "1.0"
+version: "0.7.0"
+pipeline_min_version: "0.7.0"
 tags: [framer, elementor, v4, pipeline, mcp, novamira]
 ---
 
@@ -60,7 +61,8 @@ MCP: novamira/adrians-export-design-system { "what": "all" }
 -> als design-system-export.json speichern
 ```
 
-> **Cache-Hinweis**: `mcp-bridge.js` cached diesen Export automatisch (5 Min TTL).
+> **Cache-Hinweis**: `McpDesignSystemCache` (scripts/lib/mcp-cache.js) cached diesen Export
+> automatisch unter `.pipeline/design-system.json` (5 Min TTL via `PIPELINE_DESIGN_SYSTEM_CACHE_TTL`).
 > Das ist korrekt — `adrians-export-design-system` ist read-only und ändert sich nicht
 > während eines Pipeline-Durchlaufs. Nur `adrians-setup-v4-foundation` darf nie gecacht
 > werden (GV-IDs und GC-IDs sind session-live und können sich ändern).

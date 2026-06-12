@@ -3,23 +3,31 @@
  * Novamira Ability: adrians-delete-snippet
  *
  * Ability-Name:  novamira/adrians-delete-snippet
- * Version:       1.0.0
+ * Version:       1.1.0
  *
- * Löscht ein WPCode-Snippet oder deaktiviert es (Soft-Delete).
+ * Löscht ein WPCode-Snippet, deaktiviert es (Soft-Delete) oder aktiviert es wieder.
  *
  * Parameter:
  *   { "title": string  PFLICHT  - Snippet-Titel
- *     "mode":  string  optional - "delete"(def) | "deactivate" }
+ *     "mode":  string  optional - "delete"(def) | "deactivate" | "activate" }
  *
  * Rückgabe:
- *   { "success": bool, "snippet_id": int, "action": "deleted"|"deactivated"|"not_found", "message": string }
+ *   { "success": bool, "snippet_id": int, "action": "deleted"|"deactivated"|"activated"|"not_found", "message": string }
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+require_once __DIR__ . '/adrians-helpers.php';
+
 function novamira_adrians_delete_snippet( array $params ): array {
+
+    /* ── Capability-Check (Defense-in-Depth) ─────────────────────────── */
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return [ 'success' => false, 'message' => 'Fehlende Berechtigung: manage_options erforderlich.' ];
+    }
+
     $title = isset( $params['title'] ) ? sanitize_text_field( $params['title'] ) : '';
     $mode  = isset( $params['mode'] )  ? sanitize_key( $params['mode'] )         : 'delete';
 
@@ -38,8 +46,22 @@ function novamira_adrians_delete_snippet( array $params ): array {
         ];
     }
 
+    if ( $mode === 'activate' ) {
+        wp_update_post( [ 'ID' => $snippet_id, 'post_status' => 'publish' ] );
+        delete_transient( 'wpcode_snippets' );
+        delete_transient( 'wpcode_snippets_auto_insert' );
+        return [
+            'success'    => true,
+            'snippet_id' => $snippet_id,
+            'action'     => 'activated',
+            'message'    => "Snippet \"$title\" (ID: $snippet_id) aktiviert.",
+        ];
+    }
+
     if ( $mode === 'deactivate' ) {
         wp_update_post( [ 'ID' => $snippet_id, 'post_status' => 'draft' ] );
+        delete_transient( 'wpcode_snippets' );
+        delete_transient( 'wpcode_snippets_auto_insert' );
         return [
             'success'    => true,
             'snippet_id' => $snippet_id,

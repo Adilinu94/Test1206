@@ -138,6 +138,25 @@ describe('framer-utils', async () => {
     utils.walkTree(tree, n => visited.push(n.id));
     assert.deepEqual(visited, ['root', 'child1', 'grandchild', 'child2']);
   });
+
+  // wrapHtmlContent — exported from framer-utils, used by e-heading / e-paragraph / e-button
+  test('wrapHtmlContent: plain text produces html-v3 shape', () => {
+    const r = utils.wrapHtmlContent('Hello World');
+    assert.equal(r['$$type'], 'html-v3', '$$type must be html-v3');
+    assert.equal(r.value?.content?.['$$type'], 'string', 'inner $$type must be string');
+    assert.equal(r.value?.content?.value, 'Hello World', 'content value must match');
+  });
+
+  test('wrapHtmlContent: empty string → value is empty string (not undefined)', () => {
+    const r = utils.wrapHtmlContent('');
+    assert.equal(r.value?.content?.value, '', 'empty string must not become undefined');
+  });
+
+  test('wrapHtmlContent: HTML tags preserved in value', () => {
+    const html = '<strong>Bold</strong> text';
+    const r = utils.wrapHtmlContent(html);
+    assert.equal(r.value?.content?.value, html, 'HTML tags must be preserved verbatim');
+  });
 });
 
 // ── 2. convert-xml-to-v4 ──────────────────────────────────────────────────
@@ -708,4 +727,45 @@ describe('convert-xml-to-v4: cross-project robustness', () => {
     assert.equal(link.value?.tag?.value, 'a', `tag value must be 'a'`);
   });
 
+});
+
+// ─── Suite 10: validate-v4-tree DOM Depth check (C7) ────────────────────────
+
+describe('validate-v4-tree: DOM depth check (C7)', () => {
+  const VALIDATE_SCRIPT = join(SCRIPTS, 'validate-v4-tree.js');
+
+  /** Builds a nested element tree of the given depth. */
+  function buildNestedTree(depth) {
+    function makeNode(d) {
+      const node = { id: `node-d${d}`, widgetType: 'e-flexbox', settings: {}, styles: {}, elements: [] };
+      if (d > 0) node.elements.push(makeNode(d - 1));
+      return node;
+    }
+    return [makeNode(depth)];
+  }
+
+  test('C7: tree depth 3 → no warnings, no errors', () => {
+    const tree = buildNestedTree(3);
+    const treeFile = tmpFile('depth3.json', JSON.stringify(tree));
+    const result = run('validate-v4-tree.js', [treeFile, '--mode=warn'], { expectFail: false });
+    const parsed = JSON.parse(result.stdout);
+    // DOM-DEPTH must not appear in errors or warnings arrays
+    const allIssues = [...(parsed.errors ?? []), ...(parsed.warnings ?? [])];
+    const domDepthIssues = allIssues.filter(i => i.rule === 'DOM-DEPTH');
+    assert.equal(domDepthIssues.length, 0,
+      `Depth-3 tree should not trigger DOM-DEPTH, got: ${JSON.stringify(domDepthIssues)}`);
+  });
+
+  test('C7: tree depth 6 → DOM-DEPTH error reported', () => {
+    const tree = buildNestedTree(6);
+    const treeFile = tmpFile('depth6.json', JSON.stringify(tree));
+    const result = run('validate-v4-tree.js', [treeFile, '--mode=warn'], { expectFail: false });
+    const parsed = JSON.parse(result.stdout);
+    const allIssues = [...(parsed.errors ?? []), ...(parsed.warnings ?? [])];
+    const domDepthIssues = allIssues.filter(i => i.rule === 'DOM-DEPTH');
+    assert.ok(domDepthIssues.length > 0,
+      `Depth-6 tree should trigger DOM-DEPTH error, got errors: ${JSON.stringify(parsed.errors)}`);
+    assert.ok(domDepthIssues[0].message.includes('6'),
+      `DOM-DEPTH message should mention depth 6, got: ${domDepthIssues[0].message}`);
+  });
 });

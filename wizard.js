@@ -768,7 +768,7 @@ async function main() {
         '2. MCP: novamira/adrians-export-design-system { what: all } -> design-system-export.json speichern.',
         '3. GV-IDs aus design-system-export.json in v4-tree.json eintragen (design-token-extractor.js).',
         '4. Optional: cross-validate-sources.js --design-system design-system-export.json --tree v4-tree.json',
-        '5. Optional: generate-global-classes.js und asset-to-wp-media.js ausfuehren.',
+        '5. generate-global-classes.js --tree v4-tree.json --output tokens/gc-plan.json  (PFLICHT — verhindert ~45 Style-Duplikate)',
         '5a. Optional: framer-animation-extractor.js ausfuehren (animation-plan.json → inject-animation-code.js)',
         '6. patch-v4-tree-media-ids.js ausfuehren (Invariant IV).',
         '7. framer-pre-build-validate.js --tree v4-tree.json (Score muss >= 85 sein).',

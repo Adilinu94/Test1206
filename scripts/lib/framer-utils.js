@@ -301,3 +301,21 @@ export function extractGvIds(node) {
   scan(node);
   return [...ids];
 }
+
+// ─────────────────────────────────────────────
+// HTML CONTENT WRAPPING
+// ─────────────────────────────────────────────
+
+/**
+ * Wraps text or HTML content in the Elementor V4 html-v3 format.
+ * Used by e-heading, e-paragraph, e-button and other text widgets.
+ *
+ * @param {string} content - Plain text or HTML content
+ * @returns {{ '$$type': 'html-v3', value: { content: { '$$type': 'string', value: string } } }}
+ */
+export function wrapHtmlContent(content) {
+  return {
+    '$$type': 'html-v3',
+    value: { content: { '$$type': 'string', value: String(content ?? '') } },
+  };
+}

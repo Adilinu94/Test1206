@@ -24,7 +24,7 @@ const __dirname  = path.dirname(__filename);
 import {
   normalizeHex, resolveCssVar, generateStyleId,
   wrapSize, wrapUnitless, wrapDimensions, wrapBorderRadius, wrapGvColor, wrapGvFont,
-  wrapColor, wrapType, wrapImageSrc, isDimensionValue, wrapImage,
+  wrapColor, wrapType, wrapImageSrc, isDimensionValue, wrapImage, wrapHtmlContent,
 } from './lib/framer-utils.js';
 
 // ─────────────────────────────────────────────
@@ -285,13 +285,6 @@ function determineHtmlTag(attrs) {
   if (/\bh6\b|heading.?6/.test(name))          return 'h6';
   if (/paragraph|body|text/.test(name))         return 'p';
   return 'h2'; // default heading
-}
-
-function wrapHtmlContent(content) {
-  return {
-    '$$type': 'html-v3',
-    value: { content: { '$$type': 'string', value: content || '' } },
-  };
 }
 
 function wrapLink(href, targetBlank = false) {

@@ -588,6 +588,52 @@ function scanForHardcodedHex(obj, path, el, styleId, warnings, keyPath = '') {
   }
 }
 
+// ─── Check: DOM depth (C7 — warning ≥4, error ≥6) ──────────────────
+
+/**
+ * Measures the maximum nesting depth of the element tree.
+ * Deep trees cause server-timeout risk in elementor-set-content.
+ * warning ≥ 4 levels deep, error ≥ 6 levels deep.
+ */
+function checkDomDepth(tree, errors, warnings) {
+  let maxDepth = 0;
+  let deepestPath = '';
+
+  function walk(node, depth, pathStr) {
+    if (depth > maxDepth) {
+      maxDepth = depth;
+      deepestPath = pathStr;
+    }
+    const children = node.elements ?? node.children ?? node.items ?? [];
+    if (Array.isArray(children)) {
+      children.forEach((child, i) => {
+        const id = child.id ?? child.widgetType ?? `[${i}]`;
+        walk(child, depth + 1, `${pathStr} > ${id}`);
+      });
+    }
+  }
+
+  const roots = Array.isArray(tree) ? tree : [tree];
+  roots.forEach(root => {
+    const id = root.id ?? root.widgetType ?? 'root';
+    walk(root, 0, id);
+  });
+
+  if (maxDepth >= 6) {
+    errors.push({
+      check: 7, rule: 'DOM-DEPTH', elementId: deepestPath,
+      path: deepestPath,
+      message: `DOM depth ${maxDepth} ≥ 6 — server timeout risk in elementor-set-content. Flatten the tree.`,
+    });
+  } else if (maxDepth >= 4) {
+    warnings.push({
+      check: 'C7', rule: 'DOM-DEPTH', elementId: deepestPath,
+      path: deepestPath,
+      message: `DOM depth ${maxDepth} ≥ 4 — performance degradation risk. Consider flattening.`,
+    });
+  }
+}
+
 // ─── Main validation ────────────────────────────────────────────────
 
 function validate() {
@@ -606,6 +652,9 @@ function validate() {
     checkVerboseStyleFormat(el, path, errors);
     checkHardcodedHex(el, path, warnings);
   });
+
+  // Tree-level check: DOM depth (not per-element, runs once on full tree)
+  checkDomDepth(tree, errors, warnings);
 
   // Scoring: 6 vital checks, each worth ~16.7%
   // Checks 1-6 are "vital", responsive-coverage and hardcoded-hex are warnings only
@@ -660,6 +709,7 @@ function validate() {
     C4: { name: 'RESPONSIVE-COVERAGE', vital: true, weight: 16 },
     C5: { name: 'WIDGET-SETTINGS', vital: true, weight: 17 },
     C6: { name: 'VERBOSE-STYLE-FORMAT', vital: true, weight: 16 },
+    C7: { name: 'DOM-DEPTH', vital: false, weight: 8 },
     placebo: { name: 'HARDCODED-HEX', vital: false, weight: 0 }
   };
 

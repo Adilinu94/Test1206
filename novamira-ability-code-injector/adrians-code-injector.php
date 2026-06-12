@@ -54,6 +54,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit( 'No direct access.' );
 }
 
+require_once __DIR__ . '/adrians-helpers.php';
+
 /**
  * Haupt-Ability-Handler.
  * Wird vom Novamira MCP-Adapter aufgerufen:
@@ -64,6 +66,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array          Strukturierter Ergebnis-Array (wird zu JSON serialisiert)
  */
 function novamira_adrians_code_injector( array $params ): array {
+
+    /* ── 0. Capability-Check (Defense-in-Depth) ───────────────────────────── */
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return [ 'success' => false, 'message' => 'Fehlende Berechtigung: manage_options erforderlich.' ];
+    }
 
     /* ── 1. Parameter lesen & validieren ─────────────────────────────────── */
 
@@ -226,22 +233,6 @@ function novamira_adrians_code_injector( array $params ): array {
 /* ─── Hilfsfunktionen ────────────────────────────────────────────────────── */
 
 /**
- * Sucht ein WPCode-Snippet nach exaktem Titel.
- * @return int  Post-ID oder 0
- */
-function novamira_find_wpcode_snippet( string $title ): int {
-    $q = new WP_Query( [
-        'post_type'      => 'wpcode_snippet',
-        'post_status'    => [ 'publish', 'draft', 'private', 'trash' ],
-        'title'          => $title,
-        'posts_per_page' => 1,
-        'fields'         => 'ids',
-        'no_found_rows'  => true,
-    ] );
-    return ! empty( $q->posts ) ? (int) $q->posts[0] : 0;
-}
-
-/**
  * Baut einen vollständigen PHP wp_enqueue_scripts Snippet für GSAP.
  *
  * Das generierte PHP lädt GSAP-Core + gewünschte Plugins vom CDN,
@@ -321,11 +312,10 @@ function novamira_build_gsap_snippet( string $animation_js, string $version, arr
     /* Inline JS: registerPlugin + Animationscode */
     $register_block = ! empty( $register_calls ) ? implode( "\n", $register_calls ) . "\n\n" : '';
     $inline_js      = $register_block . $animation_js;
-    $inline_escaped = addslashes( $inline_js );
 
     $lines[] = '    wp_add_inline_script(';
     $lines[] = "        '{$last_handle}',";
-    $lines[] = "        '{$inline_escaped}'";
+    $lines[] = '        ' . wp_json_encode( $inline_js );
     $lines[] = '    );';
     $lines[] = '}';
     $lines[] = "add_action( 'wp_enqueue_scripts', '{$fn_uid}', 10 );";

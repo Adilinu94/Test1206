@@ -27,7 +27,7 @@ framer-v4-pipeline-v2/
 ├── schemas/
 │   └── v4-prop-type-schema.json          # Widget-Pflichtfelder fuer Validator
 ├── tests/
-│   └── pipeline.test.js                  # 33 Regressionstests, node --test
+│   └── pipeline.test.js                  # 49 Regressionstests in 10 Suiten, node --test
 └── scripts/
     ├── lib/
     │   ├── framer-utils.js               # Gemeinsame Utilities (wrapSize, walkTree, ...)

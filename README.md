@@ -13,7 +13,7 @@ Standalone-Pipeline zur Konvertierung von **Framer-Websites** in **Elementor V4 
 
 ```bash
 node wizard.js          # Interaktiver CLI-Wizard (empfohlen)
-npm test                # 33 Unit-Tests
+npm test                # 49 Unit-Tests (10 Suiten)
 npm run test:e2e        # 12 E2E-Tests
 ```
 
@@ -35,7 +35,7 @@ npm run test:e2e        # 12 E2E-Tests
 
 ```bash
 # Tests
-npm test                  # 33 Unit-Tests (framer-utils, converter, guards…)
+npm test                  # 49 Unit-Tests in 10 Suiten (framer-utils, converter, guards…)
 npm run test:e2e          # 12 E2E-Tests (kompletter Pipeline-Durchlauf)
 npm run test:all          # beides
 
@@ -398,7 +398,7 @@ framer-v4-pipeline-v2/
 │   ├── build-dependency-graph.js        # Kahn-Algorithmus Build-Reihenfolge
 │   └── export-mcp-xml.js                # getNodeXml Plan-Generator
 └── tests/
-    ├── pipeline.test.js                 # 33 Unit-Tests
+    ├── pipeline.test.js                 # 49 Unit-Tests in 10 Suiten
     └── e2e.test.js                      # 12 E2E-Tests
 ```
 
@@ -416,4 +416,4 @@ framer-v4-pipeline-v2/
 | 5 | Duplicate Widget-IDs (`node-7` 5×) | `uniqueWidgetId()` mit Counter — analog zu `uniqueStyleId()` |
 | 6 | SVG-Circles → `e-flexbox` statt `e-svg` | `determineWidgetType` erkennt SVG-Tags/Attribute; `serializeSvgNode()` serialisiert Sub-Tree zurück zu Markup |
 
-**Alle 33 Unit-Tests weiterhin grün.**
+**Alle 49 Unit-Tests weiterhin grün (10 Suiten).**
