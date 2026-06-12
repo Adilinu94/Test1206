@@ -1,0 +1,1402 @@
+Node xml:
+<Desktop
+    nodeId="WQLkyLRf1"
+    position="absolute"
+    width="1200px"
+    height="fit-content"
+    top="0px"
+    left="0px"
+    <!-- background color string or project color style path (if starts with /) -->
+    backgroundColor="/Primary/01"
+    overflow="clip"
+    layout="stack"
+    stackDirection="vertical"
+    stackDistribution="start"
+    stackAlignment="center"
+>
+  <Hero
+      nodeId="cv9xHAkuT"
+      width="1fr"
+      height="100vh"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="62px 12px 12px 12px"
+      stackDirection="horizontal"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="e9zUrBoue"
+        width="1fr"
+        height="1fr"
+        borderRadius="40px"
+        overflow="clip"
+    >
+      <VideoContainer
+          nodeId="avWpqAoW7"
+          position="absolute"
+          top="0px"
+          right="0px"
+          bottom="0px"
+          left="0px"
+          overflow="clip"
+      >
+        <Video
+            nodeId="FvB39t2a3"
+            locked="true"
+            position="absolute"
+            top="0px"
+            right="0px"
+            bottom="0px"
+            left="0px"
+            srcType="Upload"
+            srcUrl="https://framerusercontent.com/assets/MLWPbW1dUQawJLhhun3dBwpgJak.mp4"
+            playing="true"
+            posterEnabled="true"
+            <!-- background color string or project color style path (if starts with /) -->
+            backgroundColor="rgba(122, 18, 18, 0)"
+            startTime="0"
+            loop="true"
+            objectFit="cover"
+            controls="false"
+            muted="true"
+            volume="25"
+         />
+        <Overlay
+            nodeId="etOoCUHkk"
+            locked="true"
+            position="absolute"
+            top="0px"
+            right="0px"
+            bottom="0px"
+            left="0px"
+            <!-- background color string or project color style path (if starts with /) -->
+            backgroundColor="/Neutral/Opacity/08 20%"
+            overflow="clip"
+         />
+      </VideoContainer>
+      <Header
+          nodeId="sFwmFGNrV"
+          position="absolute"
+          width="700px"
+          height="fit-content"
+          top="80px"
+          left="80px"
+          maxWidth="700px"
+          overflow="clip"
+          layout="stack"
+          gap="16px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="start"
+      >
+        <TrustedBy
+            nodeId="ZcW8UvZnh"
+            width="fit-content"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="8px"
+            stackDirection="horizontal"
+            stackDistribution="start"
+            stackAlignment="center"
+        >
+          <SunHorizon
+              nodeId="WWnVycPtg"
+              width="20px"
+              height="16px"
+              aspectRatio="1"
+              ezTt3ayMo="rgb(255, 219, 115)"
+              lschgej4H="1"
+              qxTvv_EBh="1"
+           />
+          <Helped200FoundersRiseTheirBrands
+              nodeId="ZWZwAJrrV"
+              width="fit-content"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Body/Body S Strong"
+          >
+            HELPED +200 FOUNDERS RISE THEIR BRANDS
+          </Helped200FoundersRiseTheirBrands>
+        </TrustedBy>
+        <TextWrapper
+            nodeId="l8JKVj34o"
+            width="1fr"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="0px 12px"
+            stackDirection="horizontal"
+            stackDistribution="start"
+            stackAlignment="center"
+            stackWrap="true"
+        >
+          <We
+              nodeId="kUknK9uK0"
+              width="fit-content"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Heading/H1"
+          >
+            We
+          </We>
+          <Build
+              nodeId="r73QjTgPY"
+              width="fit-content"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Heading/H1"
+          >
+            build
+          </Build>
+          <DesignOn
+              nodeId="lqrR8ESxR"
+              width="fit-content"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Heading/H1"
+          >
+            design on
+          </DesignOn>
+          <Clarity
+              nodeId="RpN_HpJXi"
+              width="fit-content"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Heading/H1"
+          >
+            clarity,
+          </Clarity>
+          <Speed
+              nodeId="FtU7P3Nns"
+              width="fit-content"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Heading/H1"
+          >
+            speed,
+          </Speed>
+          <And
+              nodeId="W93S3itiB"
+              width="fit-content"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Heading/H1"
+          >
+            and
+          </And>
+          <Care
+              nodeId="as3SIYSva"
+              width="fit-content"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Heading/H1b"
+          >
+            care.
+          </Care>
+        </TextWrapper>
+      </Header>
+      <ContentFooter
+          nodeId="WzkC8njFi"
+          position="absolute"
+          height="fit-content"
+          right="80px"
+          bottom="60px"
+          left="80px"
+          overflow="visible"
+          layout="stack"
+          gap="10px"
+          stackDirection="horizontal"
+          stackDistribution="space-between"
+          stackAlignment="end"
+      >
+        <WeCreateThoughtfulWorkThroughARefinedProcessGuidedByClearThi
+            nodeId="aWMoUlxld"
+            width="350px"
+            height="fit-content"
+            <!-- project text style path, always starts with / -->
+            inlineTextStyle="/Body/Body L"
+        >
+          We create thoughtful work through a refined process, guided by clear thinking and a deep respect for time.
+        </WeCreateThoughtfulWorkThroughARefinedProcessGuidedByClearThi>
+        <HowWeWorkCta
+            nodeId="WW2RoTPIg"
+            width="1fr"
+            height="fit-content"
+            maxWidth="240px"
+            <!-- the component id this instance uses -->
+            componentId="oT49hpoNx"
+            variant="dWC_XoCeS"
+            nUjzUoV6a="See how we work with you"
+            wBLSdxBjD="/#how-we-work"
+            puu0Giny_="false"
+         />
+      </ContentFooter>
+    </Container>
+  </Hero>
+  <About
+      nodeId="UhzfruEF6"
+      width="1fr"
+      height="fit-content"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="200px 0px 60px 0px"
+      stackDirection="horizontal"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="ZFKID31RT"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1120px"
+        overflow="visible"
+        layout="stack"
+        gap="60px"
+        stackDirection="vertical"
+        stackDistribution="start"
+        stackAlignment="center"
+    >
+      <Headline
+          nodeId="sdN2SFIY6"
+          width="1fr"
+          height="fit-content"
+          maxWidth="650px"
+          overflow="clip"
+          layout="stack"
+          gap="24px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <Eyebrow
+            nodeId="dX5pNj_Gs"
+            width="fit-content"
+            height="fit-content"
+            <!-- the component id this instance uses -->
+            componentId="Ji54VOx3x"
+            variant="NVy0EpWk9"
+            BpO6nknvQ="About Us"
+         />
+        <ADeliberateApproachToMeaningfulModernWork
+            nodeId="fUhZcYOGQ"
+            width="1fr"
+            height="fit-content"
+            <!-- project text style path, always starts with / -->
+            inlineTextStyle="/Heading/H2"
+        >
+          A deliberate approach to meaningful, modern work.
+        </ADeliberateApproachToMeaningfulModernWork>
+      </Headline>
+      <Content
+          nodeId="rNQWMPAqA"
+          width="1fr"
+          height="fit-content"
+          overflow="visible"
+          layout="stack"
+          gap="12px"
+          stackDirection="horizontal"
+          stackDistribution="center"
+          stackAlignment="start"
+      >
+        <ImageL
+            nodeId="TCV5ExGB0"
+            position="sticky"
+            width="1fr"
+            height="460px"
+            top="120px"
+            aspectRatio="0.777"
+            borderRadius="24px"
+            zIndex="1"
+            overflow="clip"
+        >
+          <Image
+              nodeId="Nbge6zfdH"
+              locked="true"
+              position="absolute"
+              top="0px"
+              right="-0.5px"
+              bottom="0px"
+              left="0px"
+              borderRadius="16px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/0yswDmxDmoofa2GI3pWMdp3OE.webp"
+              overflow="clip"
+           />
+        </ImageL>
+        <Content
+            nodeId="Rv16kjdb6"
+            width="1fr"
+            height="fit-content"
+            zIndex="1"
+            overflow="clip"
+            layout="stack"
+            gap="40px"
+            padding="0px 12px 0px 12px"
+            stackDirection="vertical"
+            stackDistribution="start"
+            stackAlignment="start"
+        >
+          <Image
+              nodeId="ndRyFOCHV"
+              width="40px"
+              height="48px"
+              aspectRatio="1"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/mWdyc8HQZiv7QVwRwSVOdK2q3N0.png"
+              overflow="clip"
+           />
+          <Content
+              nodeId="UIFSS5Aa1"
+              width="1fr"
+              height="fit-content"
+              overflow="clip"
+              layout="stack"
+              gap="40px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="start"
+          >
+            <Details
+                nodeId="U9jHys4Mo"
+                width="1fr"
+                height="fit-content"
+                overflow="clip"
+                layout="stack"
+                gap="24px"
+                stackDirection="vertical"
+                stackDistribution="start"
+                stackAlignment="start"
+            >
+              <TextWrapper
+                  nodeId="JQRBMCMs5"
+                  width="1fr"
+                  height="fit-content"
+                  overflow="clip"
+                  layout="stack"
+                  gap="18px"
+                  stackDirection="vertical"
+                  stackDistribution="start"
+                  stackAlignment="start"
+              >
+                <PulmaWasShapedByASimpleBeliefMeaningfulWorkDoesnTNeedToBeLou
+                    nodeId="RG6d6F9rV"
+                    width="1fr"
+                    height="fit-content"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Body/Body M"
+                >
+                  Pulma was shaped by a simple belief: meaningful work doesn’t need to be loud, and speed doesn’t need to feel rushed. We operate between precision and pace, where ideas are carefully refined, then carried forward with quiet confidence.
+                </PulmaWasShapedByASimpleBeliefMeaningfulWorkDoesnTNeedToBeLou>
+                <OurProcessIsDeliberateNeverSlowEachProjectBeginsWithAlignmen
+                    nodeId="XkhUMoQZv"
+                    width="1fr"
+                    height="fit-content"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Body/Body M"
+                >
+                  Our process is deliberate, never slow. Each project begins with alignment, understanding intent before execution. From structure to interaction, every detail is handled with focus and care.
+                </OurProcessIsDeliberateNeverSlowEachProjectBeginsWithAlignmen>
+                <WeWorkWithinSystemsNotToLimitCreativityButToGiveItDirectionW
+                    nodeId="hh6ppDvU0"
+                    width="1fr"
+                    height="fit-content"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Body/Body M"
+                >
+                  We work within systems not to limit creativity, but to give it direction. With the right structure in place, creativity becomes more intentional, more scalable, and ultimately more meaningful.
+                </WeWorkWithinSystemsNotToLimitCreativityButToGiveItDirectionW>
+              </TextWrapper>
+              <TextButton
+                  nodeId="bH2CytOKP"
+                  width="fit-content"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="z138Kj77q"
+                  vbprB00Jw="Learn More About Us"
+                  MTCQdvIX6="/about"
+                  E1npcvKFK="false"
+               />
+            </Details>
+            <CardWrapper
+                nodeId="oSpF1mCNe"
+                width="1fr"
+                height="fit-content"
+                overflow="clip"
+                layout="grid"
+                gap="8px 8px"
+                gridColumns="2"
+                gridRows="2"
+                gridAlignment="center"
+                gridColumnWidthType="minmax"
+                gridColumnWidth="200"
+                gridColumnMinWidth="50"
+                gridRowHeightType="auto"
+                gridRowHeight="200"
+            >
+              <CardSocialProof
+                  nodeId="mpTtdmchB"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="mLTo4U9oK"
+                  variant="gBQHJ0w1x"
+                  UughCs62p="0"
+                  fCH_5X58F="98"
+                  KLyLuqW2W=""
+                  P_Vx1uimX="%"
+                  Nftb6DggF="On-time delivery"
+               />
+              <CardSocialProof
+                  nodeId="Hv13RL5Kk"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="mLTo4U9oK"
+                  variant="gBQHJ0w1x"
+                  UughCs62p="0"
+                  fCH_5X58F="40"
+                  KLyLuqW2W=""
+                  P_Vx1uimX="%"
+                  Nftb6DggF="Faster launch"
+               />
+              <CardSocialProof
+                  nodeId="eFpGLlTd8"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="mLTo4U9oK"
+                  variant="gBQHJ0w1x"
+                  UughCs62p="0"
+                  fCH_5X58F="90"
+                  KLyLuqW2W=""
+                  P_Vx1uimX="%"
+                  Nftb6DggF="Returning clients"
+               />
+              <CardSocialProof
+                  nodeId="CQpTQ6Htr"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="mLTo4U9oK"
+                  variant="gBQHJ0w1x"
+                  UughCs62p="0"
+                  fCH_5X58F="200"
+                  KLyLuqW2W="+"
+                  P_Vx1uimX=""
+                  Nftb6DggF="Completed projects"
+               />
+            </CardWrapper>
+          </Content>
+        </Content>
+        <ImageR
+            nodeId="D2OFLV5fS"
+            position="sticky"
+            width="1fr"
+            height="460px"
+            top="120px"
+            aspectRatio="0.777"
+            borderRadius="24px"
+            zIndex="1"
+            overflow="clip"
+        >
+          <Image
+              nodeId="lel1vG2XO"
+              locked="true"
+              position="absolute"
+              top="0px"
+              right="-0.5px"
+              bottom="0px"
+              left="0px"
+              borderRadius="16px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/5jW0ErePXfr8zKx0CQSVYuRsC0c.webp"
+              overflow="clip"
+           />
+        </ImageR>
+      </Content>
+    </Container>
+  </About>
+  <Clients
+      nodeId="Renf0PWLx"
+      width="1fr"
+      height="fit-content"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="0px 0px 200px 0px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="YvyIG3liH"
+        width="1fr"
+        height="fit-content"
+        maxWidth="800px"
+        overflow="clip"
+        layout="stack"
+        gap="24px"
+        stackDirection="vertical"
+        stackDistribution="start"
+        stackAlignment="center"
+    >
+      <TrustedByManyAndYou
+          nodeId="u31NQEPOD"
+          width="fit-content"
+          height="fit-content"
+          <!-- project text style path, always starts with / -->
+          inlineTextStyle="/Body/Body S Strong"
+      >
+        TRUSTED BY MANY, AND YOU
+      </TrustedByManyAndYou>
+      <CardWrapper
+          nodeId="XWoGxJGjk"
+          width="1fr"
+          height="fit-content"
+          overflow="clip"
+          layout="stack"
+          gap="12px"
+          stackDirection="horizontal"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <Card
+            nodeId="zOQ4JMPh_"
+            width="200px"
+            height="100px"
+            aspectRatio="2"
+            <!-- background color string or project color style path (if starts with /) -->
+            backgroundColor="/Neutral/01"
+            borderRadius="16px"
+            borderWidth="1px"
+            borderStyle="solid"
+            borderColor="/Neutral/03"
+            overflow="clip"
+        >
+          <Logo1
+              nodeId="llDlUrJXw"
+              position="absolute"
+              width="108px"
+              height="20px"
+              centerX="50%"
+              centerY="50%"
+              overflow="clip"
+          >
+          </Logo1>
+        </Card>
+        <Card
+            nodeId="d8gjwdOUb"
+            width="200px"
+            height="100px"
+            aspectRatio="2"
+            <!-- background color string or project color style path (if starts with /) -->
+            backgroundColor="/Neutral/01"
+            borderRadius="16px"
+            borderWidth="1px"
+            borderStyle="solid"
+            borderColor="/Neutral/03"
+            overflow="clip"
+        >
+          <Logo2
+              nodeId="ClekKfxcx"
+              position="absolute"
+              width="110px"
+              height="21px"
+              centerX="50%"
+              centerY="49%"
+              overflow="clip"
+          >
+          </Logo2>
+        </Card>
+        <Card
+            nodeId="T3Vd0_hyQ"
+            width="200px"
+            height="100px"
+            aspectRatio="2"
+            <!-- background color string or project color style path (if starts with /) -->
+            backgroundColor="/Neutral/01"
+            borderRadius="16px"
+            borderWidth="1px"
+            borderStyle="solid"
+            borderColor="/Neutral/03"
+            overflow="clip"
+        >
+          <Logo3
+              nodeId="b__xUiq2E"
+              position="absolute"
+              width="120px"
+              height="18px"
+              centerX="50%"
+              centerY="50%"
+              overflow="clip"
+          >
+          </Logo3>
+        </Card>
+        <Card
+            nodeId="vNbzo2B6K"
+            width="200px"
+            height="100px"
+            aspectRatio="2"
+            <!-- background color string or project color style path (if starts with /) -->
+            backgroundColor="/Neutral/01"
+            borderRadius="16px"
+            borderWidth="1px"
+            borderStyle="solid"
+            borderColor="/Neutral/03"
+            overflow="clip"
+        >
+          <Logo4
+              nodeId="n02Z8sZJO"
+              position="absolute"
+              width="120px"
+              height="17px"
+              centerX="50%"
+              centerY="50%"
+              overflow="clip"
+          >
+          </Logo4>
+        </Card>
+        <Card
+            nodeId="kAaWp0NeB"
+            width="200px"
+            height="100px"
+            aspectRatio="2"
+            <!-- background color string or project color style path (if starts with /) -->
+            backgroundColor="/Neutral/01"
+            borderRadius="16px"
+            borderWidth="1px"
+            borderStyle="solid"
+            borderColor="/Neutral/03"
+            overflow="clip"
+        >
+          <Logo5
+              nodeId="vIdOiNAau"
+              position="absolute"
+              width="111px"
+              height="20px"
+              centerX="50%"
+              centerY="50%"
+              overflow="clip"
+          >
+          </Logo5>
+        </Card>
+      </CardWrapper>
+    </Container>
+  </Clients>
+  <Main
+      nodeId="ve4Z1ULmu"
+      width="1fr"
+      height="fit-content"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="0px 0px 200px 0px"
+      stackDirection="horizontal"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="AOcGuLib3"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1120px"
+        overflow="visible"
+        layout="stack"
+        gap="60px"
+        stackDirection="vertical"
+        stackDistribution="start"
+        stackAlignment="center"
+    >
+      <Headline
+          nodeId="aGyBSgPzC"
+          width="1fr"
+          height="fit-content"
+          maxWidth="550px"
+          overflow="clip"
+          layout="stack"
+          gap="24px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <Eyebrow
+            nodeId="sqBBeZOdE"
+            width="fit-content"
+            height="fit-content"
+            <!-- the component id this instance uses -->
+            componentId="Ji54VOx3x"
+            variant="NVy0EpWk9"
+            BpO6nknvQ="Our Work"
+         />
+        <WorkShapedByClarityCarriedThroughWithCare
+            nodeId="v3IfvrkGV"
+            width="1fr"
+            height="fit-content"
+            <!-- project text style path, always starts with / -->
+            inlineTextStyle="/Heading/H2"
+        >
+          Work shaped by clarity, carried through with care.
+        </WorkShapedByClarityCarriedThroughWithCare>
+      </Headline>
+      <ContentWrapper
+          nodeId="qpczZ1Agi"
+          width="1fr"
+          height="fit-content"
+          overflow="visible"
+          layout="stack"
+          gap="24px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <Works
+            nodeId="oEH7bUyLk"
+            width="1fr"
+            height="fit-content"
+            layout="stack"
+            gap="20px"
+            stackDirection="vertical"
+            stackDistribution="center"
+            stackAlignment="start"
+        >
+          <CardBestWork
+              nodeId="msP91etsZ"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="AMO4LxRgK"
+              variant="vWMU8KVmr"
+              jdWQ51HPQ="Best work in 2026"
+              N4RYsQdGY="Nadina"
+              OqEzW6fXW="A modern portfolio template with a calm aesthetic, built for creatives to showcase their work clearly and confidently"
+              mbZgWw1m7="Increased conversion by 32% in the first month"
+              tp17K32rj="/work/:slug"
+           />
+        </Works>
+        <Works
+            nodeId="osvaZfD5a"
+            width="1fr"
+            height="fit-content"
+            layout="grid"
+            gap="24px 24px"
+            gridColumns="2"
+            gridRows="2"
+            gridAlignment="center"
+            gridColumnWidthType="minmax"
+            gridColumnWidth="200"
+            gridColumnMinWidth="50"
+            gridRowHeightType="auto"
+            gridRowHeight="200"
+        >
+          <CardWork
+              nodeId="dwYetzdf7"
+              width="1fr"
+              height="368px"
+              aspectRatio="1.489"
+              <!-- the component id this instance uses -->
+              componentId="TlmMaDWBH"
+              variant="SMTIvQDd8"
+              dcVYTNFvY="Halo Form"
+              r22XdVew2="/work/:slug"
+              p1om6vkw7="false"
+           />
+        </Works>
+      </ContentWrapper>
+    </Container>
+  </Main>
+  <Services
+      nodeId="R_qsi1Hrx"
+      width="1fr"
+      height="fit-content"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="0px 12px 0px 12px"
+      stackDirection="horizontal"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="hqYVFHT2x"
+        width="1fr"
+        height="fit-content"
+        <!-- background color string or project color style path (if starts with /) -->
+        backgroundColor="/Primary/02"
+        borderRadius="40px"
+        overflow="clip"
+        layout="stack"
+        gap="10px"
+        padding="100px 0px 100px 0px"
+        stackDirection="horizontal"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <ContentWrapper
+          nodeId="mo_Y6I7oz"
+          width="1fr"
+          height="fit-content"
+          maxWidth="1120px"
+          overflow="visible"
+          layout="stack"
+          gap="60px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="start"
+      >
+        <Headline
+            nodeId="Z0f64gROw"
+            width="1fr"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="24px"
+            stackDirection="horizontal"
+            stackDistribution="space-between"
+            stackAlignment="end"
+        >
+          <HeadlineWrapper
+              nodeId="wgyU4qmzD"
+              width="1fr"
+              height="fit-content"
+              maxWidth="600px"
+              overflow="clip"
+              layout="stack"
+              gap="24px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="start"
+          >
+            <Eyebrow
+                nodeId="tbKXANDot"
+                width="fit-content"
+                height="fit-content"
+                <!-- the component id this instance uses -->
+                componentId="Ji54VOx3x"
+                variant="d2tNIyExi"
+                BpO6nknvQ="Our Services"
+             />
+            <DesignAndDevelopmentShapedByClarityAndIntent
+                nodeId="IwNYeDkaj"
+                width="1fr"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Heading/H2"
+            >
+              Design and development, shaped by clarity and intent.
+            </DesignAndDevelopmentShapedByClarityAndIntent>
+          </HeadlineWrapper>
+          <WeOfferFocusedServicesCraftedWithAStructuredApproachClearThi
+              nodeId="r4eaTzQtV"
+              width="1fr"
+              height="fit-content"
+              maxWidth="350px"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Body/Body M"
+          >
+            We offer focused services crafted with a structured approach, clear thinking, and attention to detail at every stage.
+          </WeOfferFocusedServicesCraftedWithAStructuredApproachClearThi>
+        </Headline>
+        <SectionServices
+            nodeId="H5N16qBDV"
+            width="1fr"
+            height="fit-content"
+            <!-- the component id this instance uses -->
+            componentId="B9fTR5hrD"
+            variant="GsixBjTjn"
+         />
+      </ContentWrapper>
+    </Container>
+  </Services>
+  <HowItWorks
+      nodeId="Rsu8G8mkk"
+      width="1fr"
+      height="fit-content"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="200px 0px 100px 0px"
+      stackDirection="horizontal"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="jgE3d3l9r"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1120px"
+        overflow="visible"
+        layout="stack"
+        gap="60px"
+        stackDirection="vertical"
+        stackDistribution="start"
+        stackAlignment="center"
+    >
+      <Headline
+          nodeId="Kaf1gOOWg"
+          width="1fr"
+          height="fit-content"
+          maxWidth="700px"
+          overflow="clip"
+          layout="stack"
+          gap="24px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <Eyebrow
+            nodeId="FiQut0Bk0"
+            width="fit-content"
+            height="fit-content"
+            <!-- the component id this instance uses -->
+            componentId="Ji54VOx3x"
+            variant="NVy0EpWk9"
+            BpO6nknvQ="How We Work"
+         />
+        <AClearProcessFromFirstConversationToLastingSupport
+            nodeId="t1hBy8Xkn"
+            width="1fr"
+            height="fit-content"
+            <!-- project text style path, always starts with / -->
+            inlineTextStyle="/Heading/H2"
+        >
+          A clear process, from first conversation to lasting support.
+        </AClearProcessFromFirstConversationToLastingSupport>
+      </Headline>
+      <Content
+          nodeId="Dyl6yaRC0"
+          width="1fr"
+          height="fit-content"
+          maxWidth="800px"
+          overflow="visible"
+          layout="stack"
+          gap="40px"
+          stackDirection="horizontal"
+          stackDistribution="start"
+          stackAlignment="start"
+      >
+        <HowItWorkItem
+            nodeId="H4VeLvLCh"
+            width="40%"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="120px"
+            stackDirection="vertical"
+            stackDistribution="start"
+            stackAlignment="start"
+        >
+          <BuildingBlockHowItWorkItem
+              nodeId="VY5aXbAPe"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="XwPIC3rTC"
+              oD7K8je6G="1."
+              h3oQs6qD0="Book a call."
+              qK37sQJSy="We begin with a focused conversation to understand your goals, context, and direction."
+           />
+          <BuildingBlockHowItWorkItem
+              nodeId="HwqZi1dMB"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="XwPIC3rTC"
+              oD7K8je6G="2."
+              h3oQs6qD0="Design."
+              qK37sQJSy="Ideas are shaped into clear structures and thoughtful visuals, guided by purpose and precision."
+           />
+          <BuildingBlockHowItWorkItem
+              nodeId="osHqliHlf"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="XwPIC3rTC"
+              oD7K8je6G="3."
+              h3oQs6qD0="Develop."
+              qK37sQJSy="Designs are translated into reliable, functional experiences with attention to detail."
+           />
+          <BuildingBlockHowItWorkItem
+              nodeId="ovbYGnox6"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="XwPIC3rTC"
+              oD7K8je6G="4."
+              h3oQs6qD0="Deliver."
+              qK37sQJSy="The final product is refined, tested, and delivered with clarity and readiness."
+           />
+          <BuildingBlockHowItWorkItem
+              nodeId="nFeqii1Uv"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="XwPIC3rTC"
+              oD7K8je6G="5."
+              h3oQs6qD0="Support."
+              qK37sQJSy="We remain available to maintain, improve, and support your product as it evolves."
+           />
+          <Action
+              nodeId="LmCPNrVfn"
+              width="1fr"
+              height="fit-content"
+              minHeight="112px"
+              overflow="clip"
+              layout="stack"
+              gap="16px"
+              stackDirection="horizontal"
+              stackDistribution="end"
+              stackAlignment="end"
+          >
+            <Button
+                nodeId="OqATnT7uk"
+                width="fit-content"
+                height="48px"
+                <!-- the component id this instance uses -->
+                componentId="LLk3LeCJs"
+                variant="wVt7ptUHH"
+                b00pKBnWz="Book a Call"
+                yYNLQP977="https://cal.com/qoim-ttvtuj/30mnt"
+                KnfwAAZQz="false"
+                n4_97vsXN="12px 20px 12px 20px"
+                K7_zGhbUg="false"
+             />
+            <TextWrapper
+                nodeId="oF0fwTMmq"
+                width="1fr"
+                height="fit-content"
+                minHeight="48px"
+                overflow="clip"
+                layout="stack"
+                stackDirection="horizontal"
+                stackDistribution="center"
+                stackAlignment="center"
+            >
+              <Approximately15Minutes
+                  nodeId="Dx1xowuu1"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- project text style path, always starts with / -->
+                  inlineTextStyle="/Body/Body S"
+              >
+                Approximately 15 minutes
+              </Approximately15Minutes>
+            </TextWrapper>
+          </Action>
+        </HowItWorkItem>
+        <CardHowItWork
+            nodeId="Hq9hQJOvM"
+            position="sticky"
+            width="1fr"
+            height="320px"
+            top="120px"
+            aspectRatio="1.375"
+            <!-- the component id this instance uses -->
+            componentId="wYqORP41I"
+            variant="sHhb77Te1"
+         />
+      </Content>
+    </Container>
+  </HowItWorks>
+  <Testimonials
+      nodeId="Z1SRKraST"
+      width="1fr"
+      height="fit-content"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="100px 0px 100px 0px"
+      stackDirection="horizontal"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="bQ4wCU9my"
+        width="1fr"
+        height="fit-content"
+        overflow="clip"
+        layout="stack"
+        gap="60px"
+        stackDirection="vertical"
+        stackDistribution="start"
+        stackAlignment="center"
+    >
+      <Headline
+          nodeId="UaJoCQ84Z"
+          width="1fr"
+          height="fit-content"
+          maxWidth="500px"
+          overflow="clip"
+          layout="stack"
+          gap="24px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <Eyebrow
+            nodeId="oZkFbvHS7"
+            width="fit-content"
+            height="fit-content"
+            <!-- the component id this instance uses -->
+            componentId="Ji54VOx3x"
+            variant="NVy0EpWk9"
+            BpO6nknvQ="Testimonials"
+         />
+        <TrustedByTeamsWhoValueQuality
+            nodeId="QKMyr4Ltq"
+            width="1fr"
+            height="fit-content"
+            <!-- project text style path, always starts with / -->
+            inlineTextStyle="/Heading/H2"
+        >
+          Trusted by teams who value quality.
+        </TrustedByTeamsWhoValueQuality>
+      </Headline>
+      <Content
+          nodeId="iNj991VZp"
+          width="1fr"
+          height="fit-content"
+          maxWidth="1440px"
+          overflow="clip"
+          layout="stack"
+          gap="32px"
+          padding="0px 20px 0px 20px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <CardWrapper
+            nodeId="fNtXR9YG7"
+            width="1fr"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="12px"
+            stackDirection="horizontal"
+            stackDistribution="start"
+            stackAlignment="start"
+        >
+          <CardTestimonials
+              nodeId="zu6TFky4S"
+              width="370px"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="Yzh0KBxkd"
+              variant="tjoQl1RtR"
+              UgAxcR3_V="“Pulma brought a level of clarity to our product that we hadn’t experienced before. Every decision felt intentional, and the result speaks for itself.”"
+              s9dGv3reb="Daniel Foster"
+              lOzJF6F_l="Founder at Nusa Labs"
+           />
+          <CardTestimonials
+              nodeId="HuVqImoBY"
+              width="370px"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="Yzh0KBxkd"
+              variant="tjoQl1RtR"
+              UgAxcR3_V="“Working with Pulma was seamless. Their process is structured, focused, and respectful of time, which made collaboration easy and effective.”"
+              s9dGv3reb="Emily Carter"
+              lOzJF6F_l="Product Manager at Karya Digital"
+           />
+          <CardTestimonials
+              nodeId="DRubdF80i"
+              width="370px"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="Yzh0KBxkd"
+              variant="tjoQl1RtR"
+              UgAxcR3_V=""Pulma brought a level of clarity to our project that made the entire process feel smooth and well organized. Every stage was handled with care""
+              s9dGv3reb="Ryan Mitchell"
+              lOzJF6F_l="Head of Design at Altura Studio"
+           />
+          <CardTestimonials
+              nodeId="WYqiuq2gH"
+              width="370px"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="Yzh0KBxkd"
+              variant="tjoQl1RtR"
+              UgAxcR3_V="“From design to development, everything was handled with precision and care. The final product feels refined and built to last.”"
+              s9dGv3reb="Kevin Brooks"
+              lOzJF6F_l="Co-founder at Lumen Tech"
+           />
+          <CardTestimonials
+              nodeId="w_wDW4F4T"
+              width="370px"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="Yzh0KBxkd"
+              variant="tjoQl1RtR"
+              UgAxcR3_V="“Pulma doesn’t just deliver design, they bring clarity to the entire process. It changed how we think about our product.”"
+              s9dGv3reb="Sophie Bennett"
+              lOzJF6F_l="Founder at Nusa LabsFounder at Seraya"
+           />
+        </CardWrapper>
+        <ProjectDelivered
+            nodeId="DJYSZii6S"
+            width="fit-content"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="12px"
+            stackDirection="horizontal"
+            stackDistribution="start"
+            stackAlignment="center"
+        >
+          <Tag
+              nodeId="m9l3qQ2O6"
+              width="fit-content"
+              height="fit-content"
+              <!-- background color string or project color style path (if starts with /) -->
+              backgroundColor="/Accent/Grey Blue/01"
+              borderRadius="8px"
+              overflow="clip"
+              layout="stack"
+              gap="10px"
+              padding="4px 8px 4px 8px"
+              stackDirection="horizontal"
+              stackDistribution="center"
+              stackAlignment="center"
+          >
+            <200
+                nodeId="MVHtkSRYY"
+                width="fit-content"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Body/Body M Strong"
+            >
+              +200
+            </200>
+          </Tag>
+          <ProjectsDeliveredAcrossGrowingCompanies
+              nodeId="bAzL3n3ib"
+              width="fit-content"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Body/Body M"
+          >
+            projects delivered across growing companies.
+          </ProjectsDeliveredAcrossGrowingCompanies>
+        </ProjectDelivered>
+      </Content>
+    </Container>
+  </Testimonials>
+  <Pricing
+      nodeId="LB3HBnPUd"
+      width="1fr"
+      height="fit-content"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="100px 0px 100px 0px"
+      stackDirection="horizontal"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="JHV4CWQ8n"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1120px"
+        borderRadius="0px"
+        overflow="clip"
+        layout="stack"
+        gap="60px"
+        stackDirection="vertical"
+        stackDistribution="start"
+        stackAlignment="center"
+    >
+      <Headline
+          nodeId="GwC_oTDHL"
+          width="1fr"
+          height="fit-content"
+          maxWidth="600px"
+          overflow="clip"
+          layout="stack"
+          gap="24px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <Eyebrow
+            nodeId="rS3Z73qoy"
+            width="fit-content"
+            height="fit-content"
+            <!-- the component id this instance uses -->
+            componentId="Ji54VOx3x"
+            variant="NVy0EpWk9"
+            BpO6nknvQ="Pricing"
+         />
+        <FlexibleEngagementShapedAroundYourNeeds
+            nodeId="rXLV8iufx"
+            width="1fr"
+            height="fit-content"
+            <!-- project text style path, always starts with / -->
+            inlineTextStyle="/Heading/H2"
+        >
+          Flexible engagement, shaped around your needs.
+        </FlexibleEngagementShapedAroundYourNeeds>
+      </Headline>
+      <SectionPricing
+          nodeId="LasJUrbkc"
+          width="1fr"
+          height="fit-content"
+          <!-- the component id this instance uses -->
+          componentId="IyV18o4kJ"
+          variant="dGL7WsRBW"
+       />
+    </Container>
+  </Pricing>
+  <SectionFaQs
+      nodeId="Gqo6lPZyz"
+      width="1fr"
+      height="fit-content"
+      <!-- the component id this instance uses -->
+      componentId="VfMmlR6JR"
+      variant="LB1dkYT_A"
+   />
+  <Lenis
+      nodeId="w_wIPqhFC"
+      width="fit-content"
+      height="fit-content"
+      smooth="true"
+      intensity="12"
+      infinite="false"
+      orientation="vertical"
+   />
+</Desktop>
+<!-- This is a non-primary variant. To see children inside, call getNodeXml again on this nodeId. -->
+<Tablet
+    nodeId="VZd7BF2ja"
+    position="absolute"
+    width="810px"
+    height="fit-content"
+    top="0px"
+    left="1300px"
+    <!-- background color string or project color style path (if starts with /) -->
+    backgroundColor="/Primary/01"
+    overflow="clip"
+    layout="stack"
+    stackDirection="vertical"
+    stackDistribution="start"
+    stackAlignment="center"
+ />
+<!-- This is a non-primary variant. To see children inside, call getNodeXml again on this nodeId. -->
+<Phone
+    nodeId="j9XAq6E1n"
+    position="absolute"
+    width="390px"
+    height="fit-content"
+    top="0px"
+    left="2210px"
+    <!-- background color string or project color style path (if starts with /) -->
+    backgroundColor="/Primary/01"
+    overflow="clip"
+    layout="stack"
+    stackDirection="vertical"
+    stackDistribution="start"
+    stackAlignment="center"
+ />
