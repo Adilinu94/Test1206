@@ -1,6 +1,6 @@
 # 🚀 Framer → Elementor V4 Pipeline V2: Master Blueprint
 
-> **Version:** v0.8.0 | **Stand:** 2026-06-12
+> **Version:** v0.9.0 | **Stand:** 2026-06-12
 
 ## 🎯 Overview
 Ziel: Umsetzung eines stabilen, token-effizienten Framer-zu-V4-Workflows basierend auf einer **3-Wege-Symbiose**:

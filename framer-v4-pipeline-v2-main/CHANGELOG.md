@@ -10,6 +10,7 @@
 - **Leere Directories**: `batch/`, `v4-management/` entfernt
 - **Plugin-Infrastruktur**: `composer.json`, `phpcs.xml`, `README.md`, `CHANGELOG.md`
 - **Skills auf solar.local**: 3 Skills per MCP-Bridge installiert
+- **`elementor-screenshot-to-v4.md`** + **`tools/framer-export/`** hinzugefuegt
 - **BLUEPRINT.md**: v0.8.0→v0.9.0, 3 bekannte Issues abgehakt
 - **HANDOFF.md**: Alte `novamira-adrians-extra` Referenzen bereinigt
 
