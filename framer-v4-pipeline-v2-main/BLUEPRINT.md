@@ -183,7 +183,7 @@ framer-v4-pipeline-v2/
 - [ ] End-to-End Test mit echter Framer-URL
 
 ### Bekannte Issues (Low Priority)
-- [ ] GitHub Token in Remote-URL — Sicherheitsrisiko (`git remote set-url` ohne Token)
+- [x] GitHub Token in Remote-URL — ✅ Bereinigt (2026-06-12)
 - [ ] Rollback Cleanup — Keine automatische Bereinigung alter Backups (>24h)
 - [ ] split-large-tree.js Timeout — Kein Fallback für übergroße Trees
 
