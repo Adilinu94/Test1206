@@ -1,0 +1,38 @@
+{
+    "name": "adilinu94/novamira-adrianv2",
+    "description": "Novamira V2 Plugin — MCP-Abilities für Elementor V4 Atomic Widgets, Audit, Media, SEO und mehr",
+    "type": "wordpress-plugin",
+    "version": "1.0.0",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Adrian",
+            "email": "adilinu94@github"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "composer/installers": "^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "squizlabs/php_codesniffer": "^3.7",
+        "wp-coding-standards/wpcs": "^3.0",
+        "vimeo/psalm": "^5.0"
+    },
+    "autoload": {
+        "classmap": ["includes/"]
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "lint": "phpcs --standard=phpcs.xml",
+        "lint:fix": "phpcbf --standard=phpcs.xml",
+        "analyze": "psalm",
+        "test": "phpunit"
+    }
+}
