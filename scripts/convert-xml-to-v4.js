@@ -214,6 +214,13 @@ function determineWidgetType(attrs, xmlNode) {
   const name    = (attrs.name || '').toLowerCase();
   const tagName = (xmlNode?.tagName || '').toLowerCase();
 
+  // ── C2: Explicit CSS Grid Detection ──
+  // Check for explicit CSS Grid properties BEFORE name-pattern heuristic.
+  // Framer uses display:grid / grid-template-* in CSS — these must override
+  // the child-count heuristic to avoid false positives.
+  if (attrs.display === 'grid') return 'e-div-block';
+  if (attrs['grid-template-columns'] || attrs['grid-template-rows']) return 'e-div-block';
+
   // ── Explicit Component Name Mapping (RC-16 Fix) ──
   // Check if the Framer component name maps directly to a V4 widget type.
   // Falls through to heuristic if the map entry's guard condition isn't met.
@@ -408,7 +415,12 @@ function resolveLineHeight(lineHeight) {
 // ─────────────────────────────────────────────
 
 // RC-09 Helper: determines grid-template-columns value from attrs + child structure
+// C2 Upgrade: respects explicit CSS grid-template-columns from Framer attributes
 function detectGridLayout(xmlNode, attrs) {
+  // C2: Explicit grid-template-columns from CSS takes priority
+  if (attrs['grid-template-columns']) return attrs['grid-template-columns'];
+  if (attrs['grid-template-rows']) return null; // rows defined but not columns → auto
+
   const childCount = (xmlNode?.children || []).filter(c => c.tagName && c.tagName !== '_root').length;
   if (childCount < 2) return null;
   if (childCount === 2) return '1fr 1fr';
@@ -767,6 +779,80 @@ function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0)
 }
 
 // ─────────────────────────────────────────────
+// C6: TOKEN-TO-GV SUBSTITUTION PASS  (Root-Cause Fix)
+// ─────────────────────────────────────────────
+
+function findGvIdForHex(hex, tokenMapping) {
+  if (!hex || !tokenMapping) return null;
+  const normHex = hex.replace('#', '').toLowerCase();
+  for (const [name, data] of Object.entries(tokenMapping.colors || {})) {
+    const dataHex = (data.hex || '').replace('#', '').toLowerCase();
+    if (dataHex === normHex && data.gv_id) return data.gv_id;
+  }
+  return null;
+}
+
+function findGvIdForFont(family, tokenMapping) {
+  if (!family || !tokenMapping) return null;
+  const normFamily = family.replace(/['"]/g, '').toLowerCase().trim();
+  for (const [name, data] of Object.entries(tokenMapping.fonts || {})) {
+    const dataFamily = (data.family || '').replace(/['"]/g, '').toLowerCase().trim();
+    if (dataFamily === normFamily && data.gv_id) return data.gv_id;
+  }
+  return null;
+}
+
+function substituteTokensWithGvIds(tree, tokenMapping) {
+  if (!tokenMapping) return { tree, substitutions: 0 };
+  let substitutions = 0;
+
+  function walkNode(node) {
+    if (!node || typeof node !== 'object') return;
+
+    if (node.styles) {
+      for (const [styleId, styleDef] of Object.entries(node.styles)) {
+        for (const variant of (styleDef.variants || [])) {
+          if (!variant.props) continue;
+          for (const [prop, value] of Object.entries(variant.props)) {
+            if (!value || typeof value !== 'object') continue;
+
+            // Color → GV
+            if (value['$$type'] === 'color') {
+              const hex = typeof value.value === 'string' ? value.value : null;
+              if (!hex || !hex.startsWith('#')) continue;
+              const gvId = findGvIdForHex(hex, tokenMapping);
+              if (gvId) {
+                variant.props[prop] = wrapGvColor(gvId);
+                substitutions++;
+              }
+            }
+
+            // Font → GV
+            if (prop === 'font-family' && value['$$type'] === 'string') {
+              const family = value.value;
+              if (!family) continue;
+              const gvId = findGvIdForFont(family, tokenMapping);
+              if (gvId) {
+                variant.props[prop] = wrapGvFont(gvId);
+                substitutions++;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    const children = node.elements || [];
+    for (const child of children) walkNode(child);
+  }
+
+  const roots = Array.isArray(tree) ? tree : [tree];
+  for (const root of roots) walkNode(root);
+
+  return { tree, substitutions };
+}
+
+// ─────────────────────────────────────────────
 // RC-13: TOKEN USAGE ANALYZER
 // ─────────────────────────────────────────────
 
@@ -967,6 +1053,21 @@ log(`XML nodes parsed: ${xmlRoots.length} root node(s)`);
 const v4Tree = xmlRoots
   .filter(n => n.tagName && n.tagName !== '_root')
   .map(n => convertNode(n, tokenMapping, fontResolution, imageMap, 0));
+
+// C6: Token-to-GV Substitution Pass (Root-Cause Fix)
+// Replaces hardcoded hex values with e-gv-XXXXXXXX references
+// from token-mapping.json. Runs AFTER conversion to catch all
+// hardcoded colors/fonts that were written by convertNode().
+if (tokenMapping) {
+  let totalSubstitutions = 0;
+  for (const root of v4Tree) {
+    const result = substituteTokensWithGvIds(root, tokenMapping);
+    totalSubstitutions += result.substitutions;
+  }
+  if (totalSubstitutions > 0) {
+    log(`C6 GV-Substitution: ${totalSubstitutions} hardcoded values → e-gv-* references`);
+  }
+}
 
 // ─────────────────────────────────────────────
 // OUTPUT

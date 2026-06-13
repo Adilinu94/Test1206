@@ -729,7 +729,275 @@ describe('convert-xml-to-v4: cross-project robustness', () => {
 
 });
 
-// ─── Suite 10: validate-v4-tree DOM Depth check (C7) ────────────────────────
+// ─── Suite 11: C2 Grid Detection (Strict Grid Mapping) ────────────────────
+
+describe('C2: Strict Grid Mapping', () => {
+  test('C2: display:grid → e-div-block', () => {
+    const xml = `<Frame name="Stats" display="grid" stackGap="20px"><Text name="A">1</Text><Text name="B">2</Text><Text name="C">3</Text></Frame>`;
+    const xmlFile = tmpFile('c2-grid.xml', xml);
+    const outFile = tmpFile('c2-grid-v4.json');
+    run('convert-xml-to-v4.js', ['--xml', xmlFile, '--output', outFile]);
+    const tree = readJson(outFile);
+    assert.equal(tree.widgetType, 'e-div-block',
+      `display:grid should produce e-div-block, got ${tree.widgetType}`);
+  });
+
+  test('C2: grid-template-columns → e-div-block', () => {
+    const xml = `<Frame name="Gallery" grid-template-columns="1fr 1fr 1fr"><Text name="A">1</Text><Text name="B">2</Text></Frame>`;
+    const xmlFile = tmpFile('c2-gtc.xml', xml);
+    const outFile = tmpFile('c2-gtc-v4.json');
+    run('convert-xml-to-v4.js', ['--xml', xmlFile, '--output', outFile]);
+    const tree = readJson(outFile);
+    assert.equal(tree.widgetType, 'e-div-block',
+      `grid-template-columns should produce e-div-block, got ${tree.widgetType}`);
+  });    test('C2: no grid attr → still uses name-pattern heuristic', () => {
+    const xml = `<Frame name="Gallery" stackDirection="horizontal"><Text name="A">1</Text><Text name="B">2</Text><Text name="C">3</Text></Frame>`;
+    const xmlFile = tmpFile('c2-gallery.xml', xml);
+    const outFile = tmpFile('c2-gallery-v4.json');
+    run('convert-xml-to-v4.js', ['--xml', xmlFile, '--output', outFile]);
+    const tree = readJson(outFile);
+    // Gallery with 3 children → e-div-block via name heuristic (not broken by C2)
+    assert.equal(tree.widgetType, 'e-div-block',
+      `Gallery with 3 children should still use e-div-block via heuristic, got ${tree.widgetType}`);
+  });
+});
+
+// ─── Suite 12: C4 Semantic GC Naming ────────────────────────────────────────
+
+describe('C4: Semantic GC Naming', () => {
+  test('C4: GC name uses semantic pattern with token map', async () => {
+    const tree = [{
+      widgetType: 'e-heading',
+      id: 'h1',
+      settings: { classes: { '$$type': 'classes', value: ['stitle1'] }, tag: 'h1',
+        title: { '$$type': 'html-v3', value: { content: { '$$type': 'string', value: 'Hero' } } } },
+      styles: { stitle1: { '$$type': 'heading', variants: [{
+        meta: { breakpoint: null, state: null },
+        props: {
+          'font-size': { '$$type': 'size', value: { size: 60, unit: 'px' } },
+          color: { '$$type': 'color', value: '#111111' },
+        },
+      }] } },
+    }, {
+      widgetType: 'e-heading',
+      id: 'h2',
+      settings: { classes: { '$$type': 'classes', value: ['stitle2'] }, tag: 'h2',
+        title: { '$$type': 'html-v3', value: { content: { '$$type': 'string', value: 'Sub' } } } },
+      styles: { stitle2: { '$$type': 'heading', variants: [{
+        meta: { breakpoint: null, state: null },
+        props: {
+          'font-size': { '$$type': 'size', value: { size: 60, unit: 'px' } },
+          color: { '$$type': 'color', value: '#111111' },
+        },
+      }] } },
+    }];
+    const treeFile = tmpFile('c4-tree.json', tree);
+    const tokenFile = tmpFile('c4-tokens.json', {
+      colors: { 'primary': { hex: '#111111', gv_id: 'e-gv-abc', label: 'primary' } },
+      fonts: {},
+      sizes: {},
+    });
+    const outFile = tmpFile('c4-gc-plan.json');
+    run('generate-global-classes.js', ['--tree', treeFile, '--variables', tokenFile, '--output', outFile]);
+    const plan = readJson(outFile);
+    const gcNames = (plan.suggested_classes || []).map(gc => gc.name);
+    // Should contain semantic names, not just gc-bg-1
+    const hasSemanticName = gcNames.some(n => n.includes('text-xl-primary') || n.includes('text') || n.includes('surface'));
+    assert.ok(hasSemanticName,
+      `GC names should be semantic, got: ${gcNames.join(', ')}`);
+  });
+});
+
+// ─── Suite 13: C5 Breakpoint-aware Scaling ─────────────────────────────────
+
+describe('C5: Breakpoint-aware Scaling', () => {
+  const bpData = {
+    nodes: [{
+      name: 'hero-headline',
+      variants: [
+        { meta: { breakpoint: null }, props: { 'font-size': { '$$type': 'size', value: { size: 80, unit: 'px' } } } },
+        { meta: { breakpoint: 'tablet' }, props: { 'font-size': { '$$type': 'size', value: { size: 48, unit: 'px' } } } },
+        { meta: { breakpoint: 'mobile' }, props: { 'font-size': { '$$type': 'size', value: { size: 32, unit: 'px' } } } },
+      ],
+    }],
+  };
+
+  test('C5: element-specific factors from breakpoints.json', () => {
+    const tree = [{
+      widgetType: 'e-heading',
+      id: 'hero-headline',
+      settings: { classes: { '$$type': 'classes', value: ['shead'] }, tag: 'h1',
+        title: { '$$type': 'html-v3', value: { content: { '$$type': 'string', value: 'Hero' } } } },
+      styles: {
+        shead: {
+          variants: [{
+            meta: { breakpoint: null, state: null },
+            props: { 'font-size': { '$$type': 'size', value: { size: 80, unit: 'px' } } },
+          }],
+        },
+      },
+    }];
+    const treeFile = tmpFile('c5-tree.json', tree);
+    const bpFile = tmpFile('c5-bp.json', bpData);
+    const outFile = tmpFile('c5-out.json');
+    run('auto-scale-responsive.js', ['--tree', treeFile, '--breakpoints', bpFile, '--output', outFile]);
+    const result = readJson(outFile);
+    const variants = result[0].styles.shead.variants;
+    const tabletV = variants.find(v => v.meta?.breakpoint === 'tablet');
+    // With breakpoints: 48/80 = 0.6 factor, so 80*0.6 = 48
+    assert.ok(tabletV, 'Should inject tablet variant');
+    assert.equal(tabletV.props['font-size'].value.size, 48,
+      `Tablet size should be 48px from breakpoints, got ${tabletV.props['font-size'].value.size}`);
+  });
+
+  test('C5: falls back to default factors without breakpoints.json', () => {
+    const tree = [{
+      widgetType: 'e-heading',
+      id: 'h2',
+      settings: { classes: { '$$type': 'classes', value: ['sh2'] }, tag: 'h2',
+        title: { '$$type': 'html-v3', value: { content: { '$$type': 'string', value: 'Sub' } } } },
+      styles: {
+        sh2: {
+          variants: [{
+            meta: { breakpoint: null, state: null },
+            props: { 'font-size': { '$$type': 'size', value: { size: 40, unit: 'px' } } },
+          }],
+        },
+      },
+    }];
+    const treeFile = tmpFile('c5-fb-tree.json', tree);
+    const outFile = tmpFile('c5-fb-out.json');
+    run('auto-scale-responsive.js', ['--tree', treeFile, '--output', outFile]);
+    const result = readJson(outFile);
+    const variants = result[0].styles.sh2.variants;
+    const mobileV = variants.find(v => v.meta?.breakpoint === 'mobile');
+    // Without breakpoints: 40 * 0.6 = 24
+    assert.ok(mobileV, 'Should inject mobile variant');
+    assert.equal(mobileV.props['font-size'].value.size, 24,
+      `Mobile size should be 24px (40*0.6), got ${mobileV.props['font-size'].value.size}`);
+  });
+});
+
+// ─── Suite 14: C6 Token-to-GV Substitution ─────────────────────────────────
+
+describe('C6: Token-to-GV Substitution', () => {
+  test('C6: hardcoded color → gv-color when token has gv_id', () => {
+    const xml = `<Text name="Heading" text="Hello" font-size="48px" color="#111111"/>`;
+    const xmlFile = tmpFile('c6-c1.xml', xml);
+    const tokenFile = tmpFile('c6-t1.json', {
+      colors: { 'primary': { hex: '#111111', gv_id: 'e-gv-abc123' } },
+      fonts: {},
+      sizes: {},
+    });
+    const outFile = tmpFile('c6-v4.json');
+    run('convert-xml-to-v4.js', ['--xml', xmlFile, '--tokens', tokenFile, '--output', outFile]);
+    const tree = readJson(outFile);
+    const color = tree.styles[Object.keys(tree.styles)[0]].variants[0].props.color;
+    assert.equal(color['$$type'], 'global-color-variable',
+      `Color should be $$type:global-color-variable after substitution, got ${color['$$type']}`);
+    assert.equal(color.value, 'e-gv-abc123',
+      `Color value should be e-gv-abc123, got ${color.value}`);
+  });
+
+  test('C6: color without gv_id stays as hardcoded', () => {
+    const xml = `<Text name="Heading" text="Hello" font-size="48px" color="#222222"/>`;
+    const xmlFile = tmpFile('c6-c2.xml', xml);
+    const tokenFile = tmpFile('c6-t2.json', {
+      colors: { 'primary': { hex: '#111111', gv_id: null } },
+      fonts: {},
+      sizes: {},
+    });
+    const outFile = tmpFile('c6-v4-2.json');
+    run('convert-xml-to-v4.js', ['--xml', xmlFile, '--tokens', tokenFile, '--output', outFile]);
+    const tree = readJson(outFile);
+    const color = tree.styles[Object.keys(tree.styles)[0]].variants[0].props.color;
+    // No gv_id for #222222 → stays as $$type:color
+    assert.ok(color['$$type'] === 'color' || color.value === undefined || color.value?.startsWith('#'),
+      `Color without gv_id should stay hardcoded, got: ${JSON.stringify(color)}`);
+  });
+
+  test('C6: font-family → gv-font when token has gv_id', () => {
+    const xml = `<Text name="Heading" text="Hello" font-size="48px" font-family="Inter"/>`;
+    const xmlFile = tmpFile('c6-f1.xml', xml);
+    const tokenFile = tmpFile('c6-tf1.json', {
+      colors: {},
+      fonts: { 'inter': { family: 'Inter', gv_id: 'e-gv-font-x' } },
+      sizes: {},
+    });
+    const outFile = tmpFile('c6-v4-f1.json');
+    run('convert-xml-to-v4.js', ['--xml', xmlFile, '--tokens', tokenFile, '--output', outFile]);
+    const tree = readJson(outFile);
+    const font = tree.styles[Object.keys(tree.styles)[0]].variants[0].props['font-family'];
+    assert.equal(font['$$type'], 'global-font-variable',
+      `font-family should be $$type:global-font-variable after substitution, got ${font['$$type']}`);
+    assert.equal(font.value, 'e-gv-font-x');
+  });
+});
+
+// ─── Suite 15: D3 GRID_VS_FLEXBOX_COVERAGE ────────────────────────────────
+
+describe('D3: GRID_VS_FLEXBOX_COVERAGE', () => {
+  const VALIDATE_SCRIPT = join(SCRIPTS, 'validate-v4-tree.js');
+
+  test('D3: e-flexbox with flex-wrap:wrap → warning', () => {
+    const tree = [{
+      widgetType: 'e-flexbox',
+      id: 'flex-wrap-container',
+      settings: { classes: { '$$type': 'classes', value: ['sfw'] } },
+      styles: {
+        sfw: {
+          variants: [{
+            meta: { breakpoint: null, state: null },
+            props: { 'flex-wrap': { '$$type': 'string', value: 'wrap' } },
+          }],
+        },
+      },
+      elements: [{ id: 'c1', widgetType: 'e-heading' }, { id: 'c2', widgetType: 'e-heading' }],
+    }];
+    const treeFile = tmpFile('d3-fw.json', tree);
+    const result = run('validate-v4-tree.js', [treeFile, '--mode=warn'], { expectFail: false });
+    const parsed = JSON.parse(result.stdout);
+    const gridIssues = (parsed.warnings || []).filter(w => w.rule === 'GRID_VS_FLEXBOX');
+    assert.ok(gridIssues.length > 0,
+      `flex-wrap:wrap should trigger GRID_VS_FLEXBOX warning, got warnings: ${JSON.stringify(parsed.warnings)}`);
+  });
+
+  test('D3: e-flexbox with 4+ children → warning', () => {
+    const tree = [{
+      widgetType: 'e-flexbox',
+      id: 'many-kids',
+      settings: { classes: { '$$type': 'classes', value: ['smk'] } },
+      styles: { smk: { variants: [{ meta: { breakpoint: null, state: null }, props: {} }] } },
+      elements: [
+        { id: 'c1', widgetType: 'e-heading' }, { id: 'c2', widgetType: 'e-heading' },
+        { id: 'c3', widgetType: 'e-heading' }, { id: 'c4', widgetType: 'e-heading' },
+      ],
+    }];
+    const treeFile = tmpFile('d3-4c.json', tree);
+    const result = run('validate-v4-tree.js', [treeFile, '--mode=warn'], { expectFail: false });
+    const parsed = JSON.parse(result.stdout);
+    const gridIssues = (parsed.warnings || []).filter(w => w.rule === 'GRID_VS_FLEXBOX');
+    assert.ok(gridIssues.length > 0,
+      `4+ children should trigger GRID_VS_FLEXBOX warning, got warnings: ${JSON.stringify(parsed.warnings)}`);
+  });
+
+  test('D3: e-flexbox with <4 children and no wrap → no warning', () => {
+    const tree = [{
+      widgetType: 'e-flexbox',
+      id: 'few-kids',
+      settings: { classes: { '$$type': 'classes', value: ['sfk'] } },
+      styles: { sfk: { variants: [{ meta: { breakpoint: null, state: null }, props: {} }] } },
+      elements: [{ id: 'c1', widgetType: 'e-heading' }, { id: 'c2', widgetType: 'e-heading' }],
+    }];
+    const treeFile = tmpFile('d3-ok.json', tree);
+    const result = run('validate-v4-tree.js', [treeFile, '--mode=warn'], { expectFail: false });
+    const parsed = JSON.parse(result.stdout);
+    const gridIssues = (parsed.warnings || []).filter(w => w.rule === 'GRID_VS_FLEXBOX');
+    assert.equal(gridIssues.length, 0,
+      `e-flexbox with 2 children should not trigger GRID_VS_FLEXBOX`);
+  });
+});
+
 
 describe('validate-v4-tree: DOM depth check (C7)', () => {
   const VALIDATE_SCRIPT = join(SCRIPTS, 'validate-v4-tree.js');

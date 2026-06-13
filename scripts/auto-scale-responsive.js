@@ -30,11 +30,45 @@ const THRESHOLDS = {
   borderRadius: 12, // px -- RC-14: large border radii look out of place on mobile
 };
 
-// Skalierungsfaktoren
-const SCALE_FACTORS = {
+// C5: Skalierungsfaktoren — werden aus breakpoints.json geladen wenn verfuegbar
+// Fallback: Pauschalfaktoren fuer den Fall ohne breakpoints.json
+const DEFAULT_SCALE_FACTORS = {
   tablet: 0.75,
   mobile: 0.6,
 };
+
+let breakpointsData = null;
+
+function getPxValue(wrapped) {
+  return getWrappedSizeNumber(wrapped) ?? NaN;
+}
+
+function getElementScaleFactors(elementId, styleId) {
+  if (!breakpointsData) return { ...DEFAULT_SCALE_FACTORS };
+
+  const node = (breakpointsData.nodes || []).find(n =>
+    (n.selector && (n.selector.includes(elementId) || n.selector.includes(styleId))) ||
+    (n.name && (n.name.includes(elementId) || n.name.includes(styleId)))
+  );
+
+  if (!node?.variants) return { ...DEFAULT_SCALE_FACTORS };
+
+  const base = node.variants.find(v => !v.meta?.breakpoint || v.meta?.breakpoint === null)?.props || {};
+  const tabletV = node.variants.find(v => v.meta?.breakpoint === 'tablet')?.props || {};
+  const mobileV = node.variants.find(v => v.meta?.breakpoint === 'mobile')?.props || {};
+
+  const baseFs = getPxValue(base['font-size']);
+  if (baseFs && baseFs > 0) {
+    const tabletPx = getPxValue(tabletV['font-size']);
+    const mobilePx = getPxValue(mobileV['font-size']);
+    return {
+      tablet: isNaN(tabletPx) ? DEFAULT_SCALE_FACTORS.tablet : tabletPx / baseFs,
+      mobile: isNaN(mobilePx) ? DEFAULT_SCALE_FACTORS.mobile : mobilePx / baseFs,
+    };
+  }
+
+  return { ...DEFAULT_SCALE_FACTORS };
+}
 
 function walkTree(obj, callback) {
   if (typeof obj !== 'object' || obj === null) return;
@@ -165,14 +199,17 @@ function autoScaleResponsive(tree) {
         const baseVariant = findBaseVariant(style);
         if (!baseVariant?.props) continue;
 
+        // C5: Element-spezifische Breakpoint-Faktoren
+        const factors = getElementScaleFactors(node.id || styleId, styleId);
+
         const newVariants = [];
 
         if (!hasBreakpoint(style, 'tablet')) {
-          const tablet = buildScaledVariant(baseVariant, 'tablet', SCALE_FACTORS.tablet);
+          const tablet = buildScaledVariant(baseVariant, 'tablet', factors.tablet);
           if (tablet) newVariants.push(tablet);
         }
         if (!hasBreakpoint(style, 'mobile')) {
-          const mobile = buildScaledVariant(baseVariant, 'mobile', SCALE_FACTORS.mobile);
+          const mobile = buildScaledVariant(baseVariant, 'mobile', factors.mobile);
           if (mobile) newVariants.push(mobile);
         }
 
@@ -189,11 +226,12 @@ function autoScaleResponsive(tree) {
 
 async function main() {
   const cliArgs = (() => {
-    const a = { tree: null, output: null };
+    const a = { tree: null, output: null, breakpoints: null };
     const argv = process.argv.slice(2);
     for (let i = 0; i < argv.length; i++) {
       if (argv[i] === '--tree'   && argv[i+1]) { a.tree   = argv[++i]; }
       else if (argv[i] === '--output' && argv[i+1]) { a.output = argv[++i]; }
+      else if (argv[i] === '--breakpoints' && argv[i+1]) { a.breakpoints = argv[++i]; }
       else if (!argv[i].startsWith('--') && !a.tree)   { a.tree   = argv[i]; }
       else if (!argv[i].startsWith('--') && !a.output) { a.output = argv[i]; }
     }
@@ -201,6 +239,12 @@ async function main() {
   })();
   const treePath   = cliArgs.tree   || path.join(rootDir, 'v4-tree.json');
   const outputPath = cliArgs.output || treePath;
+
+  // C5: Load breakpoints.json for element-specific scale factors
+  if (cliArgs.breakpoints && fs.existsSync(cliArgs.breakpoints)) {
+    breakpointsData = JSON.parse(fs.readFileSync(cliArgs.breakpoints, 'utf8'));
+    console.log(`📐 Breakpoint-Daten geladen: ${(breakpointsData.nodes || []).length} Selectoren`);
+  }
 
   if (!fs.existsSync(treePath)) {
     console.error(`Datei nicht gefunden: ${treePath}`);

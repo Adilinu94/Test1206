@@ -127,46 +127,68 @@ function hashSignature(obj) {
   return createHash('md5').update(str).digest('hex').slice(0, 12);
 }
 
-// Semantischen GC-Namen aus Props ableiten
-function suggestName(type, props, index) {
+// C4: Semantic GC Naming — BEM-style with token awareness
+// Extrahiert die Pixel-Zahl aus einem V4 size-Wrapper
+function getPxNumber(wrapped) {
+  if (!wrapped) return NaN;
+  const v = typeof wrapped === 'object' ? (wrapped.value?.size ?? wrapped.value) : wrapped;
+  const match = String(v).match(/([\d.]+)/);
+  return match ? parseFloat(match[1]) : NaN;
+}
+
+// Sucht Token-Namen fuer eine Farbe im Token-Mapping
+function findTokenByHex(hex, tokenMap) {
+  if (!tokenMap || !hex) return null;
+  const normHex = hex.replace('#', '').toLowerCase();
+  for (const [name, data] of Object.entries(tokenMap.colors || {})) {
+    if (data.hex && data.hex.replace('#', '').toLowerCase() === normHex) {
+      return (data.label || name).replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 20);
+    }
+  }
+  return null;
+}
+
+// Semantischen GC-Namen aus Props ableiten (C4 Upgrade)
+function suggestName(type, props, index, tokenMap) {
+  const parts = ['gc'];
   const propKeys = Object.keys(props);
 
   if (type === 'typography') {
+    parts.push('text');
+    // Size-Modifier
     const fontSize = props['font-size'];
-    let size = '';
-    if (fontSize) {
-      const v = typeof fontSize === 'object' ? (fontSize.value?.size ?? '') : fontSize;
-      const n = parseInt(String(v), 10);
-      if (!isNaN(n)) {
-        if (n >= 60) size = 'xxl';
-        else if (n >= 48) size = 'xl';
-        else if (n >= 36) size = 'lg';
-        else if (n >= 24) size = 'md';
-        else if (n >= 18) size = 'sm';
-        else if (n >= 14) size = 'xs';
-        else size = 'tiny';
-      }
-    }
-    const hasColor = propKeys.includes('color');
-    const base = hasColor ? 'text' : 'type';
-    return `gc-${base}-${size || index}`;
-  }
-
-  if (type === 'structure') {
+    const n = getPxNumber(fontSize);
+    if (n >= 48) parts.push('xl');
+    else if (n >= 28) parts.push('lg');
+    else if (n >= 18) parts.push('md');
+    else if (n >= 14) parts.push('sm');
+    else parts.push('xs');
+    // Color semantic from token map
+    const colorVal = props['color']?.value;
+    const token = findTokenByHex(colorVal, tokenMap);
+    if (token) parts.push(token);
+    else parts.push('neutral');
+  } else if (type === 'structure') {
     const hasMaxWidth = propKeys.includes('max-width');
     const hasGap = propKeys.includes('gap');
     const hasPadding = propKeys.some(k => k.startsWith('padding'));
-    if (hasMaxWidth && hasPadding) return `gc-section-${index}`;
-    if (hasGap) return `gc-grid-${index}`;
-    if (hasPadding) return `gc-pad-${index}`;
-    return `gc-layout-${index}`;
+    if (hasMaxWidth && hasPadding) parts.push('section');
+    else if (hasGap) parts.push('grid');
+    else if (hasPadding) parts.push('pad');
+    else parts.push('layout');
+    parts.push(String(index));
+  } else if (type === 'background') {
+    parts.push('surface');
+    const bgVal = props['background-color']?.value;
+    const token = findTokenByHex(bgVal, tokenMap);
+    if (token) parts.push(token);
+    else parts.push('neutral');
+  } else {
+    parts.push('style');
+    parts.push(String(index));
   }
 
-  if (type === 'background') {
-    return `gc-bg-${index}`;
-  }
-
-  return `gc-style-${index}`;
+  return sanitizeGcName(parts.join('-'));
 }
 
 // Stellt sicher dass GC-Namen keine Leerzeichen/Bindestriche enthalten
@@ -299,7 +321,7 @@ let gcIndex = 1;
 // Typo-GCs (≥ MIN_DUPS Duplikate)
 for (const [sig, { props, elements }] of typographySignatures) {
   if (elements.length >= MIN_DUPS) {
-    const name = sanitizeGcName(suggestName('typography', props, gcIndex++));
+    const name = sanitizeGcName(suggestName('typography', props, gcIndex++, tokenMapping));
     const reason = `${elements.length} Elemente mit identischer Typografie: ${
       Object.keys(props).slice(0, 3).join(', ')
     }${Object.keys(props).length > 3 ? ', ...' : ''}`;
@@ -332,7 +354,7 @@ for (const [sig, { props, elements }] of typographySignatures) {
 // Struktur-GCs (≥ MIN_DUPS Duplikate)
 for (const [sig, { props, elements }] of structureSignatures) {
   if (elements.length >= MIN_DUPS) {
-    const name = sanitizeGcName(suggestName('structure', props, gcIndex++));
+    const name = sanitizeGcName(suggestName('structure', props, gcIndex++, tokenMapping));
     const reason = `${elements.length} Container mit identischem Layout: ${
       Object.keys(props).slice(0, 3).join(', ')
     }${Object.keys(props).length > 3 ? ', ...' : ''}`;
@@ -375,8 +397,7 @@ for (const el of backgroundElements) {
   bgSignatureMap.get(sig).elements.push(el.id);
 }
 
-for (const [sig, { props, elements }] of bgSignatureMap) {
-  const name = sanitizeGcName(suggestName('background', props, gcIndex++));
+for (const [sig, { props, elements }] of bgSignatureMap) {    const name = sanitizeGcName(suggestName('background', props, gcIndex++, tokenMapping));
   const reason = elements.length > 1
     ? `${elements.length} Elemente mit identischer Hintergrundfarbe (background.color → IMMER GC)`
     : `background.color → IMMER GC (Bug 3 Schutz), auch bei nur 1 Element`;

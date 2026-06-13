@@ -556,6 +556,41 @@ function checkVerboseStyleFormat(el, path, errors) {
   }
 }
 
+// ─── Check 8: GRID_VS_FLEXBOX_COVERAGE (D3) ─────────────────────────
+
+function checkGridVsFlexboxCoverage(el, path, errors, warnings) {
+  const elType = getElementType(el);
+  if (elType !== 'e-flexbox') return;
+
+  const styles = el.styles || {};
+  const children = el.elements || [];
+
+  for (const [styleId, styleDef] of Object.entries(styles)) {
+    for (const variant of (styleDef.variants || [])) {
+      const props = variant.props || {};
+
+      // Check 1: flex-wrap: wrap → sollte Grid sein
+      if (props['flex-wrap']?.value === 'wrap') {
+        warnings.push({
+          check: 8, rule: 'GRID_VS_FLEXBOX',
+          elementId: getElementId(el), path,
+          message: `e-flexbox with flex-wrap:wrap — consider e-div-block with display:grid`,
+        });
+        return;
+      }
+    }
+  }
+
+  // Check 2: >=4 direkte Kinder → Grid-Kandidat
+  if (children.length >= 4) {
+    warnings.push({
+      check: 8, rule: 'GRID_VS_FLEXBOX',
+      elementId: getElementId(el), path,
+      message: `e-flexbox with ${children.length} children — consider grid-template-columns`,
+    });
+  }
+}
+
 // ─── Check: Hardcoded hex (collected as warnings) ───────────────────
 
 function checkHardcodedHex(el, path, warnings) {
@@ -651,6 +686,7 @@ function validate() {
     checkWidgetSettings(el, path, errors);
     checkVerboseStyleFormat(el, path, errors);
     checkHardcodedHex(el, path, warnings);
+    checkGridVsFlexboxCoverage(el, path, errors, warnings);
   });
 
   // Tree-level check: DOM depth (not per-element, runs once on full tree)
@@ -710,6 +746,7 @@ function validate() {
     C5: { name: 'WIDGET-SETTINGS', vital: true, weight: 17 },
     C6: { name: 'VERBOSE-STYLE-FORMAT', vital: true, weight: 16 },
     C7: { name: 'DOM-DEPTH', vital: false, weight: 8 },
+    C8: { name: 'GRID_VS_FLEXBOX', vital: false, weight: 5 },
     placebo: { name: 'HARDCODED-HEX', vital: false, weight: 0 }
   };
 
