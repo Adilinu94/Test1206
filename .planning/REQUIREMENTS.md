@@ -1,11 +1,12 @@
 # Requirements — framer-v4-pipeline-v2
 
 > **Definiert:** 2026-06-13 | **Quelle:** V4_DESIGN_IMPROVEMENTS_RESEARCH.md (v2)
+> **Update:** 2026-06-13 — Sprint 4 Code-Review Remediation abgeschlossen
 > **Core Value:** Token-effizienter, stabiler Framer→V4-Workflow
 
 ---
 
-## v1 Requirements (Sprint 1)
+## v1 Requirements (Sprint 1) ✅ Complete
 
 ### ENHANCEMENT-1: Strict Grid Mapping
 - **ID:** `ENH-1`
@@ -46,7 +47,7 @@
 
 ---
 
-## v2 Requirements (Sprint 2)
+## v2 Requirements (Sprint 2) ✅ Complete
 
 ### SCRIPT-1: extract-framer-components.js
 - **ID:** `SCR-1`
@@ -84,7 +85,7 @@
 
 ---
 
-## v2 Requirements (Sprint 3)
+## v3 Requirements (Sprint 3) ✅ Complete
 
 ### SCRIPT-3: extract-framer-forms.js
 - **ID:** `SCR-3`
@@ -117,27 +118,55 @@
 
 ---
 
+## v4 Requirements (Sprint 4) ✅ Complete
+
+### ENHANCEMENT-7: C3 Native Routing Completion
+- **ID:** `ENH-7`
+- **Beschreibung:** `framer-animation-extractor.js` — `--native` Flag: V4-native Interaction-JSON statt GSAP-Code. `mapEasingToGSAP` → `mapEasingToElementor` umbenannt. MCP-Routing zu `edit-interaction`.
+- **Datei:** `scripts/framer-animation-extractor.js`
+- **Akzeptanz:** Mit `--native` produziert der Output `v4_interactions` Objekte (Typ `v4-native`) ohne GSAP `code` Strings
+- **Test:** `--native` Flag → Output enthält `v4_interactions[]` ohne `code`-Strings
+
+### ENHANCEMENT-8: structuralHash in framer-utils.js
+- **ID:** `ENH-8`
+- **Beschreibung:** `structuralHash()` einmalig in `framer-utils.js` definieren (mit `includeTag`, `nullOnSmall`, `short` Optionen), in A1 und D1 importieren statt lokaler Doppel-Definition.
+- **Dateien:** `scripts/lib/framer-utils.js`, `scripts/extract-framer-components.js`, `scripts/validate-v4-tree.js`
+- **Akzeptanz:** Keine doppelte `structuralHash`-Definition mehr. Beide Scripts importieren aus `framer-utils.js`.
+- **Test:** A1 und D1 Tests bestehen unverändert mit gemeinsamem Import
+
+### ENHANCEMENT-9: A2 v4-tree Mode Implementation
+- **ID:** `ENH-9`
+- **Beschreibung:** `extract-framer-interactions.js` `--v4-tree` Flag: Walked den V4 Tree, erkennt Elemente mit opacity/transform Styles, generiert V4-native interaction Objekte.
+- **Datei:** `scripts/extract-framer-interactions.js`
+- **Akzeptanz:** `--v4-tree v4-tree.json` erzeugt `interactions[]` mit V4-native JSON
+- **Test:** V4 Tree mit opacity-Styles → erwartete interaction im Output
+
+---
+
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENH-1 (C2) | Sprint 1 | Pending |
-| ENH-2 (C4) | Sprint 1 | Pending |
-| ENH-3 (C5) | Sprint 1 | Pending |
-| ENH-4 (C6) | Sprint 1 | Pending |
-| VAL-1 (D3) | Sprint 1 | Pending |
-| SCR-1 (A1) | Sprint 2 | Pending |
-| SCR-2 (A2) | Sprint 2 | Pending |
-| ENH-5 (C1) | Sprint 2 | Pending |
-| ENH-6 (C3) | Sprint 2 | Pending |
-| INT-1 (B1-B3) | Sprint 2 | Pending |
-| VAL-2 (D1) | Sprint 2 | Pending |
-| SCR-3 (A3) | Sprint 3 | Pending |
-| ABL-1 (B4) | Sprint 3 | Pending |
-| VAL-3 (D2) | Sprint 3 | Pending |
+| ENH-1 (C2) | Sprint 1 | ✅ Complete |
+| ENH-2 (C4) | Sprint 1 | ✅ Complete |
+| ENH-3 (C5) | Sprint 1 | ✅ Complete |
+| ENH-4 (C6) | Sprint 1 | ✅ Complete |
+| VAL-1 (D3) | Sprint 1 | ✅ Complete |
+| SCR-1 (A1) | Sprint 2 | ✅ Complete |
+| SCR-2 (A2) | Sprint 2 | ✅ Complete |
+| ENH-5 (C1) | Sprint 2 | ✅ Complete |
+| ENH-6 (C3) | Sprint 2 | ✅ Complete |
+| INT-1 (B1-B3) | Sprint 2 | ✅ Complete |
+| VAL-2 (D1) | Sprint 2 | ✅ Complete |
+| SCR-3 (A3) | Sprint 3 | ✅ Complete |
+| ABL-1 (B4) | Sprint 3 | ✅ Complete |
+| VAL-3 (D2) | Sprint 3 | ✅ Complete |
+| ENH-7 (C3-native) | Sprint 4 | ✅ Complete |
+| ENH-8 (structHash) | Sprint 4 | ✅ Complete |
+| ENH-9 (A2-v4tree) | Sprint 4 | ✅ Complete |
 
-**Coverage:** 14 Requirements → 3 Sprints → 100% geplant
-**Test-Abdeckung:** 11 neue Test-Blöcke für alle Requirements definiert
+**Coverage:** 17 Requirements → 4 Sprints → 100% complete
+**Test-Abdeckung:** 24 Test-Suiten, 77 Test-Fälle, alle grün
 
 ---
 
