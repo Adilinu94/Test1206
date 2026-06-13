@@ -1052,7 +1052,92 @@ describe('D1: COMPONENT_REUSE_POTENTIAL', () => {
   });
 });
 
-// ─── Suite 15: D3 GRID_VS_FLEXBOX_COVERAGE ────────────────────────────────
+// ─── Suite 20: A3 Form Extraction ─────────────────────────────────────────
+
+describe('A3: Form Extraction', () => {
+  test('A3: detects form with input fields', () => {
+    const html = `<!DOCTYPE html><html><head></head><body>
+      <form action="mailto:hello@example.com">
+        <label>Name</label><input type="text" name="name" placeholder="Your name" required/>
+        <label>Email</label><input type="email" name="email" placeholder="you@example.com"/>
+        <button type="submit">Send</button>
+      </form>
+    </body></html>`;
+    const htmlFile = tmpFile('a3-form.html', html);
+    const outFile = tmpFile('a3-form-plan.json');
+    run('extract-framer-forms.js', ['--html', htmlFile, '--output', outFile]);
+    const plan = readJson(outFile);
+    assert.ok(plan.forms.length >= 1,
+      `Should detect form, got ${plan.forms.length}`);
+    assert.ok(plan.forms[0].fields.length >= 2,
+      `Should have 2 fields, got ${plan.forms[0].fields.length}`);
+  });
+
+  test('A3: generates V4 atomic form tree', () => {
+    const html = `<!DOCTYPE html><html><head></head><body>
+      <form>
+        <input type="text" name="name" placeholder="Name"/>
+        <button type="submit">Submit</button>
+      </form>
+    </body></html>`;
+    const htmlFile = tmpFile('a3-tree-form.html', html);
+    const outFile = tmpFile('a3-tree-plan.json');
+    run('extract-framer-forms.js', ['--html', htmlFile, '--output', outFile]);
+    const plan = readJson(outFile);
+    const tree = plan.forms[0].v4_tree;
+    assert.ok(tree.elements.some(el => el.widgetType === 'e-field-label'),
+      'Should contain e-field-label');
+    assert.ok(tree.elements.some(el => el.widgetType === 'e-field-input'),
+      'Should contain e-field-input');
+    assert.ok(tree.elements.some(el => el.widgetType === 'e-field-submit'),
+      'Should contain e-field-submit');
+  });
+});
+
+// ─── Suite 21: D2 NATIVE_INTERACTION_COVERAGE ──────────────────────────────
+
+describe('D2: NATIVE_INTERACTION_COVERAGE', () => {
+  test('D2: GSAP animations that could be native → warning', () => {
+    const tree = [{
+      id: 'hero', widgetType: 'e-heading',
+      settings: { classes: { '$$type': 'classes', value: ['sh'] } },
+      styles: { sh: { variants: [{ meta: { breakpoint: null, state: null }, props: {} }] } },
+    }];
+    const treeFile = tmpFile('d2-tree.json', tree);
+
+    const animPlan = {
+      meta: { source: 'test' },
+      snippets: [{
+        type: 'gsap',
+        title: 'Hero Fade',
+        tags: ['gsap', 'scrolltrigger'],
+        interactions: [{ effect: 'fade' }],
+      }],
+    };
+    const planFile = tmpFile('d2-ap.json', animPlan);
+
+    const result = run('validate-v4-tree.js', [treeFile, '--mode=warn', `--animation-plan=${planFile}`], { expectFail: false });
+    const parsed = JSON.parse(result.stdout);
+    const nativeIssues = (parsed.warnings || []).filter(w => w.rule === 'NATIVE_INTERACTION_COVERAGE');
+    assert.ok(nativeIssues.length > 0,
+      `GSAP fade should trigger NATIVE_INTERACTION_COVERAGE, got warnings: ${JSON.stringify(parsed.warnings)}`);
+  });
+
+  test('D2: no warning without --animation-plan', () => {
+    const tree = [{
+      id: 'hero', widgetType: 'e-heading',
+      settings: { classes: { '$$type': 'classes', value: ['sh'] } },
+      styles: { sh: { variants: [{ meta: { breakpoint: null, state: null }, props: {} }] } },
+    }];
+    const treeFile = tmpFile('d2-noap.json', tree);
+    const result = run('validate-v4-tree.js', [treeFile, '--mode=warn']);
+    const parsed = JSON.parse(result.stdout);
+    const nativeIssues = (parsed.warnings || []).filter(w => w.rule === 'NATIVE_INTERACTION_COVERAGE');
+    assert.equal(nativeIssues.length, 0,
+      'Without --animation-plan, NATIVE_INTERACTION_COVERAGE should not fire');
+  });
+});
+
 
 describe('D3: GRID_VS_FLEXBOX_COVERAGE', () => {
   const VALIDATE_SCRIPT = join(SCRIPTS, 'validate-v4-tree.js');

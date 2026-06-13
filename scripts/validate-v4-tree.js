@@ -50,12 +50,18 @@ if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
 
 const treePath = args[0];
 let mode = 'strict';
-let schemaPath = SCHEMA_PATH_DEFAULT;
-
-for (const arg of args.slice(1)) {
-  if (arg.startsWith('--mode=')) mode = arg.replace('--mode=', '');
-  if (arg.startsWith('--schema=')) schemaPath = arg.replace('--schema=', '');
-}
+let schemaPath = SCHEMA_PATH_DEFAULT;  let animationPlan = null;
+  for (const arg of args.slice(1)) {
+    if (arg.startsWith('--mode=')) mode = arg.replace('--mode=', '');
+    if (arg.startsWith('--schema=')) schemaPath = arg.replace('--schema=', '');
+    if (arg.startsWith('--animation-plan=')) {
+      const planPath = arg.replace('--animation-plan=', '');
+      if (fs.existsSync(planPath)) {
+        try { animationPlan = JSON.parse(fs.readFileSync(planPath, 'utf8')); }
+        catch (e) { console.error(`Warning: Cannot read animation-plan: ${e.message}`); }
+      }
+    }
+  }
 
 // ─── Load inputs ────────────────────────────────────────────────────
 
@@ -639,6 +645,33 @@ function checkComponentReusePotential(tree, errors, warnings) {
   }
 }
 
+// ─── Check 10: NATIVE_INTERACTION_COVERAGE (D2) ─────────────────────
+
+function checkNativeInteractionCoverage(tree, animationPlan, warnings) {
+  const interactions = animationPlan.interactions || animationPlan.snippets || [];
+
+  const gsapEntries = interactions.filter(i =>
+    i.type === 'gsap' || (i.tags && (i.tags.includes('gsap') || i.tags.includes('scrolltrigger')))
+  );
+
+  for (const entry of gsapEntries) {
+    const effects = entry.interactions || entry.effects || [];
+    const mappableToNative = effects.filter(e =>
+      ['fade', 'slide-up', 'zoom', 'rotate', 'slide-left'].includes(e.effect || e.animation)
+    );
+
+    if (mappableToNative.length > 0) {
+      warnings.push({
+        check: 10, rule: 'NATIVE_INTERACTION_COVERAGE',
+        elementId: entry.selector || entry.title || 'unknown',
+        path: animationPlan.meta?.source || '',
+        message: `${mappableToNative.length} GSAP animations could be V4-native interactions. Use C3 routing to edit-interaction.`,
+        suggestion: 'Use framer-animation-extractor.js with C3 native routing',
+      });
+    }
+  }
+}
+
 // ─── Check: Hardcoded hex (collected as warnings) ───────────────────
 
 function checkHardcodedHex(el, path, warnings) {
@@ -740,6 +773,11 @@ function validate() {
   // D1: Tree-level COMPONENT_REUSE_POTENTIAL check
   checkComponentReusePotential(tree, errors, warnings);
 
+  // D2: NATIVE_INTERACTION_COVERAGE check (requires --animation-plan)
+  if (animationPlan) {
+    checkNativeInteractionCoverage(tree, animationPlan, warnings);
+  }
+
   // Tree-level check: DOM depth (not per-element, runs once on full tree)
   checkDomDepth(tree, errors, warnings);
 
@@ -799,6 +837,7 @@ function validate() {
     C7: { name: 'DOM-DEPTH', vital: false, weight: 8 },
     C8: { name: 'GRID_VS_FLEXBOX', vital: false, weight: 5 },
     C9: { name: 'COMPONENT_REUSE_POTENTIAL', vital: false, weight: 5 },
+    C10: { name: 'NATIVE_INTERACTION_COVERAGE', vital: false, weight: 5 },
     placebo: { name: 'HARDCODED-HEX', vital: false, weight: 0 }
   };
 

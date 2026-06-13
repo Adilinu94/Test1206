@@ -49,6 +49,7 @@
     "compare:hero": "node scripts/section-compare.js --framer-url https://remarkable-interface-616594.framer.app/ --elementor-url http://solar.local/framer-e2e-test-hero/ --section hero --above-fold --open",
     "extract-components": "node scripts/extract-framer-components.js",
     "extract-interactions": "node scripts/extract-framer-interactions.js",
+    "extract-forms": "node scripts/extract-framer-forms.js",
     "extract-animations": "node scripts/framer-animation-extractor.js",
     "auto-fix": "node scripts/post-build-auto-fix.js",
     "inject-code": "node scripts/inject-animation-code.js",
