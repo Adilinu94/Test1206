@@ -1444,3 +1444,71 @@ describe('ENH-11: convert-xml-to-v4.js JSDoc', () => {
     assert.ok(tree.settings?.image, 'Has image settings');
   });
 });
+
+// ─── Suite 28: Sprint 6 — preflight-check.js standalone ───────────────────
+
+describe('Sprint 6: preflight-check.js standalone', () => {
+  test('S6: preflight-check.js script file exists and has --help', () => {
+    const p = join(SCRIPTS, 'preflight-check.js');
+    assert.ok(existsSync(p), `preflight-check.js should exist at ${p}`);
+    const content = readFileSync(p, 'utf8');
+    assert.ok(content.includes('--help'), 'Should have --help handling');
+    assert.ok(content.includes('runPreflight'), 'Should import runPreflight');
+  });
+});
+
+// ─── Suite 29: Sprint 6 — wizard.js batch subcommand ──────────────────────
+
+describe('Sprint 6: wizard.js batch subcommand', () => {
+  test('S6: wizard.js help shows batch subcommand', () => {
+    const wizardPath = join(PROJECT_ROOT, 'wizard.js');
+    const result = runFromRoot('wizard.js', ['help']);
+    assert.ok(
+      result.stdout.includes('batch') || result.stdout.includes('BATCH'),
+      `help should list batch subcommand, got: ${result.stdout.slice(0, 200)}`
+    );
+  });
+
+  test('S6: wizard.js batch without --pages exits with error code 2', () => {
+    const result = runFromRoot('wizard.js', ['batch'], { expectFail: true });
+    assert.strictEqual(result.code, 2,
+      `Should exit with code 2 for missing --pages, got code=${result.code} stdout=${result.stdout.slice(0,80)}`
+    );
+  });
+});
+
+// ─── Suite 30: Sprint 6 — wizard.js modular structure ─────────────────────
+
+describe('Sprint 6: wizard.js modular structure', () => {
+  test('S6: wizard/cmd-dry-run.js is executable', () => {
+    const p = join(SCRIPTS, 'wizard', 'cmd-dry-run.js');
+    assert.ok(existsSync(p), `cmd-dry-run.js exists`);
+    const content = readFileSync(p, 'utf8');
+    assert.ok(content.includes('runDryRun'), 'Exports runDryRun');
+  });
+
+  test('S6: wizard/cmd-batch.js has empty pages guard', () => {
+    const p = join(SCRIPTS, 'wizard', 'cmd-batch.js');
+    const content = readFileSync(p, 'utf8');
+    assert.ok(content.includes('--pages erfordert'), 'Has --pages validation');
+    assert.ok(content.includes('!pagesList || !pagesList.trim()'), 'Has empty guard');
+  });
+});
+
+// ── Helper: run script relative to project root (for wizard.js) ───────────
+
+const PROJECT_ROOT = dirname(SCRIPTS);
+
+function runFromRoot(script, extraArgs = [], { expectFail = false } = {}) {
+  try {
+    const out = execFileSync(NODE, [join(PROJECT_ROOT, script), ...extraArgs], {
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 15000,
+    });
+    return { ok: true, stdout: out, stderr: '' };
+  } catch (err) {
+    if (expectFail) return { ok: false, stdout: err.stdout || '', stderr: err.stderr || '', code: err.status };
+    throw err;
+  }
+}

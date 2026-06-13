@@ -16,6 +16,7 @@
     "test:bridge": "node scripts/lib/mcp-bridge.js --self-test",
     "validate": "node scripts/framer-pre-build-validate.js",
     "preflight": "node scripts/framer-pre-build-validate.js",
+    "preflight-check": "node scripts/preflight-check.js",
     "schema-validate": "node scripts/validate-v4-tree.js",
     "validate-tree": "node scripts/validate-v4-tree.js",
     "check-binding": "node scripts/verify-build-binding.js",
@@ -56,7 +57,8 @@
     "inject-code": "node scripts/inject-animation-code.js",
     "inject-animations": "node scripts/inject-animation-code.js --plan animation-plan.json",
     "inject-from-export": "node scripts/inject-animation-code.js --from-framer-export",
-    "lint:version": "node --input-type=module -e \"import{readFileSync}from'node:fs';const p=JSON.parse(readFileSync('package.json','utf8'));const c=readFileSync('CHANGELOG.md','utf8');if(!c.includes(p.version)){process.stderr.write('CHANGELOG.md missing v'+p.version+'\\n');process.exit(1)}console.log('v'+p.version+' OK')\""
+    "wizard-batch": "node wizard.js batch",
+    "lint:version": "node --input-type=module -e \"import{readFileSync}from'node:fs';const p=JSON.parse(readFileSync('package.json','utf8'));const c=readFileSync('CHANGELOG.md','utf8');if(!c.includes(p.version)){process.stderr.write('CHANGELOG.md missing v'+p.version+'\\\\n');process.exit(1)}console.log('v'+p.version+' OK')\""
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
