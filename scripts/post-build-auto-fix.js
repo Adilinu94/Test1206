@@ -12,10 +12,10 @@
  *      → von scripts/visual-qa.js mit axe-core A11y-Integration
  *
  * Auto-Fix Kategorien + zugeordnete Novamira-Abilities:
- *   Color Contrast   → novamira-extra/fix-color-contrast
- *   Missing Alt Text → novamira-extra/add-alt-text-from-context
- *   SEO Meta Tags    → novamira-extra/generate-meta-tags
- *   Schema Markup    → novamira-extra/generate-schema-markup
+ *   Color Contrast   → novamira-adrianv2/adrians-fix-color-contrast
+ *   Missing Alt Text → novamira-adrianv2/adrians-add-alt-text-from-context
+ *   SEO Meta Tags    → novamira-adrianv2/adrians-generate-meta-tags
+ *   Schema Markup    → novamira-adrianv2/adrians-generate-schema-markup
  *   Layout/Style     → novamira/adrians-patch-element-styles
  *   Variable Drift   → novamira/adrians-patch-element-styles
  *
@@ -227,7 +227,7 @@ function classifyIssues(report) {
             help: v.help,
             helpUrl: v.helpUrl,
             breakpoint: r.breakpoint,
-            ability: 'novamira-extra/fix-color-contrast',
+            ability: 'novamira-adrianv2/adrians-fix-color-contrast',
             params: {
               post_id: postId || report.meta?.post_id,
               apply: !args['dry-run'],
@@ -244,7 +244,7 @@ function classifyIssues(report) {
             impact: v.impact,
             help: v.help,
             breakpoint: r.breakpoint,
-            ability: 'novamira-extra/add-alt-text-from-context',
+            ability: 'novamira-adrianv2/adrians-add-alt-text-from-context',
             params: {
               post_id: postId || report.meta?.post_id,
               apply: !args['dry-run'],
@@ -281,7 +281,7 @@ function deduplicateIssues(issues) {
 
   for (const [ability, groupIssues] of groups) {
     // Global-fix abilities: ein Call für alle
-    if (ability === 'novamira-extra/fix-color-contrast') {
+    if (ability === 'novamira-adrianv2/adrians-fix-color-contrast') {
       mcpCalls.push({
         ability,
         params: {
@@ -293,7 +293,7 @@ function deduplicateIssues(issues) {
         phase: 'post-build-auto-fix',
         dry_run: !groupIssues[0].params.apply,
       });
-    } else if (ability === 'novamira-extra/add-alt-text-from-context') {
+    } else if (ability === 'novamira-adrianv2/adrians-add-alt-text-from-context') {
       mcpCalls.push({
         ability,
         params: {
@@ -364,11 +364,11 @@ function mapAbilityForType(type) {
   const map = {
     layout: 'novamira/adrians-patch-element-styles',
     style: 'novamira/adrians-patch-element-styles',
-    color: 'novamira-extra/fix-color-contrast',
-    contrast: 'novamira-extra/fix-color-contrast',
-    alt: 'novamira-extra/add-alt-text-from-context',
-    'alt-text': 'novamira-extra/add-alt-text-from-context',
-    seo: 'novamira-extra/generate-meta-tags',
+    color: 'novamira-adrianv2/adrians-fix-color-contrast',
+    contrast: 'novamira-adrianv2/adrians-fix-color-contrast',
+    alt: 'novamira-adrianv2/adrians-add-alt-text-from-context',
+    'alt-text': 'novamira-adrianv2/adrians-add-alt-text-from-context',
+    seo: 'novamira-adrianv2/adrians-generate-meta-tags',
     variable: 'novamira/adrians-patch-element-styles',
   };
   return map[type?.toLowerCase()] || 'novamira/adrians-patch-element-styles';
@@ -386,12 +386,12 @@ const effectivePostId = postId || qaReport.post_id || qaReport.meta?.post_id;
 
 // SEO-Abilities zusätzlich einplanen (wenn enabled)
 if (enabledTypes.has('seo') && effectivePostId) {
-  const hasMetaCalls = mcpCalls.some(c => c.ability === 'novamira-extra/generate-meta-tags');
-  const hasSchemaCalls = mcpCalls.some(c => c.ability === 'novamira-extra/generate-schema-markup');
+  const hasMetaCalls = mcpCalls.some(c => c.ability === 'novamira-adrianv2/adrians-generate-meta-tags');
+  const hasSchemaCalls = mcpCalls.some(c => c.ability === 'novamira-adrianv2/adrians-generate-schema-markup');
 
   if (!hasMetaCalls) {
     mcpCalls.push({
-      ability: 'novamira-extra/generate-meta-tags',
+      ability: 'novamira-adrianv2/adrians-generate-meta-tags',
       params: { post_id: effectivePostId },
       note: 'SEO Meta-Tags vorsorglich generieren (keine Issues im Report, aber Best Practice)',
       phase: 'post-build-auto-fix',
@@ -401,7 +401,7 @@ if (enabledTypes.has('seo') && effectivePostId) {
 
   if (!hasSchemaCalls) {
     mcpCalls.push({
-      ability: 'novamira-extra/generate-schema-markup',
+      ability: 'novamira-adrianv2/adrians-generate-schema-markup',
       params: { post_id: effectivePostId },
       note: 'Schema-Markup vorsorglich generieren',
       phase: 'post-build-auto-fix',
@@ -499,9 +499,9 @@ Liest einen QA-Report und generiert MCP-Execution-Pläne für
 automatisch behebbare Issues mit Novamira-Abilities.
 
 Auto-Fix Kategorien:
-  contrast   → novamira-extra/fix-color-contrast
-  alt-text   → novamira-extra/add-alt-text-from-context
-  seo        → novamira-extra/generate-meta-tags + generate-schema-markup
+  contrast   → novamira-adrianv2/adrians-fix-color-contrast
+  alt-text   → novamira-adrianv2/adrians-add-alt-text-from-context
+  seo        → novamira-adrianv2/adrians-generate-meta-tags + generate-schema-markup
   layout     → novamira/adrians-patch-element-styles
   variables  → novamira/adrians-patch-element-styles
 

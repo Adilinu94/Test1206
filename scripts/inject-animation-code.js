@@ -142,18 +142,55 @@ if (snippetSpecs.length === 0) {
   process.exit(0);
 }
 
-const mcpPlan = {
-  description: 'Novamira adrians-code-injector MCP-Plan',
-  generated_at: new Date().toISOString(),
-  total: snippetSpecs.length,
-  steps: snippetSpecs.map((spec, i) => ({
-    step: i + 1,
-    ability: 'novamira/adrians-code-injector',
-    parameters: buildParameters(spec),
-  })),
-};
+const isSingleMode = hasFlag('--single-mode'); // Debug-Flag: zwingt Individual-Calls
+
+const mcpPlan = isSingleMode
+  ? buildIndividualPlan(snippetSpecs)
+  : buildBatchPlan(snippetSpecs);
 
 const outputFile = getArg('--output', 'animation-mcp-plan.json');
+
+// ─── Plan-Builder ─────────────────────────────────────────────────────────────
+
+/**
+ * Generiert einen einzelnen Batch-Call (1 MCP-Call für alle Snippets).
+ * Bevorzugter Modus — reduziert N MCP-Roundtrips auf 1.
+ */
+function buildBatchPlan(specs) {
+  return {
+    description: 'Novamira adrians-batch-inject-snippets MCP-Plan (Batch)',
+    generated_at: new Date().toISOString(),
+    mode: 'batch',
+    total: specs.length,
+    steps: [{
+      step: 1,
+      ability: 'novamira-adrianv2/adrians-batch-inject-snippets',
+      parameters: {
+        snippets: specs.map(spec => buildParameters(spec)),
+      },
+    }],
+  };
+}
+
+/**
+ * Generiert individuelle Calls (ein Schritt pro Snippet).
+ * Nur für Debugging via --single-mode Flag.
+ */
+function buildIndividualPlan(specs) {
+  return {
+    description: 'Novamira adrians-code-injector MCP-Plan (Single — Debug)',
+    generated_at: new Date().toISOString(),
+    mode: 'single',
+    total: specs.length,
+    steps: specs.map((spec, i) => ({
+      step: i + 1,
+      ability: 'novamira-adrianv2/adrians-code-injector',
+      parameters: buildParameters(spec),
+    })),
+  };
+}
+
+// ─── Output ───────────────────────────────────────────────────────────────────
 writeFileSync(outputFile, JSON.stringify(mcpPlan, null, 2));
 
 console.log(`\n╔══════════════════════════════════════════════════════╗`);
@@ -170,9 +207,14 @@ snippetSpecs.forEach((s, i) => {
 });
 
 console.log(`\n─── Agent-Anweisung ───────────────────────────────────`);
-console.log(`Führe alle ${snippetSpecs.length} Schritte in animation-mcp-plan.json aus:`);
+if (isSingleMode) {
+  console.log(`[--single-mode] Führe ${snippetSpecs.length} individuelle Calls aus:`);
+  console.log(`  Ability: novamira-adrianv2/adrians-code-injector`);
+} else {
+  console.log(`Führe 1 Batch-Call für alle ${snippetSpecs.length} Snippets aus:`);
+  console.log(`  Ability: novamira-adrianv2/adrians-batch-inject-snippets`);
+}
 console.log(`  Tool:    novamira-solar-local:mcp-adapter-execute-ability`);
-console.log(`  Format:  { ability_name: "novamira/adrians-code-injector", parameters: { ... } }`);
 console.log(`\nErgebnisse als injection-results.json speichern, dann:`);
 console.log(`  node scripts/inject-animation-code.js --apply-results injection-results.json\n`);
 

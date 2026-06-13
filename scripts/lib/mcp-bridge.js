@@ -556,6 +556,31 @@ export class McpBridge {
     return results;
   }
 
+  /**
+   * Führt mehrere MCP-Calls parallel aus via Promise.allSettled.
+   * Alle Calls laufen gleichzeitig — Ergebnisreihenfolge entspricht Input-Reihenfolge.
+   * Fehler einzelner Calls werfen nicht — sie landen als { status: 'rejected', reason } im Ergebnis.
+   *
+   * Nutze callParallel() für unabhängige Pre-Build-Schritte (z.B. parallel-pre-build.js).
+   * Nutze callSequence() wenn Calls voneinander abhängen oder serielle Ausführung nötig ist.
+   *
+   * @param {Array<{ability: string, params?: object}>} calls
+   * @returns {Promise<Array<{status: 'fulfilled'|'rejected', value?: any, reason?: any, ability: string}>>}
+   */
+  async callParallel(calls) {
+    if (!Array.isArray(calls) || calls.length === 0) return [];
+    process.stderr.write(`[mcp-bridge] callParallel: ${calls.length} calls gestartet\n`);
+    const start = Date.now();
+    const settled = await Promise.allSettled(
+      calls.map(({ ability, params = {} }) => this.call(ability, params))
+    );
+    const ms = Date.now() - start;
+    const failed = settled.filter(r => r.status === 'rejected').length;
+    process.stderr.write(`[mcp-bridge] callParallel: fertig in ${ms}ms (${calls.length - failed} ok, ${failed} fehler)\n`);
+    // Reichere Ergebnisse mit ability-Name an
+    return settled.map((result, i) => ({ ...result, ability: calls[i].ability }));
+  }
+
   // ── Spezialisierte Methoden ──────────────────────────────────────────────
 
   /**

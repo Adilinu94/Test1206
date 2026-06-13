@@ -39,3 +39,24 @@ if ( ! function_exists( 'novamira_find_wpcode_snippet' ) ) {
         return ! empty( $q->posts ) ? (int) $q->posts[0] : 0;
     }
 }
+
+/**
+ * Traversiert einen Elementor-Element-Tree rekursiv.
+ * Wird von adrians-fix-color-contrast, adrians-add-alt-text und weiteren Abilities genutzt.
+ *
+ * @param array    $tree     Elementor-Element-Array (Top-Level oder elements[])
+ * @param callable $callback Wird für jedes Element aufgerufen, erhält das Element-Array
+ */
+if ( ! function_exists( 'novamira_walk_elementor_tree' ) ) {
+    function novamira_walk_elementor_tree( array $tree, callable $callback ): void {
+        foreach ( $tree as $element ) {
+            if ( ! is_array( $element ) ) {
+                continue;
+            }
+            $callback( $element );
+            if ( ! empty( $element['elements'] ) && is_array( $element['elements'] ) ) {
+                novamira_walk_elementor_tree( $element['elements'], $callback );
+            }
+        }
+    }
+}
