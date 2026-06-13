@@ -1,14 +1,14 @@
 # Milestone Summary — framer-v4-pipeline-v2
 
-> **Version:** v0.10.0 | **Datum:** 2026-06-13
+> **Version:** v0.11.0 | **Datum:** 2026-06-13
 > **Milestone:** V4 Design Improvements — 6 Sprints Complete
-> **Status:** ✅ ALLE 20+ Requirements erfüllt, 88/88 Tests grün
+> **Status:** ✅ ALLE 23 Requirements erfüllt, 88/88 Tests grün
 
 ---
 
 ## 📊 Executive Summary
 
-In **6 Sprints** (~30h netto) wurde die Framer→Elementor V4 Pipeline von 49 auf **88 Tests** (+80%) ausgebaut, **8 neue Scripts** erstellt, **5 bestehende Scripts modularisiert**, **20+ Requirements** implementiert und ein vollständiges **Codebase-Audit** mit **6 identifizierten Lücken** durchgeführt und alle geschlossen.
+In **6 Sprints** (~30h netto) wurde die Framer→Elementor V4 Pipeline von 49 auf **88 Tests** (+80%) ausgebaut, **12 neue Scripts/Module** erstellt, **5 bestehende Scripts modularisiert**, **23 Requirements** implementiert und ein vollständiges **Codebase-Audit** mit **6 identifizierten Lücken** durchgeführt und alle geschlossen.
 
 **Ergebnis:** Eine Pipeline, die Framer-Designs automatisch in vollständige V4 Atomic Widget Trees konvertiert — mit semantischen Global Classes, GV-Substitution, Breakpoint-bewusstem Responsive Scaling, Component-Extraktion, V4-nativen Interaktionen, Atomic Forms, Dark-Mode-Extraktion, Concurrency-geschützten MCP-Calls, Batch-Multi-Page-Deployments, JSDoc-Dokumentation und einem modularen Wizard.
 
@@ -168,7 +168,7 @@ In **6 Sprints** (~30h netto) wurde die Framer→Elementor V4 Pipeline von 49 au
 | **Test-Suiten** | 10 | **30** | +20 |
 | **Scripts** | 15 | **23** | +8 |
 | **Wizard-Module** | 1 | **8** | +7 |
-| **Requirements** | 0 | **20+** | +20+ |
+| **Requirements** | 0 | **23** | +23 |
 | **npm-Scripts** | ~30 | **~42** | +12 |
 | **Code-Review offen** | — | **0** | ✅ |
 | **JSDoc-Dokumentation** | 0 Funktionen | **18+ Funktionen** | ✅ |
@@ -327,7 +327,6 @@ framer-v4-pipeline-v2/
 | Priorität | Task | Begründung |
 |-----------|------|------------|
 | 🔴 P0 | End-to-End Test mit echter Framer-URL | Letzter offener Punkt aus BLUEPRINT.md |
-| 🟡 P1 | Docs auf v0.11.0 aktualisieren (REQUIREMENTS, CHANGELOG, BLUEPRINT, ROADMAP) | Dokumentation synchronisieren |
 | 🟡 P1 | `npm run test:all` finale Regression (88 + 12 + 4 = 104 Tests) | Vollständige Abdeckung verifizieren |
 | 🟢 P2 | `wizard.js` --help Blocks vereinheitlichen | Konsistenz mit Script-Standards |
 | 🟢 P2 | `extract-framer-dark-mode.js` `--format markdown` implementieren | In --help beworben, aber nicht implementiert |
@@ -336,5 +335,5 @@ framer-v4-pipeline-v2/
 ---
 
 > **Milestone abgeschlossen:** 2026-06-13
-> **Nächster Milestone:** End-to-End Framer-URL Test + v0.11.0
-> **Gesamt-Impact:** 49→88 Tests (+80%), 15→23 Scripts (+53%), 905→~300 Wizard-Zeilen (−67%), 0→23 formalisierte Requirements
+> **Nächster Milestone:** End-to-End Framer-URL Test
+> **Gesamt-Impact:** 49→88 Tests (+80%), 15→28 Scripts/Module (+87%), 905→~300 Wizard-Zeilen (−67%), 0→23 formalisierte Requirements, alle Docs auf v0.11.0 synchronisiert
