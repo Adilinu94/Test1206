@@ -1,6 +1,6 @@
 # 🚀 Framer → Elementor V4 Pipeline V2: Master Blueprint
 
-> **Version:** v0.10.0 | **Stand:** 2026-06-13
+> **Version:** v0.11.0 | **Stand:** 2026-06-13
 
 ## 🎯 Overview
 Ziel: Umsetzung eines stabilen, token-effizienten Framer-zu-V4-Workflows basierend auf einer **3-Wege-Symbiose**:
@@ -39,7 +39,17 @@ framer-v4-pipeline-v2/
     ├── extract-framer-styles.js          # CSS-Properties + Variablen aus HTML-Export
     ├── extract-framer-components.js      # A1: Component Extraction (wiederholte Muster)
     ├── extract-framer-interactions.js    # A2: Interaction Extraction (CSS → V4 Pro)
+    ├── extract-framer-dark-mode.js       # Dark-Mode-CSS → V4 Variable-Set (ENH-10)
     ├── extract-framer-forms.js           # A3: Form Extraction (→ V4 Atomic Forms)
+    ├── preflight-check.js                # Standalone Preflight System-Checks (S6)
+    └── wizard/
+        ├── shared.js                     # Shared helpers (log, runFile, recovery)
+        ├── cmd-preflight.js              # Preflight sub-command
+        ├── cmd-dry-run.js                # Dry-run sub-command
+        ├── cmd-preview.js                # Preview sub-command
+        ├── cmd-promote.js                # Promote sub-command
+        ├── cmd-serve.js                  # Serve sub-command
+        └── cmd-batch.js                  # Batch Multi-Page Build (S6)
     ├── extract-image-urls.js             # Bild-URLs aus HTML-Export
     ├── extract-responsive-breakpoints.js # Breakpoints aus CSS
     ├── resolve-fonts.js                  # Font-Referenzen aufloesen (FR;/GF; Prefix)
@@ -131,8 +141,13 @@ framer-v4-pipeline-v2/
 - [x] `schemas/v4-prop-type-schema.json` → via V2-Plugin REST-Endpoint + lokales Fixture für Tests
 - [x] **`extract-framer-components.js`** (A1): Component Extraction — wiederholte Muster → Blueprints
 - [x] **`extract-framer-interactions.js`** (A2): CSS Transitions + Framer Appear → V4 Pro Interactions
-- [x] **`extract-framer-forms.js`** (A3): `<form>`/`<input>`/`<button>` → V4 Atomic Forms
-- [x] `tests/pipeline.test.js`: **77 Tests in 24 Suiten** (node --test), alle gruen
+- [x] **`extract-framer-dark-mode.js`** (ENH-10): Dark-Mode-CSS → V4 Variable-Set (Brace-Counting, Light-Token-Matching)
+- [x] **`preflight-check.js`** (S6): Standalone 8-System-Checks (--help, --json)
+- [x] **`scripts/wizard/`** (S6): 7 Modul-Dateien — Wizard von 905→~300 Zeilen reduziert
+- [x] **FIX-7**: `mcp-bridge.js` callParallel() p-limit (concurrency=3, Worker-Pool, MCP_CONCURRENCY env var)
+- [x] **ENH-11**: `convert-xml-to-v4.js` JSDoc für 9 Kernfunktionen
+- [x] **wizard.js batch**: `--pages` + `--post-ids` Multi-Page Subcommand (S6)
+- [x] `tests/pipeline.test.js`: **88 Tests in 30 Suiten** (node --test), alle gruen
 - [x] `tests/e2e.test.js`: 12 Tests, alle gruen
 - [x] `tests/integration.test.js`: 4 Tests, alle gruen
 - [x] GSD-Projekt: `.planning/` mit PROJECT.md, REQUIREMENTS.md, ROADMAP.md, PLAN-1-4.md, STATE.md, config.json
@@ -199,7 +214,7 @@ framer-v4-pipeline-v2/
 | IV | Image-Src url-Key | Wenn `id` gesetzt ist, darf `url`-Key nicht existieren (nicht mal als `null`) |
 | V | custom_css Format | `custom_css` immer `{"raw":"..."}` - nie plain String (crasht die Site) |
 
-**wizard.js Phase-Übersicht (v0.10.0):**
+**wizard.js Phase-Übersicht (v0.11.0):**
 | Phase | Beschreibung | Fail-Fast |
 |-------|-------------|-----------|
 | 0 | MCP Connector Check | ✅ |
@@ -218,9 +233,9 @@ framer-v4-pipeline-v2/
 ## ✅ Lokale Verifikation
 
 ```bash
-npm test                # 77 pipeline tests (24 Suiten)
+npm test                # 88 pipeline tests (30 Suiten)
 npm run test:e2e        # 12 e2e tests
-npm run test:all        # 93 tests total (77 pipeline + 12 e2e + 4 integration)
+npm run test:all        # 104 tests total (88 pipeline + 12 e2e + 4 integration)
 npm run test:integration # 4 integration tests
 npm run test:bridge     # mcp-bridge.js --self-test
 npm run test:mcp-mock   # Integration tests gegen Mock-Server
@@ -232,7 +247,10 @@ npm run gc-execute      # generate-global-classes.js --execute
 npm run post-build-qa   # run-post-build-qa.js
 npm run extract-components  # A1: Component Extraction
 npm run extract-interactions # A2: Interaction Extraction
+npm run extract-dark-mode  # Dark-Mode CSS Extraction (ENH-10)
 npm run extract-forms   # A3: Form Extraction
+npm run preflight-check # Standalone Preflight Checks (S6)
+npm run wizard-batch    # Multi-Page Batch Build (S6)
 node --check wizard.js
 node --check scripts/lib/mcp-bridge.js
 ```

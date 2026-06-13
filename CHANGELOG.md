@@ -1,5 +1,26 @@
 # Changelog — framer-v4-pipeline-v2
 
+## [v0.11.0] — 2026-06-13
+
+### Sprint 5 — Audit-Gap Remediation (77→83 Tests)
+
+- **FIX-7 p-limit**: `callParallel()` Worker-Pool mit `concurrency=3`. `McpBridge.defaultConcurrency` via Constructor + `MCP_CONCURRENCY` env var. Verhindert Race-Conditions bei 10+ parallelen Requests.
+- **ENH-10 `extract-framer-dark-mode.js`** (NEU): Extrahiert `@media (prefers-color-scheme: dark)` Blöcke. Brace-Counting für nested-rule-safe Parsing. V4 Dark Mode Variable-Set JSON mit Light-Token-Matching.
+- **ENH-11 convert-xml-to-v4.js JSDoc**: `@param`/`@returns` für 9 Kernfunktionen (`tokenizeXml`, `buildTree`, `determineWidgetType`, `buildStyleProps`, `resolveColor`, `extractComponentText`, `convertNode`, `substituteTokensWithGvIds`, `analyzeTokenUsage`). 0 Behavioral Change.
+
+### Sprint 6 — Wizard Modularisierung (83→88 Tests)
+
+- **`scripts/preflight-check.js`** (NEU): Standalone 8-System-Checks. `--help`, `--json`. Wiederverwendet `runPreflight()` aus `cmd-preflight.js`.
+- **`wizard.js batch`** (NEU): `--pages file1.xml,file2.xml --post-ids 42,43`. Multi-Page in 1 Durchlauf. Leere-Pages-Guard + Datei-Existenz-Validation. Batch-Summary JSON.
+- **Wizard Modular**: 905→~300 Zeilen. 7 Module in `scripts/wizard/`: shared, cmd-preflight, cmd-dry-run, cmd-preview, cmd-promote, cmd-serve, cmd-batch. Thin Router.
+
+### npm-Scripts (Neu)
+- `preflight-check`, `wizard-batch`, `extract-dark-mode`
+
+### Test-Status
+- `npm test` → 88/88 ✅ (von 49 → 88, +39 Tests über 6 Sprints)
+- 30 Test-Suiten, 23 Requirements, 100% Complete
+
 ## [v0.10.0] — 2026-06-13
 
 ### Sprint 1 — Quick Wins + Root-Cause Fix (57→61 Tests)
