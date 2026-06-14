@@ -8,6 +8,8 @@
 - **FIX-11 Wizard `--help`**: Alle 6 cmd-*.js mit konsistentem `printHelp()` Export. `wizard.js help <sub>` und `wizard.js <sub> --help` funktionieren.
 - **FIX-12 `token_name` Dedup**: `suggestDarkTokenName()` mit Property-Suffix (`dark-{base}-{selector}-{property}`). Verhindert Kollisionen bei gleichem Selektor mit unterschiedlichen Properties.
 
+## [v0.12.0] — 2026-06-14
+
 ### Sprint 8 — Live Integration (100→105 Pipeline / 12→15 E2E / 4→7 Integration)
 
 - **ENH-12 Wizard `--non-interactive`**: `wizard.js --non-interactive --url <url> --post-id <ID>` — automatisierter Pipeline-Durchlauf ohne Prompts. Schema-Sync, FramerExport, Extraktion, Manifest.
