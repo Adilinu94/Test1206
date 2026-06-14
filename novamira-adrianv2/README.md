@@ -139,7 +139,7 @@ wp plugin activate novamira-adrianv2
 
 # 2. Composer dependencies (Dev only)
 cd wp-content/plugins/novamira-adrianv2
-composer install
+php composer.phar install
 
 # 3. PHP CodeSniffer
 ./vendor/bin/phpcs --standard=phpcs.xml
@@ -187,10 +187,15 @@ Alle Tests laufen in GitHub Actions (`framer-v4-pipeline-v2-main/.github/workflo
 |-----|-----|--------|
 | `test` | Node | `node --test tests/pipeline.test.js` (114 Tests) |
 | `test-e2e` | Node | `node --check tests/e2e.test.js` (18 Tests) |
+| `test-schema` | Node | `node --check scripts/validate-v4-tree.js` |
+| `test-mcp-mock` | Node | `node tests/integration.test.js` |
+| `test-visual` | Node | `node --check scripts/visual-qa.js` |
+| `lint` | Node | `npm run lint:version` |
+| `syntax` | Node | `node --check wizard.js scripts/**/*.js` |
 | `phpunit` | PHP | `./vendor/bin/phpunit --testdox` (52 Tests) |
 | `phpcs` | PHP | `./vendor/bin/phpcs --standard=phpcs.xml` |
 | `psalm` | PHP | `./vendor/bin/psalm --no-progress` |
-| `test-all` | Gate | Alle Jobs müssen passen (main/master) |
+| `test-all` | Gate | Alle 10 Jobs müssen passen (main/master) |
 
 **Gesamt:** 184 Tests (114 Pipeline + 18 E2E + 52 PHPUnit), 100% passing.
 
@@ -206,7 +211,7 @@ bash novamira-adrianv2/scripts/deploy-plugin.sh
 npm run deploy-plugin    # (aus framer-v4-pipeline-v2-main/)
 ```
 
-Das Script kopiert geänderte Plugin-Dateien von `Umbau/novamira-adrianv2/` nach `Local Sites/solar/app/public/wp-content/plugins/novamira-adrianv2/`. Es trackt den letzten Deployment-Zeitpunkt via `.deploy-marker`.
+Das Script kopiert geänderte Plugin-Dateien vom Projekt-Root (`novamira-adrianv2/`) nach `Local Sites/solar/app/public/wp-content/plugins/novamira-adrianv2/`. Es trackt den letzten Deployment-Zeitpunkt via `.deploy-marker`.
 
 **Modi:**
 - **Incremental** (default): Nur Dateien neuer als `.deploy-marker` kopieren
@@ -229,7 +234,7 @@ composer analyze
 
 # Tests
 php composer.phar vendor/bin/phpunit
-php composer.phar vendor/bin/phpunit --testdox
+php composer.phar vendor/bin/phpunit --testdox   # Mit Test-Namen
 ```
 
 ### Coding Standards
