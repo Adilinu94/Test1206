@@ -2,7 +2,7 @@
 
 > **Erstellt:** 2026-06-13 | **Quelle:** V4_DESIGN_IMPROVEMENTS_RESEARCH.md (v2)
 > **Start:** Sprint 1 | **Ziel:** Design-Score 25% → 90%+
-> **Status:** ✅ Alle 6 Sprints abgeschlossen (88 Tests, 23 Requirements)
+> **Status:** ✅ Alle 7 Sprints abgeschlossen (100 Tests, 26 Requirements)
 
 ---
 
@@ -140,44 +140,36 @@
 
 ---
 
-## Qualitätssprung (Metriken)
+## Phase 7: Sprint 7 — Quality Hardening ✅ Complete
 
-| Metrik | Vorher | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Sprint 5 | Sprint 6 |
-|--------|--------|----------|----------|----------|----------|----------|----------|
-| DOM-Tiefe | 8 | ≤6 | ≤4 | ≤3 | ≤3 | ≤3 | ≤3 |
-| Global Class % | 0% | ≥60% | ≥80% | ≥90% | ≥90% | ≥90% | ≥90% |
-| GV-Substitution % | 0% | ≥80% | ≥90% | ≥95% | ≥95% | ≥95% | ≥95% |
-| Grid-Nutzung | 0 | ≥10% | ≥25% | ≥35% | ≥35% | ≥35% | ≥35% |
-| Components | 0 | 0 | ≥5 | ≥10 | ≥10 | ≥10 | ≥10 |
-| Interaktionen | 0 | 0 | V4-native | V4-native | V4-native | V4-native | V4-native |
-| Tests | 49 | 61 | 67 | 71 | 77 | 83 | 88 |
-| structuralHash | — | dupliziert | dupliziert | dupliziert | dedupliziert | dedupliziert | dedupliziert |
-| Code-Review offen | — | — | 3 Punkte | 3 Punkte | 0 Punkte | 0 Punkte | 0 Punkte |
-| Scripts/Module | 15 | 16 | 18 | 19 | 19 | 20 | 28 |
-| Requirements | 0 | 5 | 10 | 14 | 17 | 20 | 23 |
-| Dark Mode | ✗ | ✗ | ✗ | ✗ | ✗ | ✅ | ✅ |
-| Wizard Struktur | monolith | monolith | monolith | monolith | monolith | monolith | modular (8 files) |
-| Preflight standalone | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✅ |
-| Batch Multi-Page | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✅ |
-| callParallel() Limiter | ✗ | ✗ | ✗ | ✗ | ✗ | ✅ (p-limit) | ✅ |
-| JSDoc (convert-xml) | 0% | 0% | 0% | 0% | 0% | 9 functions | 9 functions |
+**Geschätzte Dauer:** ~3h | **Tatsächlich:** ~3h
+**Quelle:** PLAN-6.md (3 Quality-Gaps aus Codebase-Audit)
+
+| Task | Typ | Aufwand | Datei(en) |
+|------|-----|---------|-----------|
+| **FIX-10** --format markdown | Fix | ~1h | `extract-framer-dark-mode.js` |
+| **FIX-11** wizard --help (6 cmd-*.js) | Fix | ~1h | 6 `cmd-*.js` + `wizard.js` |
+| **FIX-12** token_name dedup | Fix | ~1h | `extract-framer-dark-mode.js` |
+| **Tests** 3 neue Test-Suiten | Testing | ~0.5h | `pipeline.test.js` |
+
+### Akzeptanzkriterien
+- [x] `--format markdown` in `extract-framer-dark-mode.js` → Markdown-Tabelle
+- [x] Alle 6 Wizard-Subcommands (`cmd-*.js`) mit konsistentem `printHelp()` Export
+- [x] `wizard.js help <sub>` und `wizard.js <sub> --help` funktionieren
+- [x] `suggestDarkTokenName()` mit Property-Suffix → keine Kollisionen
+- [x] `npm test` → 100/100 (+12 Tests)
 
 ---
 
-## Abgeschlossene Phasen
+## Qualitätssprung (Metriken)
 
-| Phase | Beschreibung | Status |
-|-------|-------------|--------|
-| 0 | Repo-Setup + Infrastruktur | ✅ v0.9.0 |
-| 0.5 | Security & QA | ✅ |
-| 0.2 | Schema-Dedup | ✅ |
-| 1.2–1.4 | Resilienz & Integration | ✅ |
-| 1.5 | Post-Build Auto-Fix | ✅ |
-| 2.0 | Integration Fixes A-H | ✅ |
-| 1.4+ | CI, Performance, UX, A11y | ✅ |
-| Sprint 1 | C2 Grid, C4 Semantic GC, C5 Breakpoint, C6 GV-Sub, D3 Grid/Flex | ✅ 61 Tests |
-| Sprint 2 | A1 Components, A2 Interactions, C1 Preservation, C3 Easing, D1 Reuse | ✅ 67 Tests |
-| Sprint 3 | A3 Forms, B4 create-atomic-form, D2 Native Coverage | ✅ 71 Tests |
-| Sprint 4 | C3 Native Routing, structuralHash Dedup, A2 v4-tree Mode | ✅ 77 Tests |
-| Sprint 5 | FIX-7 p-limit, ENH-10 dark-mode-extractor, ENH-11 JSDoc | ✅ 83 Tests |
-| Sprint 6 | preflight-check standalone, wizard.js batch, Wizard modular (8 files) | ✅ 88 Tests |
+| Metrik | Vorher | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Sprint 5 | Sprint 6 | Sprint 7 |
+|--------|--------|----------|----------|----------|----------|----------|----------|----------|
+| DOM-Tiefe | 8 | ≤6 | ≤4 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 |
+| Global Class % | 0% | ≥60% | ≥80% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% |
+| GV-Substitution % | 0% | ≥80% | ≥90% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% |
+| Grid-Nutzung | 0 | ≥10% | ≥25% | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% |
+| Components | 0 | 0 | ≥5 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 |
+| Interaktionen | 0 | 0 | V4-native | V4-native | V4-native | V4-native | V4-native | V4-native |
+| Tests | 49 | 61 | 67 | 71 | 77 | 83 | 88 | 100 |
+| structuralHash | 

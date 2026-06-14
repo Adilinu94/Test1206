@@ -1,15 +1,15 @@
 # framer-v4-pipeline-v2
 
-> **Version:** v0.10.0 | **Stand:** 2026-06-13
-> **GSD:** ✅ Milestone Complete — 4 Sprints abgeschlossen
+> **Version:** v0.11.0 | **Stand:** 2026-06-14
+> **GSD:** ✅ Milestone Complete — 7 Sprints abgeschlossen
 
 ---
 
 ## What This Is
 
-Ein **Standalone Node.js ESM Projekt** (18+ Scripts), das Framer-Website-Designs automatisiert in Elementor V4 Atomic Widget Trees konvertiert. Zielgruppe: WordPress-Agenturen und Entwickler, die Framer-Designs pixelgenau in Elementor V4 umsetzen wollen.
+Ein **Standalone Node.js ESM Projekt** (28+ Scripts/Module), das Framer-Website-Designs automatisiert in Elementor V4 Atomic Widget Trees konvertiert. Zielgruppe: WordPress-Agenturen und Entwickler, die Framer-Designs pixelgenau in Elementor V4 umsetzen wollen.
 
-Die Pipeline orchestriert eine **3-Wege-Symbiose**: Unframer MCP (Live-Struktur-Reader) → Lokale Pre-Build-Processing-Pipeline (18+ Scripts) → Novamira MCP (WordPress Build-Execution). Output ist eine voll funktionsfähige V4-Seite mit Global Classes, Global Variables, Responsive Variants und Animationen.
+Die Pipeline orchestriert eine **3-Wege-Symbiose**: Unframer MCP (Live-Struktur-Reader) → Lokale Pre-Build-Processing-Pipeline (28+ Scripts/Module) → Novamira MCP (WordPress Build-Execution). Output ist eine voll funktionsfähige V4-Seite mit Global Classes, Global Variables, Responsive Variants und Animationen.
 
 ---
 
@@ -28,7 +28,7 @@ Die Pipeline orchestriert eine **3-Wege-Symbiose**: Unframer MCP (Live-Struktur-
 - [x] Responsive Auto-Scaling mit C5 Breakpoint-Awareness (`auto-scale-responsive.js`)
 - [x] Pre-Build-Validierung mit 12 Guards + Score ≥85% (`framer-pre-build-validate.js`)
 - [x] V4 Tree Validator mit D1/D2/D3 Checks (`validate-v4-tree.js`)
-- [x] MCP-Bridge: JSON-RPC 2.0 + Session-Handshake (`lib/mcp-bridge.js`)
+- [x] MCP-Bridge: JSON-RPC 2.0 + Session-Handshake + p-limit Concurrency (`lib/mcp-bridge.js`)
 - [x] Asset-Batch-Upload via McpBridge (`asset-to-wp-media.js --execute`)
 - [x] Schema-Sync vom V2-Plugin (`sync-schema.js`)
 - [x] Rollback & Split-Large-Tree (`lib/rollback.js`, `lib/split-large-tree.js`)
@@ -36,11 +36,14 @@ Die Pipeline orchestriert eine **3-Wege-Symbiose**: Unframer MCP (Live-Struktur-
 - [x] A1 Component Extraction (`extract-framer-components.js`)
 - [x] A2 Interaction Extraction mit v4-tree Mode (`extract-framer-interactions.js`)
 - [x] A3 Form Extraction (`extract-framer-forms.js`)
+- [x] Dark Mode Extraction — ENH-10 (`extract-framer-dark-mode.js`) + FIX-10 --format markdown + FIX-12 token_name dedup
 - [x] structuralHash in framer-utils.js (ENH-8 Dedup)
-- [x] Interaktiver CLI-Wizard (`wizard.js`) mit Phase 0–1.4
-- [x] 77 Pipeline-Tests + 12 E2E-Tests + 4 Integration-Tests = 93 total
+- [x] Modularer CLI-Wizard (`wizard.js` ~300 Zeilen) + 6 Subcommands in `scripts/wizard/` + FIX-11 --help
+- [x] Standalone Preflight-Check (`scripts/preflight-check.js`) + Batch Multi-Page (`wizard.js batch`)
+- [x] convert-xml-to-v4.js JSDoc — 9 Kernfunktionen (ENH-11)
+- [x] 100 Pipeline-Tests + 12 E2E-Tests + 4 Integration-Tests = 116 total
 - [x] GitHub CI (7 Jobs)
-- [x] GSD-Projekt: .planning/ mit 7 Artefakten (PROJECT, REQUIREMENTS, ROADMAP, PLAN-1–4, STATE, MILESTONE-SUMMARY)
+- [x] GSD-Projekt: .planning/ mit 12 Artefakten (PROJECT, REQUIREMENTS, ROADMAP, PLAN-1–7, STATE, MILESTONE-SUMMARY)
 
 ### Out of Scope (v2+)
 
@@ -65,10 +68,12 @@ Die Pipeline orchestriert eine **3-Wege-Symbiose**: Unframer MCP (Live-Struktur-
 - **v0.7.0**: Initiales Pipeline-Repo, 44 Tests, alle Integration-Fixes A-H
 - **v0.8.0**: PIPELINE_AUDIT_REPORT — 15 Verbesserungen, Ability-Migration
 - **v0.9.0**: Repo-Cleanup, Rollback-Cleanup, Split-Large-Tree Timeout-Fallback, Plugin CI/CD
+- **v0.10.0**: Sprint 1–4 — Grid, Components, Interactions, Forms, Native Routing, 77 Tests
+- **v0.11.0**: Sprint 5–7 — Dark Mode, Wizard Modularisierung, Quality Hardening, 100 Tests
 
 ### Aktuelle Post-4943 Analyse
 - DOM-Tiefe 8 (Ziel: ≤3), 0% Global Classes (Ziel: ≥90%), 0 Grid, 0 Components
-- `#111111` 45× dupliziert — Root-Cause: fehlender Token-zu-GV-Substitutions-Pass
+- `#111111` 45× dupliziert — Root-Cause: fehlender Token-zu-GV-Substitutions-Pass → gefixt in C6
 
 ---
 
@@ -99,7 +104,11 @@ Die Pipeline orchestriert eine **3-Wege-Symbiose**: Unframer MCP (Live-Struktur-
 | structuralHash in framer-utils.js | A1+D1 Doppel-Definition dedupliziert | Complete |
 | C3 `--native` als opt-in | Legacy-GSAP-Pfad nicht brechen | Complete |
 | B1-B3 existierende Abilities | 3/4 existieren im Plugin, nur Doku nötig | Complete |
+| Wizard modular (8 files) | 905→300 Zeilen, testbar, erweiterbar | Complete |
+| callParallel() p-limit (concurrency=3) | Verhindert PHP-Timeout bei 10+ Requests | Complete |
+| JSDoc für 9 Kernfunktionen | 0→100% JSDoc-Coverage in convert-xml-to-v4.js | Complete |
+| Wizard --help in allen 6 Subcommands | Konsistente DX über alle cmd-*.js | Complete |
 
 ---
 
-> **Last Updated:** 2026-06-13 — Milestone Complete, 4 Sprints, 17 Requirements, 77 Tests
+> **Last Updated:** 2026-06-14 — 7 Sprints, 26 Requirements, 100 Pipeline-Tests

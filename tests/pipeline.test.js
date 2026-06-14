@@ -1604,6 +1604,91 @@ describe('S33: FIX-12 -- token_name uniqueness', () => {
 
 const PROJECT_ROOT = dirname(SCRIPTS);
 
+
+// ── S34: ENH-13 — Quality Metrics (Sprint 8) ────────────────────────
+
+suite('S34: ENH-13 — Quality Metrics', () => {
+  test('ENH-13: measures DOM depth correctly', () => {
+    const tree = {
+      id: 'root', widgetType: 'e-flexbox',
+      elements: [
+        { id: 'l1', widgetType: 'e-flexbox',
+          elements: [
+            { id: 'l2', widgetType: 'e-heading', elements: [] },
+          ],
+        },
+      ],
+    };
+    const treeFile = tmpFile('s34-depth.json', tree);
+    const outFile = tmpFile('s34-report.json');
+    run('measure-quality-metrics.js', [treeFile, '--output', outFile]);
+    const report = readJson(outFile);
+    assert.strictEqual(report.metrics.dom_depth.value, 3,
+      'DOM depth should be 3, got ' + report.metrics.dom_depth.value);
+  });
+
+  test('ENH-13: detects gc- coverage', () => {
+    const tree = {
+      id: 'root', widgetType: 'e-flexbox',
+      styles: {
+        'gc-surface': { variants: [{ meta: { breakpoint: null, state: null }, props: {} }] },
+        'slocal':     { variants: [{ meta: { breakpoint: null, state: null }, props: {} }] },
+      },
+      elements: [],
+    };
+    const treeFile = tmpFile('s34-gc.json', tree);
+    const outFile = tmpFile('s34-gc-report.json');
+    run('measure-quality-metrics.js', [treeFile, '--output', outFile]);
+    const report = readJson(outFile);
+    assert.strictEqual(report.metrics.gc_coverage.value, 50,
+      'GC coverage should be 50% (1/2), got ' + report.metrics.gc_coverage.value + '%');
+  });
+
+  test('ENH-13: detects GV color substitution', () => {
+    const tree = {
+      id: 'root', widgetType: 'e-flexbox',
+      styles: {
+        'stest': { variants: [{ meta: { breakpoint: null, state: null },
+          props: { 'color': { '$type': 'global-color-variable', value: 'e-gv-12345' } },
+        }]},
+      },
+      elements: [],
+    };
+    const treeFile = tmpFile('s34-gv.json', tree);
+    const outFile = tmpFile('s34-gv-report.json');
+    run('measure-quality-metrics.js', [treeFile, '--output', outFile]);
+    const report = readJson(outFile);
+    assert.strictEqual(report.metrics.gv_color_substitution.value, 100,
+      'GV color substitution should be 100%, got ' + report.metrics.gv_color_substitution.value + '%');
+  });
+
+  test('ENH-13: measures total_elements and grid_usage', () => {
+    const tree = {
+      id: 'root', widgetType: 'e-div-block',
+      elements: [
+        { id: 'c1', widgetType: 'e-flexbox', elements: [] },
+        { id: 'c2', widgetType: 'e-component', elements: [] },
+      ],
+    };
+    const treeFile = tmpFile('s34-grid.json', tree);
+    const outFile = tmpFile('s34-grid-report.json');
+    run('measure-quality-metrics.js', [treeFile, '--output', outFile]);
+    const report = readJson(outFile);
+    assert.strictEqual(report.metrics.total_elements.value, 3, 'Total 3 elements');
+    assert.strictEqual(report.metrics.grid_usage.value, 33, 'Grid usage 33% (1/3)');
+    assert.strictEqual(report.metrics.components.value, 1, '1 component');
+  });
+
+  test('ENH-13: --compare flag produces human-readable output', () => {
+    const tree = {
+      id: 'root', widgetType: 'e-flexbox', elements: [],
+    };
+    const treeFile = tmpFile('s34-compare.json', tree);
+    const { stdout } = run('measure-quality-metrics.js', [treeFile, '--compare']);
+    assert.ok(stdout.includes('DOM:') || stdout.includes('target'), '--compare provides readable output');
+  });
+});
+
 function runFromRoot(script, extraArgs = [], { expectFail = false } = {}) {
   try {
     const out = execFileSync(NODE, [join(PROJECT_ROOT, script), ...extraArgs], {

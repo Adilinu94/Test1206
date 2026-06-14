@@ -430,6 +430,123 @@ async function main() {
   }
 }
 
+// ── Non-Interactive Mode (Sprint 8: ENH-12 E2E Framer-URL Test) ──────────
+
+if (process.argv.includes('--non-interactive')) {
+  const urlIdx = process.argv.indexOf('--url');
+  const postIdIdx = process.argv.indexOf('--post-id');
+  const framerUrl = urlIdx >= 0 ? process.argv[urlIdx + 1] : null;
+  const targetPostId = postIdIdx >= 0 ? process.argv[postIdIdx + 1] : null;
+
+  if (!framerUrl) {
+    log.error('--non-interactive requires --url <framer-url>');
+    process.exit(2);
+  }
+
+  log.info('Non-Interactive Mode: ' + framerUrl);
+  if (targetPostId) log.info('Target Post-ID: ' + targetPostId);
+
+  // Run the same phases as interactive mode but without prompts
+  try {
+    // Phase 0.2: Schema Sync
+    log.step('Phase 0.2: Schema-Sync mit V2-Plugin...');
+    try {
+      await runFile(
+        nodeBin,
+        [path.join(pipelineDir, 'scripts', 'sync-schema.js'), '--verbose'],
+        'Prop-Schema vom V2-Plugin synchronisieren',
+        pipelineDir
+      );
+      log.success('Prop-Schema erfolgreich synchronisiert.');
+    } catch (err) {
+      log.warn('Schema-Sync fehlgeschlagen: ' + String(err).slice(0, 200));
+    }
+
+    const exportFolderName = 'framer-' + framerUrl.replace(/^https?:\/\//, '').replace(/[^a-z0-9]/gi, '-').substring(0, 30);
+    let exportDir = path.join(rootDir, 'exports', exportFolderName);
+
+    // Run FramerExport
+    log.step('Starte FramerExport...');
+    const framerExportDir = findFramerExportDir(rootDir);
+    if (!framerExportDir) {
+      log.error('FramerExport nicht gefunden. Setze FRAMER_EXPORT_DIR.');
+      process.exit(1);
+    }
+
+    await fs.mkdir(exportDir, { recursive: true });
+    // Track directories before export
+    const beforeDirs = await findIndexHtmlDirs(framerExportDir);
+
+    const pkgJson = await readJsonIfExists(path.join(framerExportDir, 'package.json'));
+    if (pkgJson && pkgJson.scripts && pkgJson.scripts.dev) {
+      await runFile(npmBin, ['run', 'dev', '--', framerUrl], 'FramerExport', framerExportDir);
+    } else if (existsSync(path.join(framerExportDir, 'src', 'cli', 'index.ts'))) {
+      await runFile(npxBin, ['tsx', 'src/cli/index.ts', framerUrl, '--platform', 'framer'], 'FramerExport', framerExportDir);
+    } else {
+      log.error('Kein unterstuetzter FramerExport-Einstieg gefunden.');
+      process.exit(1);
+    }
+
+    const after = await findIndexHtmlDirs(framerExportDir);
+    const beforeSet = new Set(beforeDirs.map(function(e) { return path.resolve(e.dir).toLowerCase(); }));
+    const generated = after.find(function(e) { return !beforeSet.has(path.resolve(e.dir).toLowerCase()); }) || after[0];
+    if (!generated) {
+      log.error('FramerExport hat kein index.html erzeugt.');
+      process.exit(1);
+    }
+    exportDir = generated.dir;
+    log.success('FramerExport: ' + exportDir);
+
+    const exportHtml = path.join(exportDir, 'index.html');
+    const tokensDir = path.join(exportDir, 'tokens');
+    await fs.mkdir(tokensDir, { recursive: true });
+
+    // Run extraction steps
+    const extractionSteps = [
+      { args: ['scripts/extract-image-urls.js', '--html', exportHtml, '--output', path.join(exportDir, 'assets', 'image-manifest.json')], desc: 'Bild-URLs' },
+      { args: ['scripts/resolve-fonts.js', '--html', exportHtml, '--fonts-dir', path.join(exportDir, 'assets', 'fonts'), '--output', path.join(tokensDir, 'font-resolution.json')], desc: 'Font-Referenzen' },
+      { args: ['scripts/extract-responsive-breakpoints.js', '--css', exportHtml, '--output', path.join(tokensDir, 'responsive-breakpoints.json')], desc: 'Breakpoints' },
+      { args: ['scripts/extract-framer-styles.js', '--html', exportHtml, '--output', path.join(tokensDir, 'extracted-styles.json')], desc: 'CSS-Properties' },
+      { args: ['scripts/design-token-extractor.js', '--html', exportHtml, '--output', path.join(tokensDir, 'token-mapping.json'), '--variables-plan', path.join(tokensDir, 'variables-plan.json')], desc: 'Design-Tokens' },
+      { args: ['scripts/framer-animation-extractor.js', '--html', exportHtml, '--output', path.join(tokensDir, 'animation-plan.json')], desc: 'Animationen' },
+      { args: ['scripts/html-to-widget-plan.js', '--html', exportHtml, '--output', path.join(tokensDir, 'widget-plan.json')], desc: 'Widget-Plan' },
+    ];
+
+    for (const step of extractionSteps) {
+      log.step('Extrahiere ' + step.desc + '...');
+      try {
+        await runFile(nodeBin, step.args, step.desc, pipelineDir);
+        log.success(step.desc + ' abgeschlossen.');
+      } catch (err) {
+        log.warn(step.desc + ' fehlgeschlagen: ' + String(err).slice(0, 100));
+      }
+    }
+
+    // Generate manifest
+    const manifest = {
+      timestamp: new Date().toISOString(),
+      framerUrl,
+      targetPostId: targetPostId || 'not-specified',
+      exportFolder: exportFolderName,
+      artifacts: {
+        exportDir: path.relative(rootDir, exportDir).replace(/\\/g, '/'),
+        tokens: path.relative(rootDir, tokensDir).replace(/\\/g, '/'),
+      },
+    };
+    const manifestPath = path.join(rootDir, 'build-manifest.json');
+    await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
+
+    log.success('Non-Interactive Pipeline abgeschlossen.');
+    console.log(JSON.stringify(manifest, null, 2));
+
+  } catch (error) {
+    log.error('Non-Interactive fehlgeschlagen: ' + error.message);
+    process.exit(1);
+  }
+
+  process.exit(0);
+}
+
 // ── Subcommand Dispatch (Sprint 6: thin router) ──────────────────────────
 
 const sub = process.argv[2];

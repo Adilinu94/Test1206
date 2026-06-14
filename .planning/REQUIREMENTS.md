@@ -1,7 +1,7 @@
 # Requirements — framer-v4-pipeline-v2
 
 > **Definiert:** 2026-06-13 | **Quelle:** V4_DESIGN_IMPROVEMENTS_RESEARCH.md (v2)
-> **Update:** 2026-06-13 — Sprint 6 Wizard Modularisierung abgeschlossen
+> **Update:** 2026-06-13 — Sprint 7 Quality Hardening abgeschlossen
 > **Core Value:** Token-effizienter, stabiler Framer→V4-Workflow
 
 ---
@@ -118,58 +118,6 @@
 
 ---
 
-## v5 Requirements (Sprint 5) ✅ Complete
-
-### FIX-7: callParallel() Concurrency-Limit
-- **ID:** `FIX-7`
-- **Beschreibung:** `McpBridge.callParallel()` Worker-Pool mit konfigurierbarem Concurrency-Limit (default 3). Verhindert Race-Conditions und PHP-Timeout bei 10+ parallelen Requests gegen lokale WP-Instanzen.
-- **Datei:** `scripts/lib/mcp-bridge.js`
-- **Akzeptanz:** `callParallel()` mit `{ concurrency: N }` Option. `McpBridge.defaultConcurrency` via Constructor + `MCP_CONCURRENCY` env var.
-- **Test:** `defaultConcurrency === 3`, constructor override
-
-### ENHANCEMENT-10: dark-mode-extractor.js
-- **ID:** `ENH-10`
-- **Beschreibung:** Extrahiert `@media (prefers-color-scheme: dark)` CSS-Blöcke aus Framer-HTML. Generiert V4 Dark Mode Variable-Set JSON mit Light-Token-Matching.
-- **Datei:** `scripts/extract-framer-dark-mode.js` (NEU)
-- **Output:** `tokens/dark-mode-variables.json`
-- **Technik:** Brace-Counting statt Regex-Lookahead (nested-rule-safe)
-- **Test:** CSS mit `@media (prefers-color-scheme: dark)` → extrahierte Overrides im Output
-
-### ENHANCEMENT-11: convert-xml-to-v4.js JSDoc
-- **ID:** `ENH-11`
-- **Beschreibung:** JSDoc-Typ-Dokumentation für 9 Kernfunktionen in `convert-xml-to-v4.js` (1.218 Zeilen, zuvor 0 JSDoc).
-- **Datei:** `scripts/convert-xml-to-v4.js`
-- **Funktionen:** `tokenizeXml`, `buildTree`, `determineWidgetType`, `buildStyleProps`, `resolveColor`, `extractComponentText`, `convertNode`, `substituteTokensWithGvIds`, `analyzeTokenUsage`
-- **Akzeptanz:** Kein Behavioral Change. Alle 77 bestehenden Tests laufen unverändert.
-- **Test:** JSDoc-Regression (XML→V4 funktioniert weiterhin)
-
----
-
-## v6 Requirements (Sprint 6) ✅ Complete
-
-### FIX-8: preflight-check.js standalone
-- **ID:** `FIX-8`
-- **Beschreibung:** `runPreflight()` aus wizard.js (905 Zeilen) in eigenständiges Script extrahiert. Aufrufbar als `node scripts/preflight-check.js` oder `wizard.js preflight`.
-- **Dateien:** `scripts/preflight-check.js` (NEU), `scripts/wizard/cmd-preflight.js` (NEU)
-- **Akzeptanz:** 8 System-Checks standalone (--help, --json). wizard.js preflight delegiert an Modul.
-- **Test:** Script existiert, --help output enthält "8 System-Checks"
-
-### FIX-9: wizard.js batch Subcommand
-- **ID:** `FIX-9`
-- **Beschreibung:** `wizard.js batch --pages file1.xml,file2.xml --post-ids 42,43` — Multi-Page-Deployments in einem Durchlauf.
-- **Dateien:** `scripts/wizard/cmd-batch.js` (NEU), `wizard.js` (Dispatch)
-- **Akzeptanz:** Validierung leerer --pages, Datei-Existenz-Check, Batch-Summary JSON
-- **Test:** `--help` zeigt batch, `batch` ohne `--pages` → exit code 2
-
-### REFACTOR-1: wizard.js modular
-- **ID:** `REF-1`
-- **Beschreibung:** wizard.js von 905-Zeilen-Monolith in 8 Module in `scripts/wizard/` aufgeteilt: shared.js, cmd-preflight, cmd-dry-run, cmd-preview, cmd-promote, cmd-serve, cmd-batch. wizard.js ist jetzt ein Thin Router (~300 Zeilen).
-- **Dateien:** `scripts/wizard/shared.js` + 6 `cmd-*.js` (NEU), `wizard.js` (rewritten)
-- **Akzeptanz:** Alle Subcommands unverändert nutzbar. Shared helpers parametrisieren `rl` für Testbarkeit.
-- **Test:** Modular-Struktur-Tests (Exports, empty-guard)
-
----
-
 ## v4 Requirements (Sprint 4) ✅ Complete
 
 ### ENHANCEMENT-7: C3 Native Routing Completion
@@ -195,42 +143,21 @@
 
 ---
 
-## Traceability
+## v5 Requirements (Sprint 5) ✅ Complete
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| ENH-1 (C2) | Sprint 1 | ✅ Complete |
-| ENH-2 (C4) | Sprint 1 | ✅ Complete |
-| ENH-3 (C5) | Sprint 1 | ✅ Complete |
-| ENH-4 (C6) | Sprint 1 | ✅ Complete |
-| VAL-1 (D3) | Sprint 1 | ✅ Complete |
-| SCR-1 (A1) | Sprint 2 | ✅ Complete |
-| SCR-2 (A2) | Sprint 2 | ✅ Complete |
-| ENH-5 (C1) | Sprint 2 | ✅ Complete |
-| ENH-6 (C3) | Sprint 2 | ✅ Complete |
-| INT-1 (B1-B3) | Sprint 2 | ✅ Complete |
-| VAL-2 (D1) | Sprint 2 | ✅ Complete |
-| SCR-3 (A3) | Sprint 3 | ✅ Complete |
-| ABL-1 (B4) | Sprint 3 | ✅ Complete |
-| VAL-3 (D2) | Sprint 3 | ✅ Complete |
-| ENH-7 (C3-native) | Sprint 4 | ✅ Complete |
-| ENH-8 (structHash) | Sprint 4 | ✅ Complete |
-| ENH-9 (A2-v4tree) | Sprint 4 | ✅ Complete |
-| FIX-7 (p-limit) | Sprint 5 | ✅ Complete |
-| ENH-10 (dark-mode) | Sprint 5 | ✅ Complete |
-| ENH-11 (JSDoc) | Sprint 5 | ✅ Complete |
-| FIX-8 (preflight-standalone) | Sprint 6 | ✅ Complete |
-| FIX-9 (wizard-batch) | Sprint 6 | ✅ Complete |
-| REF-1 (wizard-modular) | Sprint 6 | ✅ Complete |
+### FIX-7: callParallel() Concurrency-Limit
+- **ID:** `FIX-7`
+- **Beschreibung:** `McpBridge.callParallel()` Worker-Pool mit konfigurierbarem Concurrency-Limit (default 3). Verhindert Race-Conditions und PHP-Timeout bei 10+ parallelen Requests gegen lokale WP-Instanzen.
+- **Datei:** `scripts/lib/mcp-bridge.js`
+- **Akzeptanz:** `callParallel()` mit `{ concurrency: N }` Option. `McpBridge.defaultConcurrency` via Constructor + `MCP_CONCURRENCY` env var.
+- **Test:** `defaultConcurrency === 3`, constructor override
 
-**Coverage:** 23 Requirements → 6 Sprints → 100% complete
-**Test-Abdeckung:** 30 Test-Suiten, 88 Test-Fälle, alle grün
+### ENHANCEMENT-10: dark-mode-extractor.js
+- **ID:** `ENH-10`
+- **Beschreibung:** Extrahiert `@media (prefers-color-scheme: dark)` CSS-Blöcke aus Framer-HTML. Generiert V4 Dark Mode Variable-Set JSON mit Light-Token-Matching.
+- **Datei:** `scripts/extract-framer-dark-mode.js` (NEU)
+- **Output:** `tokens/dark-mode-variables.json`
+- **Technik:** Brace-Counting statt Regex-Lookahead (nested-rule-safe)
+- **Test:** CSS mit `@media (prefers-color-scheme: dark)` → extrahierte Overrides im Output
 
----
-
-## Guidelines
-
-- **Naming:** `[TYP]-[NUMMER]` — SCR (Script), ENH (Enhancement), VAL (Validation), INT (Integration), ABL (Ability)
-- **Status:** Pending → In Progress → Complete → Blocked
-- **Move to v2:** Wenn von Sprint 1 auf Sprint 2/3 verschoben
-- **Move to Out of Scope:** Wenn als redundant/existierend identifiziert
+### ENHANCEMENT-11: convert-xml-to-v4.js JSDoc

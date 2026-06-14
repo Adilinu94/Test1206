@@ -10,7 +10,7 @@
   "scripts": {
     "test": "node --test tests/pipeline.test.js",
     "test:e2e": "node --test tests/e2e.test.js",
-    "test:all": "node --test tests/pipeline.test.js && node --test tests/e2e.test.js",
+    "test:all": "node --test tests/pipeline.test.js && node --test tests/e2e.test.js && node --test tests/integration.test.js",
     "test:visual": "node --test tests/visual-regression.test.js",
     "test:integration": "node --test tests/integration.test.js",
     "test:bridge": "node scripts/lib/mcp-bridge.js --self-test",
@@ -58,7 +58,9 @@
     "inject-animations": "node scripts/inject-animation-code.js --plan animation-plan.json",
     "inject-from-export": "node scripts/inject-animation-code.js --from-framer-export",
     "wizard-batch": "node wizard.js batch",
-    "lint:version": "node --input-type=module -e \"import{readFileSync}from'node:fs';const p=JSON.parse(readFileSync('package.json','utf8'));const c=readFileSync('CHANGELOG.md','utf8');if(!c.includes(p.version)){process.stderr.write('CHANGELOG.md missing v'+p.version+'\\\\n');process.exit(1)}console.log('v'+p.version+' OK')\""
+    "lint:version": "node --input-type=module -e \"import{readFileSync}from'node:fs';const p=JSON.parse(readFileSync('package.json','utf8'));const c=readFileSync('CHANGELOG.md','utf8');if(!c.includes(p.version)){process.stderr.write('CHANGELOG.md missing v'+p.version+'\\\\n');process.exit(1)}console.log('v'+p.version+' OK')\"",
+    "measure-quality": "node scripts/measure-quality-metrics.js",
+    "test:integration-live": "node --test tests/integration.test.js -- --live"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
