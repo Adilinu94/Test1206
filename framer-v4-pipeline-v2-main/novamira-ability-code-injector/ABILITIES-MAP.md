@@ -118,3 +118,54 @@ Bei jedem neuen PHP-File in `novamira-ability-code-injector/`:
 2. Status auf ✅ setzen
 3. Ability in `novamira-skill/elementor-v4-build.md` Verbots-/Erlaubnis-Liste prüfen
 4. Test in `tests/pipeline.test.js` (optional, je nach Komplexität)
+
+---
+
+## Neue Abilities — Sprint 18 (2026-06-14)
+
+### Seiten-Management
+
+| Ability | PHP-Datei | Status | Beschreibung |
+|---------|-----------|--------|--------------|
+| `adrians-list-pages` | `adrians-list-pages.php` | ✅ | WP-Seiten auflisten mit Elementor-Filter, Suche, Pagination |
+| `adrians-get-page` | `adrians-get-page.php` | ✅ | Einzelabruf by post_id / slug / URL — inkl. Elementor-Status + SEO-Daten |
+| `adrians-update-page` | `adrians-update-page.php` | ✅ | Titel / Status / Slug / Template setzen ohne execute-php Workaround |
+
+### Cache & Performance
+
+| Ability | PHP-Datei | Status | Beschreibung |
+|---------|-----------|--------|--------------|
+| `adrians-purge-cache` | `adrians-purge-cache.php` | ✅ | Multi-Plugin Cache-Purge nach Build (WP Rocket / LiteSpeed / W3TC / SG) |
+
+### Font-Workflow
+
+| Ability | PHP-Datei | Status | Beschreibung |
+|---------|-----------|--------|--------------|
+| `adrians-font-enqueue` | `adrians-font-enqueue.php` | ✅ | Google Fonts oder lokale .woff2 als WPCode-Snippet enqueuen |
+
+### Design-System Snapshot (Rollback-Ergänzung)
+
+| Ability | PHP-Datei | Status | Beschreibung |
+|---------|-----------|--------|--------------|
+| `adrians-export-gc-snapshot` | `adrians-export-gc-snapshot.php` | ✅ | Alle GCs + GVs als JSON serialisieren |
+| `adrians-restore-gc-snapshot` | `adrians-restore-gc-snapshot.php` | ✅ | GC/GV-Snapshot wiederherstellen (merge \| replace, dry_run default: true) |
+
+### Bulk-Operationen
+
+| Ability | PHP-Datei | Status | Beschreibung |
+|---------|-----------|--------|--------------|
+| `adrians-bulk-patch-styles` | `adrians-bulk-patch-styles.php` | ✅ | Styles auf N Elementen gleichzeitig patchen (by widget_type / element_ids / css_class) |
+
+### WPCode Diagnostik
+
+| Ability | PHP-Datei | Status | Beschreibung |
+|---------|-----------|--------|--------------|
+| `adrians-check-wpcode-health` | `adrians-check-wpcode-health.php` | ✅ | WPCode-Status, PHP-Fehler in Snippets, Konflikte — Präventionscheck vor Injection |
+
+### Integration-Test Utilities
+
+| Ability | PHP-Datei | Status | Beschreibung |
+|---------|-----------|--------|--------------|
+| `adrians-create-test-page` | `adrians-test-page-manager.php` | ✅ | Draft-Testseite mit Marker anlegen (für automatisierte Tests) |
+| `adrians-cleanup-test-pages` | `adrians-test-page-manager.php` | ✅ | Alle markierten Testseiten löschen (dry_run default: true) |
+
