@@ -1,36 +1,36 @@
 # STATE — framer-v4-pipeline-v2
 
-> **Letztes Update:** 2026-06-14 — Sprints 14+15 Complete (v0.19.0)
+> **Letztes Update:** 2026-06-14 — Sprints 16+17 Complete (v0.20.0)
 
 ---
 
 ## Aktueller Status
 
 ```
-Phase:     ✅ Sprints 14+15 abgeschlossen — 2 Commits, PR #5+#6 merged
+Phase:     ✅ Sprints 16+17 abgeschlossen — 2 Commits, PR #7+#8 merged
 Branch:    master
-HEAD:      (sprint-15 → PR #6 merged)
+HEAD:      (sprint-17 → PR #8 merged)
 Tests:     128 Pipeline + 18 E2E + 52 PHPUnit = 198 total ✅
-Version:   v0.19.0
+Version:   v0.20.0
 Remote:    origin https://github.com/Adilinu94/Test1206.git
-PR #1-#6:  All merged ✅
+PR #1-#8:  All merged ✅
 ```
 
 ---
 
 ## Aktiver Fokus
 
-**Sprint 15: Code Review Remediation — ABGESCHLOSSEN** ✅
+**Sprint 17: Interactive Caching — ABGESCHLOSSEN** ✅
 
-1. ✅ Corrupt cache JSON resilience: try/catch in checkFramerExportCache
-2. ✅ Dead fallback fix: callParallel ?? 3 → ?? 5
-3. ✅ Caching tests: 9 tests (Suite 37), 114→128 pipeline
+1. ✅ FramerExport cache check before interactive recovery block
+2. ✅ Cache write inside recovery block after successful export
+3. ✅ --no-cache unified across both interactive and non-interactive modes
 
-**Sprint 14: Pipeline Performance — ABGESCHLOSSEN** ✅
+**Sprint 16: --no-cache CLI Flag — ABGESCHLOSSEN** ✅
 
-1. ✅ Concurrency 3→5 + MCP_CONCURRENCY_PROFILE presets (low=2/medium=5/high=10)
-2. ✅ FramerExport caching: 1h TTL, atomic writes, --no-cache flag
-3. ✅ Tests: Suite 25 expanded 2→8, all 128 passing
+1. ✅ --no-cache flag parsed in non-interactive mode, passed as forceRefresh
+2. ✅ checkFramerExportCache before export, writeFramerExportCache after
+3. ✅ showHelp() documented
 
 ---
 
@@ -44,6 +44,7 @@ PR #1-#6:  All merged ✅
 
 ## Letzte Änderungen
 
+- **2026-06-14**: Sprints 16+17 abgeschlossen — --no-cache flag (interactive + non-interactive), caching unified, v0.20.0
 - **2026-06-14**: Sprints 14+15 abgeschlossen — Concurrency tuning, FramerExport caching, corrupt JSON resilience, 128 tests, v0.19.0
 - **2026-06-14**: Sprint 12 abgeschlossen — Plugin README docs, v0.18.0
 - **2026-06-14**: Sprint 11 abgeschlossen — Archive Cleanup, CI Consolidation (11 jobs), v0.17.0

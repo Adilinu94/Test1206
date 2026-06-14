@@ -1,5 +1,19 @@
 # Changelog — framer-v4-pipeline-v2
 
+## [v0.20.0] — 2026-06-14
+
+### Sprint 16+17 — FramerExport Caching (Interactive + Non-Interactive)
+
+- **Sprint 16**: `--no-cache` CLI flag for non-interactive mode — `checkFramerExportCache()` skips export on cache hit, `writeFramerExportCache()` writes after fresh export. PR #7.
+- **Sprint 17**: FramerExport caching in interactive wizard mode — same cache logic, `--no-cache` unified across both modes. Shows "FramerExport aus Cache geladen" when reusing cache. PR #8.
+- **Tests**: 128 Pipeline + 18 E2E + 52 PHPUnit = 198 total
+
+### Test-Status
+- `npm test` → 128/128 ✅
+- `npm run test:e2e` → 18/18 ✅
+- PHPUnit → 52/52 ✅
+- Total: 198 tests, 100% passing
+
 ## [v0.19.0] — 2026-06-14
 
 ### Sprint 14+15 — Pipeline Performance + Caching + Code Review Remediation

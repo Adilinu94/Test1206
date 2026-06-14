@@ -2,7 +2,7 @@
 
 > **Erstellt:** 2026-06-13 | **Quelle:** V4_DESIGN_IMPROVEMENTS_RESEARCH.md (v2)
 > **Start:** Sprint 1 | **Ziel:** Design-Score 25% → 90%+
-> **Status:** ✅ Alle 14 Sprints abgeschlossen (198 Tests, 30 Requirements)
+> **Status:** ✅ Alle 17 Sprints abgeschlossen (198 Tests, 30 Requirements)
 
 ---
 
@@ -174,6 +174,47 @@ Details in PLAN-1.md bis PLAN-7.md. Zusammenfassung:
 
 ---
 
+## Phase 16: Sprint 16 — --no-cache CLI Flag (Non-Interactive) ✅ Complete
+
+**Geschätzte Dauer:** ~1h | **Tatsächlich:** ~0.5h
+**Impact:** --no-cache flag in non-interactive mode, cache hit/miss logic
+
+| Task | Typ | Aufwand | Datei(en) |
+|------|-----|---------|-----------|
+| **--no-cache Flag** | Feature | ~0.5h | `wizard.js` |
+| **showHelp Update** | Documentation | ~0.1h | `wizard.js` |
+
+### Akzeptanzkriterien
+- [x] `--no-cache` flag parsed from argv in non-interactive mode
+- [x] `checkFramerExportCache(framerUrl, noCache)` called before export
+- [x] Cache hit skips FramerExport, reuses cached exportDir
+- [x] `writeFramerExportCache()` called after successful fresh export
+- [x] PR #7: sprint-16 → master
+- [x] All 128 pipeline tests pass
+
+---
+
+## Phase 17: Sprint 17 — Interactive Mode Caching ✅ Complete
+
+**Geschätzte Dauer:** ~1h | **Tatsächlich:** ~0.5h
+**Impact:** FramerExport caching in interactive wizard mode, --no-cache unified
+
+| Task | Typ | Aufwand | Datei(en) |
+|------|-----|---------|-----------|
+| **Interactive Caching** | Feature | ~0.5h | `wizard.js` |
+| **--no-cache Unified** | Enhancement | ~0.25h | `wizard.js` |
+| **showHelp Update** | Documentation | ~0.1h | `wizard.js` |
+
+### Akzeptanzkriterien
+- [x] Cache check before interactive FramerExport recovery block
+- [x] Cache write inside recovery block after successful export
+- [x] `--no-cache` works in both interactive and non-interactive modes
+- [x] showHelp describes "(interaktiv + non-interactive)"
+- [x] PR #8: sprint-17 → master
+- [x] All 128 pipeline tests pass
+
+---
+
 ## Phase 12: Sprint 12 — Plugin README ✅ Complete
 
 **Geschätzte Dauer:** ~1h | **Tatsächlich:** ~0.5h
@@ -195,15 +236,15 @@ Details in PLAN-1.md bis PLAN-7.md. Zusammenfassung:
 
 ## Qualitätssprung (Metriken)
 
-| Metrik | Vorher | Sprint 1–7 | Sprint 8 | Sprint 9 | Sprint 10 | Sprint 11 | Sprint 12 | Sprint 14 | Sprint 15 |
+| Metrik | Vorher | Sprint 1–7 | Sprint 8 | Sprint 9 | Sprint 10 | Sprint 11 | Sprint 12 | Sprint 14 | Sprint 15 | Sprint 16 | Sprint 17 |
 |--------|--------|------------|----------|----------|-----------|-----------|-----------|-----------|-----------|
-| DOM-Tiefe | 8 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 |
-| Global Class % | 0% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% |
-| GV-Substitution % | 0% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% |
-| Grid-Nutzung | 0 | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% |
-| Components | 0 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 |
-| Interaktionen | 0 | V4-native | V4-native | V4-native | V4-native | V4-native | V4-native | V4-native | V4-native |
-| **Pipeline Tests** | 49 | 100 | 105 | 114 | 114 | 114 | 114 | 114 | **128** |
-| **E2E Tests** | 0 | 12 | 15 | 18 | 18 | 18 | 18 | 18 | **18** |
-| **PHPUnit Tests** | 2 | 21 | 21 | 52 | 52 | 52 | 52 | 52 | **52** |
-| **Total** | 51 | 133 | 141 | 184 | 184 | 184 | 184 | 184 | **198** |
+| DOM-Tiefe | 8 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 | ≤3 |
+| Global Class % | 0% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% | ≥90% |
+| GV-Substitution % | 0% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% | ≥95% |
+| Grid-Nutzung | 0 | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% | ≥35% |
+| Components | 0 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 | ≥10 |
+| Interaktionen | 0 | V4-native | V4-native | V4-native | V4-native | V4-native | V4-native | V4-native | V4-native | V4-native | V4-native |
+| **Pipeline Tests** | 49 | 100 | 105 | 114 | 114 | 114 | 114 | 114 | **128** | 128 | 128 |
+| **E2E Tests** | 0 | 12 | 15 | 18 | 18 | 18 | 18 | 18 | **18** | 18 | 18 |
+| **PHPUnit Tests** | 2 | 21 | 21 | 52 | 52 | 52 | 52 | 52 | **52** | 52 | 52 |
+| **Total** | 51 | 133 | 141 | 184 | 184 | 184 | 184 | 184 | **198** | 198 | 198 |

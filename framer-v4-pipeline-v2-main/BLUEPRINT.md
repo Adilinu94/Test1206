@@ -1,6 +1,6 @@
 # 🚀 Framer → Elementor V4 Pipeline V2: Master Blueprint
 
-> **Version:** v0.19.0 | **Stand:** 2026-06-14
+> **Version:** v0.20.0 | **Stand:** 2026-06-14
 
 ## 🎯 Overview
 Ziel: Umsetzung eines stabilen, token-effizienten Framer-zu-V4-Workflows basierend auf einer **3-Wege-Symbiose**:
@@ -161,6 +161,8 @@ framer-v4-pipeline-v2/
 - [x] **Sprint 12**: Plugin README (REST endpoints, test infra, deploy docs)
 - [x] **Sprint 14**: Concurrency 3→5, MCP_CONCURRENCY_PROFILE presets, FramerExport caching
 - [x] **Sprint 15**: Corrupt cache JSON resilience, dead fallback fix, caching tests (114→128)
+- [x] **Sprint 16**: --no-cache CLI flag in non-interactive mode, cache hit/miss logic
+- [x] **Sprint 17**: FramerExport caching in interactive wizard mode, --no-cache unified
 - [x] GSD-Projekt: `.planning/` mit PROJECT.md, REQUIREMENTS.md, ROADMAP.md, PLAN-1-7.md, STATE.md, config.json
 - [x] `--help` Blocks: A1, A2, A3 mit einheitlichem CLI-Pattern (parseArgs help Option)
 
