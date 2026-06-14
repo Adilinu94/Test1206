@@ -49,7 +49,7 @@ if (args['help'] || args['h']) {
   console.log('  --format <json|md>     Output format (default: json)');
   console.log('  --output <path>        Write results to file');
   console.log('  --only <check>         Run only: colors | fonts | breakpoints | gv-ids | all');
-  console.log('  --design-system <path> novamira-adrianv2/export-design-system output JSON (fuer GV-ID Check)');
+  console.log('  --design-system <path> adrians-export-design-system output JSON (fuer GV-ID Check)');
   console.log('  --tree <path>          V4 Tree JSON (fuer GV-ID Drift Detection)');
   console.log('  --verbose              Extra debug output');
   console.log('');
@@ -442,7 +442,7 @@ function checkBreakpoints(mcpBreakpoints, cssBPs) {
 
 // ─────────────────────────────────────────────
 // CHECK 7: GV-ID DRIFT DETECTION
-// Nutzt novamira-adrianv2/export-design-system Output um sicherzustellen
+// Nutzt adrians-export-design-system Output um sicherzustellen
 // dass alle e-gv-* IDs im V4-Tree noch im Kit existieren.
 // ─────────────────────────────────────────────
 
@@ -452,7 +452,7 @@ function checkGvIdDrift(designSystemExport, v4Tree) {
     return [{ check: 'GV_ID_DRIFT', result: 'SKIPPED', note: '--design-system und --tree benoetigt' }];
   }
 
-  // Alle e-gv-* IDs aus dem Kit sammeln (aus novamira-adrianv2/export-design-system output)
+  // Alle e-gv-* IDs aus dem Kit sammeln (aus adrians-export-design-system output)
   const kitGvIds = new Set();
   const colorData = designSystemExport?.export_data?.colors
     || designSystemExport?.colors

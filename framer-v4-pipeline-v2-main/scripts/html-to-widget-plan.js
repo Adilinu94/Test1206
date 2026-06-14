@@ -2,7 +2,7 @@
 /**
  * html-to-widget-plan.js
  *
- * Brücke zu novamira-adrianv2/html-to-elementor-widget-plan.
+ * Brücke zu novamira/adrians-html-to-elementor-widget-plan.
  * Analysiert Framer-Export HTML und erstellt einen strukturierten
  * Elementor V4 Widget-Konvertierungsplan.
  *
@@ -10,7 +10,7 @@
  * Script mit dem rohen HTML-Export und delegiert die DOM-Analyse
  * an die serverseitige MCP-Ability:
  *
- *   HTML → novamira-adrianv2/html-to-elementor-widget-plan → Widget-Plan
+ *   HTML → adrians-html-to-elementor-widget-plan → Widget-Plan
  *                                                      │
  *                                    ┌─────────────────┘
  *                                    ▼
@@ -61,7 +61,7 @@ html-to-widget-plan.js
 ZWECK:
   Analysiert Framer-Export HTML (index.html) und erstellt einen
   strukturierten Elementor V4 Widget-Konvertierungsplan via
-  novamira-adrianv2/html-to-elementor-widget-plan.
+  novamira/adrians-html-to-elementor-widget-plan.
 
   Anders als convert-xml-to-v4.js (Framer XML → V4 Tree) arbeitet
   dieses Script direkt mit HTML und delegiert die DOM-Analyse an die
@@ -78,7 +78,8 @@ OPTIONEN:
   --help                 Diese Hilfe
 
 WORKFLOW:
-  1. node html-to-widget-plan.js --html index.html --output widget-plan.json --execute      → Ruft novamira-adrianv2/html-to-elementor-widget-plan via McpBridge auf
+  1. node html-to-widget-plan.js --html index.html --output widget-plan.json --execute
+     → Ruft novamira/adrians-html-to-elementor-widget-plan via McpBridge auf
      → Schreibt native_widget_ratio, CSS/JS-Inventar, Empfehlungen, Tree
 
   2. Plan reviewen:
@@ -137,9 +138,9 @@ if (!htmlContent || htmlContent.trim().length === 0) {
 // ── McpBridge-Call ─────────────────────────────────────────────────────────
 
 async function callWidgetPlan(mcp, html, targetSurface, maxNodes) {
-  process.stderr.write(`[html-plan] Rufe novamira-adrianv2/html-to-elementor-widget-plan auf (${targetSurface}, max ${maxNodes} Nodes)...\n`);
+  process.stderr.write(`[html-plan] Rufe adrians-html-to-elementor-widget-plan auf (${targetSurface}, max ${maxNodes} Nodes)...\n`);
 
-  const result = await mcp.call('novamira-adrianv2/html-to-elementor-widget-plan', {
+  const result = await mcp.call('novamira/adrians-html-to-elementor-widget-plan', {
     html,
     target_surface: targetSurface,
     include_tree: true,
@@ -160,7 +161,7 @@ function writePlanFallback() {
     agent_instruction: [
       'Führe den folgenden MCP-Call aus:',
       '',
-      '  novamira-adrianv2/html-to-elementor-widget-plan',
+      '  novamira/adrians-html-to-elementor-widget-plan',
       `  {`,
       `    "html": "<HTML-Inhalt (${(htmlContent.length / 1024).toFixed(1)} KB)>",`,
       `    "target_surface": "${TARGET_SURFACE}",`,
@@ -181,7 +182,7 @@ function writePlanFallback() {
       '  - tree → Vereinfachter Konvertierungsbaum (elementor_target pro Node)',
     ],
     mcp_call: {
-      ability: 'novamira-adrianv2/html-to-elementor-widget-plan',
+      ability: 'novamira/adrians-html-to-elementor-widget-plan',
       params: {
         html: '<HTML_INHALT_HIER>',
         target_surface: TARGET_SURFACE,

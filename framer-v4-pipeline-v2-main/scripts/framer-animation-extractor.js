@@ -45,6 +45,7 @@ const { values: args } = parseArgs({
     'post-id':  { type: 'string' },
     output:     { type: 'string' },
     types:      { type: 'string', default: 'css,gsap,js,framer' },
+    native:    { type: 'boolean', default: false },
     verbose:    { type: 'boolean', default: false },
   },
   strict: false,
@@ -159,7 +160,7 @@ function extractAnimatedRules(css) {
 
     // Prüfe ob die Rule animation/transition enthält
     const hasAnimation = /animation\s*[^-]/.test(body);
-    const hasTransition = /transition\s*[^-:]/.test(body);
+    const hasTransition = /\btransition\s*[^-]/.test(body);
 
     if (hasAnimation || hasTransition) {
       const decls = {};
@@ -265,11 +266,6 @@ function extractScriptBlocks(htmlContent) {
 // RC-20: CSS TRANSITION → V4 INTERACTION MAPPER
 // ───────────────────────────────────────────────────────────────────────────────
 
-// ───────────────────────────────────────────────────────────────────────────────
-// RC-20: CSS TRANSITION → V4 INTERACTION MAPPER
-// P2-4: Erweitert um transform.rotate, transform.skew, und kombinierte Mappings
-// ───────────────────────────────────────────────────────────────────────────────
-
 const TRANSITION_TO_V4_MAP = {
   // opacity transitions → Fade effects
   opacity: { effect: 'fade', entrance: true, duration_scale: 1.0 },
@@ -278,20 +274,8 @@ const TRANSITION_TO_V4_MAP = {
   'transform.translateX': { effect: 'slide-left', entrance: true, duration_scale: 0.8 },
   // scale transforms
   'transform.scale': { effect: 'zoom', entrance: true, duration_scale: 1.2 },
-  // P2-4: Rotation transforms
-  'transform.rotate': { effect: 'rotate-in', entrance: true, duration_scale: 0.9 },
-  // P2-4: Skew transforms
-  'transform.skew': { effect: 'skew-in', entrance: true, duration_scale: 0.7 },
   // Combined
   'opacity+transform.translateY': { effect: 'fade-slide-up', entrance: true, duration_scale: 1.0 },
-  // P2-4: Combined opacity + translateX
-  'opacity+transform.translateX': { effect: 'fade-slide-left', entrance: true, duration_scale: 0.9 },
-  // P2-4: Combined opacity + scale
-  'opacity+transform.scale': { effect: 'fade-zoom', entrance: true, duration_scale: 1.1 },
-  // P2-4: Combined opacity + rotate
-  'opacity+transform.rotate': { effect: 'fade-rotate-in', entrance: true, duration_scale: 0.8 },
-  // P2-4: Triple compound: opacity + translateX + scale
-  'opacity+transform.translateX+transform.scale': { effect: 'fade-slide-zoom', entrance: true, duration_scale: 1.0 },
 };
 
 function mapTransitionToV4Interaction(declarations, selector) {
@@ -310,15 +294,7 @@ function mapTransitionToV4Interaction(declarations, selector) {
   // Build compound key for mapping
   const parts = [];
   if (hasOpacity) parts.push('opacity');
-  if (hasTransform) {
-    // P2-4: Detect specific transform functions in the value
-    const transformVal = declarations['transform'] || '';
-    if (/\brotate\b/i.test(transformVal)) parts.push('transform.rotate');
-    else if (/\bskew\b/i.test(transformVal)) parts.push('transform.skew');
-    else if (/\bscale\b/i.test(transformVal)) parts.push('transform.scale');
-    else if (/\btranslateX\b/i.test(transformVal)) parts.push('transform.translateX');
-    else parts.push('transform.translateY'); // default assumption
-  }
+  if (hasTransform) parts.push('transform.translateY'); // default assumption
   const key = parts.join('+') || 'opacity';
 
   const mapping = TRANSITION_TO_V4_MAP[key] || TRANSITION_TO_V4_MAP['opacity'];
@@ -336,7 +312,7 @@ function mapTransitionToV4Interaction(declarations, selector) {
       animation: mapping.effect,
       duration: Math.round(parseFloat(duration) * 1000),
       delay: Math.round(parseFloat(delay) * 1000),
-      easing: mapEasingToGSAP(easing),
+      easing: mapEasingToElementor(easing),
     },
     // Reverse (exit) variant
     exit: {
@@ -350,20 +326,27 @@ function mapTransitionToV4Interaction(declarations, selector) {
   };
 }
 
-function mapEasingToGSAP(cssEasing) {
+// C3 Fix: Elementor-native easing names (not GSAP)
+// Route to edit-interaction statt inject-animation-code.js
+function mapEasingToElementor(cssEasing) {
   const map = {
-    'ease': 'power2.out',
-    'ease-in': 'power2.in',
-    'ease-out': 'power2.out',
-    'ease-in-out': 'power2.inOut',
-    'linear': 'none',
-    'cubic-bezier(0.4, 0, 0.2, 1)': 'power3.out',
-    'cubic-bezier(0, 0, 0.2, 1)': 'power4.out',
+    'ease': 'ease',
+    'ease-in': 'ease-in',
+    'ease-out': 'ease-out',
+    'ease-in-out': 'ease-in-out',
+    'linear': 'linear',
+    'cubic-bezier(0.4, 0, 0.2, 1)': 'ease-out',
+    'cubic-bezier(0, 0, 0.2, 1)': 'ease-out',
+    'power2.out': 'ease-out',
+    'power2.in': 'ease-in',
+    'power2.inOut': 'ease-in-out',
+    'power4.out': 'ease-out',
+    'none': 'linear',
   };
-  return map[cssEasing] || 'power2.out';
+  return map[cssEasing] || 'ease';
 }
 
-function buildTransitionInteractions(animatedRules) {
+function buildTransitionInteractions(animatedRules, isNative = false) {
   if (animatedRules.length === 0) return [];
 
   const interactions = [];
@@ -376,7 +359,50 @@ function buildTransitionInteractions(animatedRules) {
 
   if (interactions.length === 0) return [];
 
-  // Generate V4-compatible interaction plan
+  // C3: --native flag → V4-native interaction JSON (kein GSAP)
+  if (isNative) {
+    return [{
+      title: `V4 Native Interactions (${interactions.length} elements)`,
+      type: 'v4-native',
+      interactions: interactions.map(ix => ({
+        selector: ix.selector,
+        v4_interaction: {
+          type: ix.v4_interaction.type,
+          animation: ix.v4_interaction.animation,
+          trigger: ix.v4_interaction.type === 'entrance' ? 'page_load' : 'scroll_into_view',
+          effects: [{
+            type: 'transform',
+            [ix.effect.includes('slide') ? 'translateY' :
+             ix.effect.includes('zoom') ? 'scale' : 'opacity']:
+              ix.effect.includes('zoom')
+                ? { from: 0.95, to: 1 }
+                : ix.effect.includes('slide')
+                  ? { from: 30, to: 0, unit: 'px' }
+                  : { from: 0, to: 1 },
+            opacity: ix.effect !== 'fade' ? { from: 0, to: 1 } : undefined,
+            easing: ix.v4_interaction.easing,
+            duration: ix.v4_interaction.duration,
+            delay: ix.v4_interaction.delay,
+          }],
+        },
+        meta: {
+          effect: ix.effect,
+          originalDuration: ix.duration,
+          originalEasing: ix.easing,
+        },
+      })),
+      mcpRouting: {
+        ability: 'novamira-adrianv2/edit-interaction',
+        note: 'C3 Complete: Route each v4_interaction via McpBridge.editInteraction(). Kein neues PHP noetig.',
+      },
+      description: `${interactions.length} CSS transitions → V4 Native Interactions (C3 Complete)`,
+      tags: ['v4', 'interactions', 'native', 'c3'],
+      on_conflict: 'replace',
+      priority: 25,
+    }];
+  }
+
+  // Legacy: Generate V4-compatible interaction plan (GSAP)
   const gsapCode = generateGSAPInteractionCode(interactions);
 
   return [{
@@ -573,7 +599,7 @@ if (keyframes.length > 0) {
 if (animatedRules.length > 0) {
   snippets.push(...buildAnimationRulesSnippet(animatedRules, isPostSpecific));
   // RC-20: Add V4 interaction mappings for CSS transitions
-  const transitionInteractions = buildTransitionInteractions(animatedRules);
+  const transitionInteractions = buildTransitionInteractions(animatedRules, args.native);
   if (transitionInteractions.length > 0) {
     snippets.push(...transitionInteractions);
     log(`  RC-20: ${transitionInteractions[0]?.interactions?.length || 0} transition→V4 interactions mapped`);

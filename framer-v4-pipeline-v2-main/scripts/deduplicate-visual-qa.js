@@ -2,10 +2,10 @@
 /**
  * deduplicate-visual-qa.js
  *
- * FIX 1: Overlap-Deduplizierung für novamira-adrianv2/visual-qa Output.
+ * FIX 1: Overlap-Deduplizierung für adrians-visual-qa Output.
  *
  * Das Problem:
- *   novamira-adrianv2/visual-qa meldet absolute-positioned Siblings paarweise (N*(N-1)/2).
+ *   adrians-visual-qa meldet absolute-positioned Siblings paarweise (N*(N-1)/2).
  *   15 Siblings in einem Container → 105 "Potential overlap" Meldungen.
  *   Das sind 105 identisch klingende info-Zeilen für EIN Problem.
  *   Ein Agent der das liest, verliert die echten Fehler im Rauschen.
@@ -22,7 +22,7 @@
  *   # Pipe aus MCP-Aufruf:
  *   node scripts/deduplicate-visual-qa.js --input qa-raw.json --output qa-clean.json
  *
- *   # Mit Post-ID direkt (wenn novamira-adrianv2/visual-qa bereits aufgerufen wurde):
+ *   # Mit Post-ID direkt (wenn adrians-visual-qa bereits aufgerufen wurde):
  *   node scripts/deduplicate-visual-qa.js --input qa-raw.json
  *
  *   # Verbose: zeigt auch die zusammengefassten Overlap-Gruppen
@@ -105,13 +105,13 @@ const { values: args } = parseArgs({
 
 if (args.help || !args.input) {
   process.stdout.write(`
-deduplicate-visual-qa.js — Overlap-Deduplizierung für novamira-adrianv2/visual-qa
+deduplicate-visual-qa.js — Overlap-Deduplizierung für adrians-visual-qa
 
 USAGE:
   node scripts/deduplicate-visual-qa.js --input <qa-raw.json> [--output <qa-clean.json>]
 
 OPTIONEN:
-  --input FILE    Raw JSON output von novamira-adrianv2/visual-qa (required)
+  --input FILE    Raw JSON output von novamira/adrians-visual-qa (required)
   --output FILE   Bereinigter Report  [default: stdout]
   --verbose       Zeigt auch deduplizierte Overlap-Gruppen Details
   --help          Diese Hilfe

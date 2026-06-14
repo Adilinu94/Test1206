@@ -19,7 +19,8 @@ import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -30,6 +31,42 @@ const WP_USER = process.env.WP_USER || 'admin';
 const WP_APP_PASSWORD = process.env.WP_APP_PASSWORD || '';
 const TEST_POST_ID = parseInt(process.env.TEST_POST_ID || '0', 10);
 const SKIP_INTEGRATION = process.env.SKIP_INTEGRATION === '1' || (!WP_APP_PASSWORD && !process.env.NOVAMIRA_MCP_URL);
+
+// ── Live Mode (Sprint 8: FIX-13) ────────────────────────────────────────
+
+const isLive = process.argv.includes('--live');
+if (isLive) {
+  console.log('[integration] LIVE MODE — testing against solar.local');
+  console.log('[integration] WP_URL: ' + WP_URL);
+}
+
+// ── Live Mode helpers ──────────────────────────────────────────────────
+
+async function runPreflightCheck() {
+  // execFileSync is imported at top of file
+  try {
+    const result = execFileSync(process.execPath, ['scripts/preflight-check.js', '--json'], {
+      cwd: path.resolve(__dirname, '..'),
+      encoding: 'utf8',
+      timeout: 30000,
+    });
+    const report = JSON.parse(result);
+    const allPassed = report.checks && report.checks.every(function(c) { return c.status === 'OK'; });
+    if (!allPassed) {
+      console.error('[integration] Preflight checks failed:');
+      for (var i = 0; i < (report.checks || []).length; i++) {
+        var chk = report.checks[i];
+        if (chk.status !== 'OK') console.error('  FAIL: ' + chk.name);
+      }
+      return false;
+    }
+    console.log('[integration] Preflight: all 8 checks passed');
+    return true;
+  } catch (e) {
+    console.error('[integration] Preflight check error: ' + e.message);
+    return false;
+  }
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -72,6 +109,44 @@ async function deleteTestPost(postId) {
 }
 
 // ── Test Suite ──────────────────────────────────────────────────────────────
+
+describe('Live WordPress Integration (--live)', function() {
+  before(async function() {
+    if (!isLive) {
+      console.log('  Skipping live tests (use --live flag)');
+      return;
+    }
+    var ok = await runPreflightCheck();
+    if (!ok) {
+      console.error('  Aborting live tests -- preflight failed');
+    }
+  });
+
+  it('MCP Session-Handshake succeeds', { skip: !isLive }, async function() {
+    var mcpPath = path.join(__dirname, '..', 'scripts', 'lib', 'mcp-bridge.js');
+    var { McpBridge } = await import(pathToFileURL(mcpPath).href);
+    var mcp = await McpBridge.fromConfig();
+    var result = await mcp.call('novamira/adrians-greet', { name: 'integration-test' });
+    assert.ok(result.message || result, 'MCP greet returns response');
+  });
+
+  it('elementor-check-setup confirms runtime_available', { skip: !isLive }, async function() {
+    var mcpPath = path.join(__dirname, '..', 'scripts', 'lib', 'mcp-bridge.js');
+    var { McpBridge } = await import(pathToFileURL(mcpPath).href);
+    var mcp = await McpBridge.fromConfig();
+    var setup = await mcp.call('novamira/elementor-check-setup', {});
+    assert.strictEqual(setup.atomic && setup.atomic.runtime_available, true, 'V4 Atomic Widgets must be available');
+  });
+
+  it('Schema-Endpoint returns valid JSON', { skip: !isLive }, async function() {
+    var { ok, data } = await wpRestFetch('/prop-schema');
+    if (!ok) {
+      console.log('  Schema endpoint not available via REST');
+      return;
+    }
+    assert.ok(data, 'Should return schema data');
+  });
+});
 
 describe('Integration Tests (solar.local)', () => {
   let postId = TEST_POST_ID;

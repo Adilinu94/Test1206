@@ -26,8 +26,6 @@ const { values: args } = parseArgs({
     'min-dups':       { type: 'string', default: '2' },
     execute:          { type: 'boolean', default: false },
     'apply-results':  { type: 'string' },  // NEU: gc-results.json -> Tree
-    'apply':          { type: 'boolean', default: false }, // P1-1: lokale Tree-Deduplizierung aus gc-plan.json
-    'plan':           { type: 'string' },                  // P1-1: gc-plan.json Input fuer --apply
     'check-abilities':{ type: 'boolean', default: false }, // RC-12: query MCP for ability availability
     'hide-missing':   { type: 'boolean', default: false }, // RC-12: drop mcp_calls with missing abilities
     'mcp-config':     { type: 'string' },                  // path to .mcp.json
@@ -53,8 +51,6 @@ OPTIONEN:
   --min-dups N            Mindest-Duplikate fuer GC-Vorschlag  [default: 2]
   --execute               MCP-Plan fuer Agent ausgeben (statt nur suggest)
   --apply-results FILE    gc-results.json -> GC-IDs in Tree schreiben
-  --apply                 Lokale Tree-Deduplizierung (liest gc-plan.json, kein MCP noetig)
-  --plan FILE             gc-plan.json Input fuer --apply [default: gc-plan.json]
   --check-abilities       MCP-Bridge befragen welche referenced abilities existieren
   --hide-missing          mcp_calls mit nicht-existierenden abilities ausblenden
   --mcp-config FILE       Pfad zu .mcp.json (sonst ./ oder ../)
@@ -66,13 +62,10 @@ WORKFLOW:
   2. node generate-global-classes.js --tree v4-tree.json --execute --output gc-plan.json
   3. Agent fuehrt gc-plan.json aus:
      - novamira/elementor-create-global-class (pro GC)
-     - novamira-adrianv2/add-global-class-variant (Varianten)
-     - novamira-adrianv2/apply-variable-to-class (Token-Bindungen)
+     - novamira/adrians-add-global-class-variant (Varianten)
+     - novamira/adrians-apply-variable-to-class (Token-Bindungen)
   4. Agent speichert GC-IDs als gc-results.json: { "label": "gc-<id>", ... }
   5. node generate-global-classes.js --apply-results gc-results.json --tree v4-tree.json
-
-  # P1-1: Lokale Tree-Deduplizierung (kein MCP noetig):
-  6. node generate-global-classes.js --tree v4-tree.json --apply --plan gc-plan.json --output v4-tree-deduped.json
 
 EXIT-CODES:
   0   Analyse abgeschlossen, Vorschläge vorhanden
@@ -134,46 +127,68 @@ function hashSignature(obj) {
   return createHash('md5').update(str).digest('hex').slice(0, 12);
 }
 
-// Semantischen GC-Namen aus Props ableiten
-function suggestName(type, props, index) {
+// C4: Semantic GC Naming — BEM-style with token awareness
+// Extrahiert die Pixel-Zahl aus einem V4 size-Wrapper
+function getPxNumber(wrapped) {
+  if (!wrapped) return NaN;
+  const v = typeof wrapped === 'object' ? (wrapped.value?.size ?? wrapped.value) : wrapped;
+  const match = String(v).match(/([\d.]+)/);
+  return match ? parseFloat(match[1]) : NaN;
+}
+
+// Sucht Token-Namen fuer eine Farbe im Token-Mapping
+function findTokenByHex(hex, tokenMap) {
+  if (!tokenMap || !hex) return null;
+  const normHex = hex.replace('#', '').toLowerCase();
+  for (const [name, data] of Object.entries(tokenMap.colors || {})) {
+    if (data.hex && data.hex.replace('#', '').toLowerCase() === normHex) {
+      return (data.label || name).replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 20);
+    }
+  }
+  return null;
+}
+
+// Semantischen GC-Namen aus Props ableiten (C4 Upgrade)
+function suggestName(type, props, index, tokenMap) {
+  const parts = ['gc'];
   const propKeys = Object.keys(props);
 
   if (type === 'typography') {
+    parts.push('text');
+    // Size-Modifier
     const fontSize = props['font-size'];
-    let size = '';
-    if (fontSize) {
-      const v = typeof fontSize === 'object' ? (fontSize.value?.size ?? '') : fontSize;
-      const n = parseInt(String(v), 10);
-      if (!isNaN(n)) {
-        if (n >= 60) size = 'xxl';
-        else if (n >= 48) size = 'xl';
-        else if (n >= 36) size = 'lg';
-        else if (n >= 24) size = 'md';
-        else if (n >= 18) size = 'sm';
-        else if (n >= 14) size = 'xs';
-        else size = 'tiny';
-      }
-    }
-    const hasColor = propKeys.includes('color');
-    const base = hasColor ? 'text' : 'type';
-    return `gc-${base}-${size || index}`;
-  }
-
-  if (type === 'structure') {
+    const n = getPxNumber(fontSize);
+    if (n >= 48) parts.push('xl');
+    else if (n >= 28) parts.push('lg');
+    else if (n >= 18) parts.push('md');
+    else if (n >= 14) parts.push('sm');
+    else parts.push('xs');
+    // Color semantic from token map
+    const colorVal = props['color']?.value;
+    const token = findTokenByHex(colorVal, tokenMap);
+    if (token) parts.push(token);
+    else parts.push('neutral');
+  } else if (type === 'structure') {
     const hasMaxWidth = propKeys.includes('max-width');
     const hasGap = propKeys.includes('gap');
     const hasPadding = propKeys.some(k => k.startsWith('padding'));
-    if (hasMaxWidth && hasPadding) return `gc-section-${index}`;
-    if (hasGap) return `gc-grid-${index}`;
-    if (hasPadding) return `gc-pad-${index}`;
-    return `gc-layout-${index}`;
+    if (hasMaxWidth && hasPadding) parts.push('section');
+    else if (hasGap) parts.push('grid');
+    else if (hasPadding) parts.push('pad');
+    else parts.push('layout');
+    parts.push(String(index));
+  } else if (type === 'background') {
+    parts.push('surface');
+    const bgVal = props['background-color']?.value;
+    const token = findTokenByHex(bgVal, tokenMap);
+    if (token) parts.push(token);
+    else parts.push('neutral');
+  } else {
+    parts.push('style');
+    parts.push(String(index));
   }
 
-  if (type === 'background') {
-    return `gc-bg-${index}`;
-  }
-
-  return `gc-style-${index}`;
+  return sanitizeGcName(parts.join('-'));
 }
 
 // Stellt sicher dass GC-Namen keine Leerzeichen/Bindestriche enthalten
@@ -306,7 +321,7 @@ let gcIndex = 1;
 // Typo-GCs (≥ MIN_DUPS Duplikate)
 for (const [sig, { props, elements }] of typographySignatures) {
   if (elements.length >= MIN_DUPS) {
-    const name = sanitizeGcName(suggestName('typography', props, gcIndex++));
+    const name = sanitizeGcName(suggestName('typography', props, gcIndex++, tokenMapping));
     const reason = `${elements.length} Elemente mit identischer Typografie: ${
       Object.keys(props).slice(0, 3).join(', ')
     }${Object.keys(props).length > 3 ? ', ...' : ''}`;
@@ -319,7 +334,7 @@ for (const [sig, { props, elements }] of typographySignatures) {
       props,
       mcp_calls: [
         {
-          ability: 'novamira-adrianv2/add-global-class-variant', // Variant auf bestehende GC setzen; GC selbst per execute-php oder Kit-Editor erstellen
+          ability: 'novamira/adrians-add-global-class-variant', // Variant auf bestehende GC setzen; GC selbst per execute-php oder Kit-Editor erstellen
           params: { name, type: 'class', props },
         },
       ],
@@ -339,7 +354,7 @@ for (const [sig, { props, elements }] of typographySignatures) {
 // Struktur-GCs (≥ MIN_DUPS Duplikate)
 for (const [sig, { props, elements }] of structureSignatures) {
   if (elements.length >= MIN_DUPS) {
-    const name = sanitizeGcName(suggestName('structure', props, gcIndex++));
+    const name = sanitizeGcName(suggestName('structure', props, gcIndex++, tokenMapping));
     const reason = `${elements.length} Container mit identischem Layout: ${
       Object.keys(props).slice(0, 3).join(', ')
     }${Object.keys(props).length > 3 ? ', ...' : ''}`;
@@ -352,7 +367,7 @@ for (const [sig, { props, elements }] of structureSignatures) {
       props,
       mcp_calls: [
         {
-          ability: 'novamira-adrianv2/add-global-class-variant', // Variant auf bestehende GC setzen; GC selbst per execute-php oder Kit-Editor erstellen
+          ability: 'novamira/adrians-add-global-class-variant', // Variant auf bestehende GC setzen; GC selbst per execute-php oder Kit-Editor erstellen
           params: { name, type: 'class', props },
         },
       ],
@@ -382,8 +397,7 @@ for (const el of backgroundElements) {
   bgSignatureMap.get(sig).elements.push(el.id);
 }
 
-for (const [sig, { props, elements }] of bgSignatureMap) {
-  const name = sanitizeGcName(suggestName('background', props, gcIndex++));
+for (const [sig, { props, elements }] of bgSignatureMap) {    const name = sanitizeGcName(suggestName('background', props, gcIndex++, tokenMapping));
   const reason = elements.length > 1
     ? `${elements.length} Elemente mit identischer Hintergrundfarbe (background.color → IMMER GC)`
     : `background.color → IMMER GC (Bug 3 Schutz), auch bei nur 1 Element`;
@@ -396,7 +410,7 @@ for (const [sig, { props, elements }] of bgSignatureMap) {
     props,
     mcp_calls: [
       {
-        ability: 'novamira-adrianv2/add-global-class-variant', // Variant auf bestehende GC setzen; GC selbst per execute-php oder Kit-Editor erstellen
+        ability: 'novamira/adrians-add-global-class-variant', // Variant auf bestehende GC setzen; GC selbst per execute-php oder Kit-Editor erstellen
         params: { name, type: 'class', props },
       },
     ],
@@ -496,8 +510,8 @@ const plan = {
     'SCHRITT 1: suggested_classes[] reviewen (Namen ggf. anpassen)',
     'SCHRITT 2: Für jede GC in suggested_classes[]:',
     '  1. novamira/execute-php: Global Class registrieren (post_type e_global_class)',
-      '  2. novamira-adrianv2/add-global-class-variant: Breakpoint-Varianten + Props setzen',
-      '  3. novamira-adrianv2/apply-variable-to-class: GV-Referenzen setzen (fuer Token-Bindung)',
+      '  2. novamira/adrians-add-global-class-variant: Breakpoint-Varianten + Props setzen',
+      '  3. novamira/adrians-apply-variable-to-class: GV-Referenzen setzen (fuer Token-Bindung)',
     'SCHRITT 3: V4 Tree aktualisieren:',
     '  Lokale Props aus element_ids[] entfernen',
     '  settings.classes.value[] mit GC-Name ergänzen',
@@ -512,18 +526,18 @@ const plan = {
     'Der V4 Tree muss die GC-Props in settings.classes.value[] referenzieren.',
     '',
     '── SCHRITT 4: Responsive Varianten ergänzen ──────────────────────────────',
-    'Nach Build für jede GC: novamira-adrianv2/add-global-class-variant',
+    'Nach Build für jede GC: novamira/adrians-add-global-class-variant',
     '  → breakpoint: "tablet" oder "mobile", props: { <skalierte Werte> }',
     '',
     '── SCHRITT 5: GC auf alle Elemente batch-anwenden ────────────────────────',
-    'novamira-adrianv2/batch-class: { class_id: "<gc-id>", element_ids: [...], action: "apply" }',
-    'Viel effizienter als einzelne remove-global-class Calls.',
+    'novamira/adrians-batch-class: { class_id: "<gc-id>", element_ids: [...], action: "apply" }',
+    'Viel effizienter als einzelne adrians-remove-global-class Calls.',
     '',
     '── SCHRITT 6: Post-Build QA ──────────────────────────────────────────────',
-    'novamira-adrianv2/visual-qa { post_id }     → overflow, z-index, negative margins',
-    'novamira-adrianv2/responsive-audit { post_id } → Breakpoint-Coverage prüfen',
-    'novamira-adrianv2/class-audit { scope: "post_ids", post_ids: [<ID>] } → unused GCs',
-    'novamira-adrianv2/export-design-system { what: "classes" } → Design-System sichern',
+    'novamira/adrians-visual-qa { post_id }     → overflow, z-index, negative margins',
+    'novamira/adrians-responsive-audit { post_id } → Breakpoint-Coverage prüfen',
+    'novamira/adrians-class-audit { scope: "post_ids", post_ids: [<ID>] } → unused GCs',
+    'novamira/adrians-export-design-system { what: "classes" } → Design-System sichern',
     '',
     '── WICHTIG: Bug-3 Schutz ─────────────────────────────────────────────────',
     'background.color NIE als lokalen Style in props setzen.',
@@ -546,8 +560,8 @@ function writeGcPlan() {
     agent_instruction: [
       'Fuer jeden step in steps[]:',
       '  1. novamira/execute-php: Global Class registrieren (post_type e_global_class)',
-      '  2. novamira-adrianv2/add-global-class-variant: Varianten + Props setzen',
-      '  3. novamira-adrianv2/apply-variable-to-class: GV-Referenzen setzen',
+      '  2. novamira/adrians-add-global-class-variant: Varianten + Props setzen',
+      '  3. novamira/adrians-apply-variable-to-class: GV-Referenzen setzen',
       'Ergebnisse als gc-results.json: { "<gc-name>": "<gc-id>", ... }',
       'Dann: node scripts/generate-global-classes.js --apply-results gc-results.json --tree <tree>',
     ],
@@ -559,11 +573,11 @@ function writeGcPlan() {
         styles: gc.props || {},
       },
       variants: (gc.variants || []).map(v => ({
-        ability: 'novamira-adrianv2/add-global-class-variant',
+        ability: 'novamira/adrians-add-global-class-variant',
         params: { class_id: '{{gc_id}}', breakpoint: v.breakpoint || 'mobile', props: v.props || {} },
       })),
       variable_bindings: (gc.variable_bindings || []).filter(b => b.gv_id).map(b => ({
-        ability: 'novamira-adrianv2/apply-variable-to-class',
+        ability: 'novamira/adrians-apply-variable-to-class',
         params: { class_id: '{{gc_id}}', breakpoint: 'desktop', prop: b.prop, variable_id: b.gv_id },
       })),
     })),
@@ -583,7 +597,7 @@ async function executeGcPlan(gcList, treeFilePath, treeData, mcp, tokenMapping) 
   process.stderr.write('[gc-execute] Rufe setup-v4-foundation auf...\n');
   let foundation;
   try {
-    foundation = await mcp.call('novamira-adrianv2/setup-v4-foundation', {});
+    foundation = await mcp.call('novamira/adrians-setup-v4-foundation', {});
   } catch (err) {
     process.stderr.write(`[gc-execute] ⚠️  setup-v4-foundation fehlgeschlagen: ${err.message}\n`);
     process.stderr.write('[gc-execute] Fahre ohne bestehende GC-IDs fort.\n');
@@ -644,7 +658,7 @@ async function executeGcPlan(gcList, treeFilePath, treeData, mcp, tokenMapping) 
       // 3. Basis-Variant setzen (desktop, keine state)
       if (gc.props && Object.keys(gc.props).length > 0) {
         try {
-          await mcp.call('novamira-adrianv2/add-global-class-variant', {
+          await mcp.call('novamira/adrians-add-global-class-variant', {
             class_id: gcId,
             breakpoint: 'desktop',
             props: gc.props,
@@ -658,7 +672,7 @@ async function executeGcPlan(gcList, treeFilePath, treeData, mcp, tokenMapping) 
       // 4. Responsive Varianten setzen
       for (const variant of gc.variants || []) {
         try {
-          await mcp.call('novamira-adrianv2/add-global-class-variant', {
+          await mcp.call('novamira/adrians-add-global-class-variant', {
             class_id: gcId,
             breakpoint: variant.breakpoint,
             props: variant.props || {},
@@ -673,7 +687,7 @@ async function executeGcPlan(gcList, treeFilePath, treeData, mcp, tokenMapping) 
       for (const binding of gc.variable_bindings || []) {
         if (!binding.gv_id) continue;
         try {
-          await mcp.call('novamira-adrianv2/apply-variable-to-class', {
+          await mcp.call('novamira/adrians-apply-variable-to-class', {
             class_id: gcId,
             breakpoint: 'desktop',
             prop: binding.prop,
@@ -756,8 +770,8 @@ async function executeGcPlan(gcList, treeFilePath, treeData, mcp, tokenMapping) 
 // Ersetzt den alten Plan-Generator. Erstellt Global Classes direkt:
 //   1. setup-v4-foundation → bestehende GC-IDs abrufen
 //   2. execute-php → neue GCs via wp_insert_post registrieren
-//   3. novamira-adrianv2/add-global-class-variant → Varianten setzen
-//   4. novamira-adrianv2/apply-variable-to-class → Token-Bindungen
+//   3. adrians-add-global-class-variant → Varianten setzen
+//   4. adrians-apply-variable-to-class → Token-Bindungen
 //   5. GC-IDs in v4-tree.json zurückschreiben (kein extra --apply-results nötig)
 if (args.execute) {
   // Dynamic import (Top-Level await in ESM)
@@ -846,145 +860,6 @@ if (args['apply-results']) {
     `[gc-apply] ✅ ${Object.keys(gcIdMap).length} GC-IDs verknuepft, ` +
     `${replacements} Tree-Referenzen ersetzt → ${outputPath}\n`
   );
-  process.exit(0);
-}
-
-// ── --apply (P1-1): Lokale Tree-Deduplizierung ──────────────────────────────
-// Liest gc-plan.json (oder nutzt den gerade analysierten Plan) und
-// dedupliziert den Tree: Style-Duplikate werden durch GC-Referenzen ersetzt,
-// ungenutzte lokale Styles werden entfernt.
-// KEIN MCP-Call — rein lokale JSON-Transformation.
-if (args.apply) {
-  let gcPlan;
-  if (args.plan) {
-    const planPath = resolve(args.plan);
-    if (!existsSync(planPath)) fatal(`gc-plan.json nicht gefunden: ${planPath}`);
-    try {
-      gcPlan = JSON.parse(readFileSync(planPath, 'utf8'));
-    } catch (e) {
-      fatal(`gc-plan.json ungültig: ${e.message}`);
-    }
-  } else {
-    gcPlan = plan; // Nutze den gerade analysierten Plan
-  }
-
-  const gcList = gcPlan.suggested_classes || [];
-  if (gcList.length === 0) {
-    process.stderr.write('[gc-apply] Keine GC-Vorschläge im Plan — Tree bleibt unverändert.\n');
-    process.exit(0);
-  }
-
-  process.stderr.write(`[gc-apply] Dedupliziere Tree mit ${gcList.length} GC-Vorschlägen...\n`);
-
-  // Baue element_id → [{gcName, category, propKeys}] Map
-  // Jedes Element kann mehrere GCs erhalten (typo + structure + background)
-  const elementGcMap = {};
-  const gcStyleRegistry = {}; // gcName → { type, props } für spätere Tree-Injektion
-
-  for (const gc of gcList) {
-    const gcName = gc.name;
-    gcStyleRegistry[gcName] = { type: gc.type, props: gc.props || {} };
-    for (const elemId of gc.element_ids) {
-      if (!elementGcMap[elemId]) elementGcMap[elemId] = [];
-      // Vermeide Duplikate: gleiche GC nicht doppelt auf gleiches Element
-      if (!elementGcMap[elemId].some(e => e.gcName === gcName)) {
-        elementGcMap[elemId].push({
-          gcName,
-          category: gc.type,
-          propKeys: Object.keys(gc.props || {}),
-        });
-      }
-    }
-  }
-
-  if (Object.keys(elementGcMap).length === 0) {
-    process.stderr.write('[gc-apply] Keine Elemente mit GC-Vorschlägen — Tree bleibt unverändert.\n');
-    process.exit(0);
-  }
-
-  // Tree laden (ggf. anderen Tree als Analyse-Input)
-  const applyTreePath = args.tree ? resolve(args.tree) : treePath;
-  let applyTreeData;
-  try {
-    applyTreeData = JSON.parse(readFileSync(applyTreePath, 'utf8'));
-  } catch (e) {
-    fatal(`Tree nicht lesbar: ${applyTreePath}: ${e.message}`);
-  }
-
-  let gcRefs = 0;
-  let stylesRemoved = 0;
-  const roots = Array.isArray(applyTreeData) ? applyTreeData : [applyTreeData];
-
-  for (const root of roots) {
-    walkTree(root, node => {
-      const nodeId = node.id ?? node.settings?.id;
-      if (!nodeId || !elementGcMap[nodeId]) return;
-
-      const gcEntries = elementGcMap[nodeId];
-
-      // 1. GC-Referenzen in settings.classes.value[] schreiben
-      if (!node.settings) node.settings = {};
-      if (!node.settings.classes) {
-        node.settings.classes = { '$$type': 'classes', value: [] };
-      }
-      const classes = node.settings.classes.value;
-      if (!Array.isArray(classes)) {
-        node.settings.classes.value = [];
-      }
-
-      for (const entry of gcEntries) {
-        if (!node.settings.classes.value.includes(entry.gcName)) {
-          node.settings.classes.value.push(entry.gcName);
-          gcRefs++;
-        }
-      }
-
-      // 2. Entferne lokale Styles die jetzt durch GCs abgedeckt sind
-      if (node.styles && typeof node.styles === 'object') {
-        const gcPropKeys = new Set(gcEntries.flatMap(e => e.propKeys));
-        const localStyleIds = Object.keys(node.styles).filter(sid => !sid.startsWith('gc-'));
-
-        for (const styleId of localStyleIds) {
-          const styleDef = node.styles[styleId];
-          if (!styleDef || !Array.isArray(styleDef.variants)) continue;
-
-          // Prüfe ob ALLE Props dieses lokalen Styles in einer GC enthalten sind
-          const baseVariant = styleDef.variants.find(
-            v => v?.meta?.breakpoint === null || v?.meta?.breakpoint === 'desktop'
-          );
-          if (!baseVariant) continue;
-
-          const localPropKeys = Object.keys(baseVariant.props || {});
-          // Entferne den lokalen Style nur wenn ALLE seine Props durch GCs abgedeckt sind
-          if (localPropKeys.length > 0 && localPropKeys.every(k => gcPropKeys.has(k))) {
-            delete node.styles[styleId];
-            stylesRemoved++;
-          }
-        }
-      }
-    });
-  }
-
-  // Tree zurückschreiben
-  const applyOutputPath = args.output
-    ? resolve(args.output)
-    : (args.tree ? resolve(args.tree) : treePath);
-  writeFileSync(applyOutputPath, JSON.stringify(applyTreeData, null, 2), 'utf8');
-
-  process.stderr.write(
-    `[gc-apply] ✅ ${gcRefs} GC-Referenzen auf ${Object.keys(elementGcMap).length} Elemente gesetzt, ` +
-    `${stylesRemoved} lokale Styles entfernt → ${applyOutputPath}\n`
-  );
-
-  const dedupedCount = allElements.length - Object.keys(elementGcMap).length;
-  const coveragePct = Math.round((Object.keys(elementGcMap).length / Math.max(allElements.length, 1)) * 100);
-  process.stderr.write(
-    `[gc-apply] 📊 GC-Coverage: ${coveragePct}% (${Object.keys(elementGcMap).length}/${allElements.length} Elemente)\n`
-  );
-  process.stderr.write(
-    `[gc-apply] 💡 Nächster Schritt: novamira-adrianv2/batch-class um GCs serverseitig zu registrieren\n`
-  );
-
   process.exit(0);
 }
 

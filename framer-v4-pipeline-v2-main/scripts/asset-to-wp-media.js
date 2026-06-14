@@ -2,7 +2,7 @@
 /**
  * asset-to-wp-media.js
  *
- * Lädt lokale Assets aus FramerExport (ZIP-Export) via novamira-adrianv2/media-upload
+ * Lädt lokale Assets aus FramerExport (ZIP-Export) via adrians-media-upload
  * in die WordPress Media Library. Arbeitet als Queue-Generator: erstellt
  * MCP-Calls die der Agent abarbeitet, und schreibt Ergebnisse via --update-from zurück.
  *
@@ -53,7 +53,7 @@ if (args.help) {
 asset-to-wp-media.js
 
 Scannt ein Asset-Verzeichnis rekursiv und erstellt eine Upload-Queue
-für novamira-adrianv2/media-upload (WordPress Media Library).
+für adrians-media-upload (WordPress Media Library).
 
 MODI:
   --queue (default)   Erstellt Upload-Queue JSON für den Agent
@@ -71,7 +71,7 @@ OPTIONEN:
 WORKFLOW:
   1. node asset-to-wp-media.js --assets-dir ./assets/ --output upload-queue.json
      → Scannt alle Dateien, erstellt Queue mit MCP-Calls
-  2. Agent iteriert durch queue[], führt novamira-adrianv2/media-upload aus
+  2. Agent iteriert durch queue[], führt novamira/adrians-media-upload aus
   3. Agent speichert Ergebnisse als results.json
   4. node asset-to-wp-media.js --update-from results.json --manifest manifest.json
      → Schreibt wp_media_id + wp_url zurück
@@ -258,7 +258,7 @@ for (const file of allFiles) {
     key, filename: fname, originalFilename: file.filename,
     relativePath: key, mimeType: mime, sizeBytes: file.size,
     mcpCall: {
-      ability_name: 'novamira-adrianv2/media-upload',
+      ability_name: 'novamira/adrians-media-upload',
       parameters: { filename: fname, mime_type: mime },
     },
     status: 'pending',
@@ -316,12 +316,12 @@ function generateUploadPlan(queue, batches, failedRead, output) {
     failed_read:  failedRead,
     batch_count:  batches.length,
     batch_size:   30,
-    ability:      'novamira-adrianv2/batch-media-upload',
+    ability:      'novamira/adrians-batch-media-upload',
     next_step:    `node scripts/asset-to-wp-media.js --apply-results <upload-results.json> --output image-map.json`,
     agent_instruction: [
       'Fuer jede Batch in batches[]:',
       '  novamira-solar-local:mcp-adapter-execute-ability',
-      '  { ability_name: "novamira-adrianv2/batch-media-upload", parameters: { files: <batch.files> } }',
+      '  { ability_name: "novamira/adrians-batch-media-upload", parameters: { files: <batch.files> } }',
       'Ergebnisse als upload-results.json speichern: { results: [{filename, wp_media_id, url},...] }',
     ],
     batches: batches.map((files, i) => ({
@@ -343,7 +343,7 @@ function generateUploadPlan(queue, batches, failedRead, output) {
 
   process.stderr.write(
     `[asset-upload] Upload-Plan fuer ${plan.total_files} Dateien in ${plan.batch_count} Batches → ${outputPath}\n` +
-    `[asset-upload] Agent: novamira-adrianv2/batch-media-upload fuer jede Batch aufrufen, dann --apply-results\n`
+    `[asset-upload] Agent: adrians-batch-media-upload fuer jede Batch aufrufen, dann --apply-results\n`
   );
 }
 
@@ -354,7 +354,7 @@ if (args.execute) {
     process.exit(0);
   }
 
-  const BATCH_SIZE = 30; // novamira-adrianv2/batch-media-upload Maximum
+  const BATCH_SIZE = 30; // adrians-batch-media-upload Maximum
 
   // Dateien als base64 einlesen und in Batches aufteilen
   const batches = [];
@@ -385,7 +385,7 @@ if (args.execute) {
   if (currentBatch.length > 0) batches.push(currentBatch);
 
   // Direkter Upload via McpBridge (Fix B)
-  // Ruft novamira-adrianv2/batch-media-upload fuer jede Batch auf
+  // Ruft novamira/adrians-batch-media-upload fuer jede Batch auf
   // und schreibt image-map.json direkt — kein manueller Zwischenschritt.
   if (batches.length === 0) {
     process.stderr.write('[asset-upload] Keine Dateien zum Hochladen (alle Lesefehler).\n');

@@ -4,6 +4,8 @@
  * ESM-Modul — import { normalizeHex, ... } from './lib/framer-utils.js'
  */
 
+import { createHash } from 'node:crypto';
+
 // ─────────────────────────────────────────────
 // COLOR UTILITIES
 // ─────────────────────────────────────────────
@@ -300,4 +302,62 @@ export function extractGvIds(node) {
   };
   scan(node);
   return [...ids];
+}
+
+// ─────────────────────────────────────────────
+// HTML CONTENT WRAPPING
+// ─────────────────────────────────────────────
+
+/**
+ * Wraps text or HTML content in the Elementor V4 html-v3 format.
+ * Used by e-heading, e-paragraph, e-button and other text widgets.
+ *
+ * @param {string} content - Plain text or HTML content
+ * @returns {{ '$$type': 'html-v3', value: { content: { '$$type': 'string', value: string } } }}
+ */
+export function wrapHtmlContent(content) {
+  return {
+    '$$type': 'html-v3',
+    value: { content: { '$$type': 'string', value: String(content ?? '') } },
+  };
+}
+
+// ─────────────────────────────────────────────
+// STRUCTURAL HASHING (A1 + D1 shared)
+// ─────────────────────────────────────────────
+
+/**
+ * Erzeugt einen strukturierten Hash für eine Liste von V4-Elementen.
+ * Verwendet von A1 (Component Extraction) und D1 (Component Reuse Check).
+ *
+ * @param {Array} elements - Array von V4-Elementen
+ * @param {Object} [options]
+ * @param {boolean} [options.short=true] - MD5-Hash (12 chars) oder Raw-String
+ * @param {boolean} [options.includeTag=false] - settings.tag in Hash einbeziehen
+ * @param {boolean} [options.nullOnSmall=false] - null zurückgeben wenn <2 Elemente
+ * @returns {string|null}
+ */
+export function structuralHash(elements, options = {}) {
+  const {
+    short = true,
+    includeTag = false,
+    nullOnSmall = false,
+  } = options;
+
+  if (!Array.isArray(elements)) return '';
+  if (nullOnSmall && elements.length < 2) return null;
+
+  const parts = elements.map(el => {
+    const wt = el.widgetType || el.elType || el.type || 'unknown';
+    const kids = (el.elements || el.children || []).length;
+    const styleKeys = Object.keys(el.styles || {}).sort().join(',');
+    const tag = includeTag ? (el.settings?.tag || '') : '';
+    return tag ? `${wt}|${kids}|${styleKeys}|${tag}` : `${wt}|${kids}|${styleKeys}`;
+  });
+
+  const raw = parts.join('::');
+  if (!short) return raw;
+
+  const hash = createHash('md5').update(raw).digest('hex').slice(0, 12);
+  return hash;
 }

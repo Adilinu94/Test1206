@@ -36,7 +36,7 @@ Die Analyse von Post 4943 und des Pipeline-Codes ergibt folgende Kernarchitektur
 | **Container** | `e-flexbox` (1D) vs. `e-div-block` (2D-Grid) — bewusste Wahl je Layout |
 | **Widgets** | 6 Atomic Widgets: `e-heading`, `e-paragraph`, `e-button`, `e-image`, `e-svg`, `e-divider` |
 | **Responsive** | Varianten pro Breakpoint (`desktop`/`tablet`/`mobile`) in `styles[styleId].variants[]` |
-| **Content-API** | `elementor-set-content` (ganzer Baum) + `novamira-adrianv2/patch-element-styles` (iterativ) |
+| **Content-API** | `elementor-set-content` (ganzer Baum) + `adrians-patch-element-styles` (iterativ) |
 | **Invarianten** | 5 harte Regeln, deren Bruch zu Render-Fehlern oder Site-Crash führt |
 
 ---
@@ -123,7 +123,7 @@ Der Build-Prozess für Post 4943 verlief über den Novamira MCP Adapter:
 
 ```
 1. create-post → Post 4943 (draft)
-2. novamira-adrianv2/setup-v4-foundation { post_id: 4943 }
+2. adrians-setup-v4-foundation { post_id: 4943 }
    → legt V4-Kit-Grundstruktur an (Variables, CSS-Basis)
 3. elementor-set-content { post_id: 4943, content: [<gesamter Baum>] }
    → SCHREIBT ALLE Elemente in EINEM Call in die Datenbank
@@ -335,13 +335,13 @@ EBENE 1: Global Variables (Design Tokens)
   ID: e-gv-XXXXXXX (7 Hex-Chars)
   Typen: color, font, size
   Ort: WordPress e_global_variables Tabelle
-  API: elementor-list-variables, novamira-adrianv2/batch-create-variables
+  API: elementor-list-variables, adrians-batch-create-variables
 
 EBENE 2: Global Classes (Kit-weit)
   ID: gc-XXXXXXXXXXXXXXXXX (lange Hex-ID)
   Typen: typography, structure
   Ort: WordPress e_global_class CPT
-  API: elementor-create-global-class, novamira-adrianv2/batch-class
+  API: elementor-create-global-class, adrians-batch-class
 
 EBENE 3: Local Styles (Element-spezifisch)
   ID: s* (z.B. snode0, feheroText)
@@ -911,7 +911,7 @@ Basierend auf der Analyse würde Post 4943 etwa so scoren:
 | Bild lädt nicht | `url: null` in image-src | `url`-Key komplett entfernen |
 | Site crasht (500) | `custom_css` ist plain string | `{"raw":"..."}` Format |
 | class_name_contains_spaces | Hyphen in Style-ID | `generateStyleId()` verwenden |
-| GV-ID Drift | Kit-Update hat IDs verschoben | `novamira-adrianv2/variable-audit { report: "drift" }` |
+| GV-ID Drift | Kit-Update hat IDs verschoben | `adrians-variable-audit { report: "drift" }` |
 
 ---
 
@@ -936,7 +936,7 @@ node scripts/convert-xml-to-v4.js \
 # → v4-tree-final.json
 
 # 4. WordPress Build
-novamira-adrianv2/setup-v4-foundation { "post_id": 4943 }
+novamira/adrians-setup-v4-foundation { "post_id": 4943 }
 novamira/elementor-set-content {
   "post_id": 4943,
   "content": JSON.parse(fs.readFileSync('v4-tree-final.json'))

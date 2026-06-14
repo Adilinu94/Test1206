@@ -14,21 +14,21 @@ const port = parseInt(process.argv.find(a => a.startsWith('--port='))?.split('='
 
 // Simulierte Ability-Responses
 const MOCK_ABILITIES = {
-  'novamira-adrianv2/greet': { greeting: 'Hello from Mock MCP', version: 'mock-0.7.0' },
+  'novamira/adrians-greet': { greeting: 'Hello from Mock MCP', version: 'mock-0.7.0' },
   'novamira/elementor-check-setup': { elementor: { version: '4.1.1' }, atomic: { runtime_available: true, global_classes_available: true, variables_available: true } },
-  'novamira-adrianv2/setup-v4-foundation': { classes: {}, variables: {}, session_id: 'mock-session' },
-  'novamira-adrianv2/export-design-system': { colors: {}, fonts: {}, classes: {} },
-  'novamira-adrianv2/layout-audit': { issues: [], passed: true },
-  'novamira-adrianv2/visual-qa': { issues: [], total_issues: 0 },
-  'novamira-adrianv2/responsive-audit': { coverage: { desktop: 100, tablet: 100, mobile: 100 } },
-  'novamira-adrianv2/variable-audit': { drift: [], unused: [] },
+  'novamira/adrians-setup-v4-foundation': { classes: {}, variables: {}, session_id: 'mock-session' },
+  'novamira/adrians-export-design-system': { colors: {}, fonts: {}, classes: {} },
+  'novamira/adrians-layout-audit': { issues: [], passed: true },
+  'novamira/adrians-visual-qa': { issues: [], total_issues: 0 },
+  'novamira/adrians-responsive-audit': { coverage: { desktop: 100, tablet: 100, mobile: 100 } },
+  'novamira/adrians-variable-audit': { drift: [], unused: [] },
   'novamira/elementor-get-content': { content: { elements: [] } },
   'novamira/elementor-set-content': { success: true },
-  'novamira-adrianv2/batch-media-upload': { results: [] },
-  'novamira-adrianv2/add-global-class-variant': { success: true },
-  'novamira-adrianv2/apply-variable-to-class': { success: true },
+  'novamira/adrians-batch-media-upload': { results: [] },
+  'novamira/adrians-add-global-class-variant': { success: true },
+  'novamira/adrians-apply-variable-to-class': { success: true },
   'novamira/execute-php': { output: '', success: true },
-  'novamira-adrianv2/html-to-elementor-widget-plan': { success: true, native_widget_ratio: 0.85, tree: [], stats: { total_elements: 42 } },
+  'novamira/adrians-html-to-elementor-widget-plan': { success: true, native_widget_ratio: 0.85, tree: [], stats: { total_elements: 42 } },
 };
 
 let sessionId = null;

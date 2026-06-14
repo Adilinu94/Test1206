@@ -35,3 +35,4 @@ _gen-*.js
 
 # Plugin deployment marker
 novamira-adrianv2/.deploy-marker
+composer.phar

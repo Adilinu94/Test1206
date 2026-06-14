@@ -1,53 +1,99 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Elementor V4 Prop Type Schema",
-  "description": "Widget requirements and $$type shapes for the Framer → Elementor V4 Pipeline validator.",
-  "$$types": {
-    "size": { "properties": { "$$type": "size", "value": { "size": "number", "unit": "string" } } },
-    "dimensions": { "properties": { "$$type": "dimensions", "value": {} } },
-    "color": { "properties": { "$$type": "color", "value": "string" } },
-    "global-color-variable": { "properties": { "$$type": "global-color-variable", "value": "string" } },
-    "global-font-variable": { "properties": { "$$type": "global-font-variable", "value": "string" } },
-    "global-size-variable": { "properties": { "$$type": "global-size-variable", "value": "string" } },
-    "string": { "properties": { "$$type": "string", "value": "string" } },
-    "number": { "properties": { "$$type": "number", "value": "number" } },
-    "boolean": { "properties": { "$$type": "boolean", "value": "boolean" } },
-    "image-src": { "properties": { "$$type": "image-src", "value": { "id": "number" } } },
-    "image-attachment-id": { "properties": { "$$type": "image-attachment-id", "value": "number" } },
-    "classes": { "properties": { "$$type": "classes", "value": ["string"] } },
-    "html-v3": { "properties": { "$$type": "html-v3", "value": { "content": {} } } },
-    "link": { "properties": { "$$type": "link", "value": { "destination": {}, "tag": "string" } } }
-  },
-  "widget_requirements": {
-    "e-heading": { "required": ["title"] },
-    "e-paragraph": { "required": ["paragraph"] },
-    "e-button": { "required": ["text"] },
-    "e-image": { "required": ["image"] },
-    "e-svg": { "required": ["svg-icon"] },
-    "e-divider": { "required": [] },
-    "e-flexbox": { "required": [] },
-    "e-div-block": { "required": [] }
-  },
-  "property_types": {
-    "font-size": "size",
-    "font-family": "string",
-    "font-weight": "string",
-    "line-height": "size",
-    "letter-spacing": "size",
-    "color": "color",
-    "text-align": "string",
-    "padding": "dimensions",
-    "margin": "dimensions",
-    "gap": "size",
-    "width": "size",
-    "max-width": "size",
-    "flex-direction": "string",
-    "background-color": "color"
-  },
-  "responsive_rules": {
-    "mandatory_mobile_if_oversize": {
-      "font-size": 28,
-      "padding": 20
+  "version": "1.0.0",
+  "types": [
+    "e-heading",
+    "e-paragraph",
+    "e-button",
+    "e-image",
+    "e-svg",
+    "e-divider",
+    "e-flexbox",
+    "e-div-block",
+    "e-component",
+    "e-field-label",
+    "e-field-input",
+    "e-field-submit"
+  ],
+  "properties": {
+    "title": {
+      "type": "html-v3",
+      "widgets": [
+        "e-heading"
+      ]
+    },
+    "paragraph": {
+      "type": "html-v3",
+      "widgets": [
+        "e-paragraph"
+      ]
+    },
+    "text": {
+      "type": "html-v3",
+      "widgets": [
+        "e-button"
+      ]
+    },
+    "image": {
+      "type": "image",
+      "widgets": [
+        "e-image"
+      ]
+    },
+    "image-src": {
+      "type": "image-src",
+      "widgets": [
+        "e-image"
+      ]
+    },
+    "svg-icon": {
+      "type": "html-v3",
+      "widgets": [
+        "e-svg"
+      ]
+    },
+    "link": {
+      "type": "link",
+      "widgets": [
+        "e-button"
+      ]
+    },
+    "classes": {
+      "type": "classes",
+      "widgets": [
+        "*"
+      ]
+    },
+    "tag": {
+      "type": "string",
+      "widgets": [
+        "e-heading",
+        "e-flexbox",
+        "e-div-block"
+      ]
+    },
+    "flex-direction": {
+      "type": "string",
+      "widgets": [
+        "e-flexbox"
+      ]
+    },
+    "component-id": {
+      "type": "string",
+      "widgets": [
+        "e-component"
+      ]
+    },
+    "field-label": {
+      "type": "html-v3",
+      "widgets": [
+        "e-field-label"
+      ]
+    },
+    "field-placeholder": {
+      "type": "string",
+      "widgets": [
+        "e-field-input"
+      ]
     }
   }
 }
