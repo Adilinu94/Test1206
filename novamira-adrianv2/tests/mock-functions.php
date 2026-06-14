@@ -95,6 +95,15 @@ if (!function_exists('wp_kses_post')) {
 if (!function_exists('sanitize_text_field')) {
     function sanitize_text_field($str) { return $str; }
 }
+if (!function_exists('sanitize_file_name')) {
+    function sanitize_file_name($filename) {
+        // Strip path components like WordPress does
+        $filename = preg_replace('#[\\/]+#', '', $filename);
+        $filename = preg_replace('#\.\.+#', '', $filename);
+        $filename = trim($filename, '. ');
+        return $filename;
+    }
+}
 if (!function_exists('esc_html')) {
     function esc_html($text) { return $text; }
 }
