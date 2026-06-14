@@ -72,7 +72,7 @@ try {
  * @param {number} depth - Current depth
  * @returns {number} Max depth found
  */
-function calcMaxDepth(node, depth = 0) {
+function calcMaxDepth(node, depth = 1) {
   let max = depth;
   for (const child of (node.elements || node.children || [])) {
     max = Math.max(max, calcMaxDepth(child, depth + 1));
@@ -100,17 +100,17 @@ function countAll(node, counter = { total: 0, grid: 0, gcStyles: 0, totalStyles:
     for (const variant of (style.variants || [])) {
       for (const [prop, val] of Object.entries(variant.props || {})) {
         // GV color detection
-        if (val?.['$$type'] === 'global-color-variable') {
+        if (val && typeof val === 'object' && !Array.isArray(val) && val['$type'] === 'global-color-variable') {
           counter.gvColors++;
           counter.totalColors++;
         } else if (
-          val?.['$$type'] === 'color' ||
+          (val && typeof val === 'object' && !Array.isArray(val) && val['$type'] === 'color') ||
           (typeof val === 'string' && (val.startsWith('#') || val.startsWith('rgb')))
         ) {
           counter.totalColors++;
         }
         // GV font detection
-        if (val?.['$$type'] === 'global-font-variable') {
+        if (val && typeof val === 'object' && !Array.isArray(val) && val['$type'] === 'global-font-variable') {
           counter.gvFonts++;
           counter.totalFonts++;
         } else if (prop === 'font-family') {

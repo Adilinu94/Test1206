@@ -1,6 +1,6 @@
 # 🚀 Framer → Elementor V4 Pipeline V2: Master Blueprint
 
-> **Version:** v0.11.0 | **Stand:** 2026-06-13
+> **Version:** v0.12.0 | **Stand:** 2026-06-14
 
 ## 🎯 Overview
 Ziel: Umsetzung eines stabilen, token-effizienten Framer-zu-V4-Workflows basierend auf einer **3-Wege-Symbiose**:
@@ -27,7 +27,7 @@ framer-v4-pipeline-v2/
 ├── schemas/
 │   └── v4-prop-type-schema.json          # Widget-Pflichtfelder fuer Validator
 ├── tests/
-│   └── pipeline.test.js                  # 49 Regressionstests in 10 Suiten, node --test
+│   └── pipeline.test.js                  # 105 Regressionstests in 33 Suiten, node --test
 └── scripts/
     ├── lib/
     │   ├── framer-utils.js               # Gemeinsame Utilities (wrapSize, walkTree, ...)
@@ -42,6 +42,7 @@ framer-v4-pipeline-v2/
     ├── extract-framer-dark-mode.js       # Dark-Mode-CSS → V4 Variable-Set (ENH-10)
     ├── extract-framer-forms.js           # A3: Form Extraction (→ V4 Atomic Forms)
     ├── preflight-check.js                # Standalone Preflight System-Checks (S6)
+    ├── measure-quality-metrics.js        # ENH-13: Quality Metrics (DOM, GC, GV, Grid, Components)
     └── wizard/
         ├── shared.js                     # Shared helpers (log, runFile, recovery)
         ├── cmd-preflight.js              # Preflight sub-command
@@ -147,10 +148,10 @@ framer-v4-pipeline-v2/
 - [x] **FIX-7**: `mcp-bridge.js` callParallel() p-limit (concurrency=3, Worker-Pool, MCP_CONCURRENCY env var)
 - [x] **ENH-11**: `convert-xml-to-v4.js` JSDoc für 9 Kernfunktionen
 - [x] **wizard.js batch**: `--pages` + `--post-ids` Multi-Page Subcommand (S6)
-- [x] `tests/pipeline.test.js`: **88 Tests in 30 Suiten** (node --test), alle gruen
-- [x] `tests/e2e.test.js`: 12 Tests, alle gruen
-- [x] `tests/integration.test.js`: 4 Tests, alle gruen
-- [x] GSD-Projekt: `.planning/` mit PROJECT.md, REQUIREMENTS.md, ROADMAP.md, PLAN-1-4.md, STATE.md, config.json
+- [x] `tests/pipeline.test.js`: **105 Tests in 33 Suiten** (node --test), alle gruen
+- [x] `tests/e2e.test.js`: **15 Tests**, alle gruen (+3 S13 ENH-12)
+- [x] `tests/integration.test.js`: **7 Tests** (4 pass, 3 skip ohne --live)
+- [x] GSD-Projekt: `.planning/` mit PROJECT.md, REQUIREMENTS.md, ROADMAP.md, PLAN-1-7.md, STATE.md, config.json
 - [x] `--help` Blocks: A1, A2, A3 mit einheitlichem CLI-Pattern (parseArgs help Option)
 
 ### Phase 0.5.x Security & QA (abgeschlossen)
@@ -183,8 +184,11 @@ framer-v4-pipeline-v2/
 - [x] **Schema:** `schemas/v4-prop-type-schema.json` Fixture für E2E-Tests
 - [x] **Live getestet:** MCP-Bridge `--self-test` + check-v4 `--auto-call` gegen solar.local ✅
 
-### In Arbeit
-- [ ] End-to-End Test mit echter Framer-URL
+### Sprint 7+8 (abgeschlossen)
+- [x] **Sprint 7** Quality Hardening: FIX-10/11/12, 88→100 Tests
+- [x] **Sprint 8** Live Integration: ENH-12/13, FIX-13/14, 100→105 Pipeline / 12→15 E2E
+- [x] End-to-End Test mit echter Framer-URL (--non-interactive Mode)
+- [x] .planning/ Docs synchronisiert (REQUIREMENTS, ROADMAP, STATE, PROJECT)
 
 ### Phase 1.4+ — CI, Performance, UX, Advanced, A11y (abgeschlossen ✅)
 - [x] **1.4:** `.github/workflows/ci.yml` — 7 Jobs (test, e2e, schema, mcp-mock, visual, lint, syntax)
@@ -233,10 +237,10 @@ framer-v4-pipeline-v2/
 ## ✅ Lokale Verifikation
 
 ```bash
-npm test                # 88 pipeline tests (30 Suiten)
-npm run test:e2e        # 12 e2e tests
-npm run test:all        # 104 tests total (88 pipeline + 12 e2e + 4 integration)
-npm run test:integration # 4 integration tests
+npm test                # 105 pipeline tests (33 Suiten)
+npm run test:e2e        # 15 e2e tests
+npm run test:all        # 127 tests total (105 pipeline + 15 e2e + 7 integration)
+npm run test:integration # 7 integration tests (4 pass, 3 skip ohne --live)
 npm run test:bridge     # mcp-bridge.js --self-test
 npm run test:mcp-mock   # Integration tests gegen Mock-Server
 npm run test:schema     # sync-schema.js --validate
@@ -251,6 +255,8 @@ npm run extract-dark-mode  # Dark-Mode CSS Extraction (ENH-10)
 npm run extract-forms   # A3: Form Extraction
 npm run preflight-check # Standalone Preflight Checks (S6)
 npm run wizard-batch    # Multi-Page Batch Build (S6)
+npm run measure-quality  # ENH-13: Quality Metrics Measurement
+npm run test:integration-live # FIX-13: Live Integration Tests
 node --check wizard.js
 node --check scripts/lib/mcp-bridge.js
 ```

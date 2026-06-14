@@ -2,6 +2,36 @@
 
 ## [v0.11.0] — 2026-06-13
 
+### Sprint 7 — Quality Hardening (88→100 Tests)
+
+- **FIX-10 `--format markdown`**: `extract-framer-dark-mode.js` — `--format markdown` produziert formatierte Variablen-Tabelle. `--format json` (default) unveraendert.
+- **FIX-11 Wizard `--help`**: Alle 6 cmd-*.js mit konsistentem `printHelp()` Export. `wizard.js help <sub>` und `wizard.js <sub> --help` funktionieren.
+- **FIX-12 `token_name` Dedup**: `suggestDarkTokenName()` mit Property-Suffix (`dark-{base}-{selector}-{property}`). Verhindert Kollisionen bei gleichem Selektor mit unterschiedlichen Properties.
+
+### Sprint 8 — Live Integration (100→105 Pipeline / 12→15 E2E / 4→7 Integration)
+
+- **ENH-12 Wizard `--non-interactive`**: `wizard.js --non-interactive --url <url> --post-id <ID>` — automatisierter Pipeline-Durchlauf ohne Prompts. Schema-Sync, FramerExport, Extraktion, Manifest.
+- **ENH-13 `measure-quality-metrics.js`** (NEU): Misst 6 Qualitaets-Metriken: DOM-Tiefe, GC-Coverage, GV-Substitution (Color+Font), Grid-Nutzung, Components. `--compare` Flag.
+- **FIX-13 Integration `--live`**: `tests/integration.test.js --live` — Live MCP-Tests gegen solar.local mit Preflight-Check (4 neue Live-Tests).
+- **FIX-14 CI `test-all`**: `.github/workflows/ci.yml` — neuer `test-all` Job (127 Tests). `package.json` — `measure-quality`, `test:integration-live` Scripts.
+
+### Docs Sync
+- `.planning/REQUIREMENTS.md`: Sprint 7+8 (FIX-10/11/12, ENH-12/13, FIX-13/14, 23→30 Requirements)
+- `.planning/ROADMAP.md`: Sprint 7 Quality Hardening + Sprint 8 Live Integration Phasen
+- `.planning/STATE.md`: v0.11.0, Sprint 8 als aktiver Fokus
+- `.planning/PROJECT.md`: v0.11.0, 7 Sprints, 105 Pipeline-Tests
+
+### npm-Scripts (Neu)
+- `measure-quality`, `test:integration-live`
+
+### Test-Status
+- `npm test` → 105/105 ✅ (von 49 → 105, +56 Tests ueber 8 Sprints)
+- 33 Test-Suiten, 30 Requirements, 100% Complete
+- `npm run test:e2e` → 15/15 ✅ (+3 S13 ENH-12 Tests)
+- `npm run test:integration` → 7 Tests (4 pass, 3 skip ohne --live)
+- `npm run test:all` → 127 Tests total
+
+
 ### Sprint 5 — Audit-Gap Remediation (77→83 Tests)
 
 - **FIX-7 p-limit**: `callParallel()` Worker-Pool mit `concurrency=3`. `McpBridge.defaultConcurrency` via Constructor + `MCP_CONCURRENCY` env var. Verhindert Race-Conditions bei 10+ parallelen Requests.
@@ -18,7 +48,7 @@
 - `preflight-check`, `wizard-batch`, `extract-dark-mode`
 
 ### Test-Status
-- `npm test` → 88/88 ✅ (von 49 → 88, +39 Tests über 6 Sprints)
+- `npm test` → 88/88 ✅ (von 49 → 88, +39 Tests über 6 Sprints (Sprint 1-6))
 - 30 Test-Suiten, 23 Requirements, 100% Complete
 
 ## [v0.10.0] — 2026-06-13

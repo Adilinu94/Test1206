@@ -114,13 +114,11 @@ describe('Live WordPress Integration (--live)', function() {
   before(async function() {
     if (!isLive) {
       console.log('  Skipping live tests (use --live flag)');
-      this.skip();
       return;
     }
     var ok = await runPreflightCheck();
     if (!ok) {
       console.error('  Aborting live tests -- preflight failed');
-      this.skip();
     }
   });
 

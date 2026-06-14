@@ -436,32 +436,32 @@ describe('E2E Pipeline: Framer XML → Elementor V4', () => {
 
 // ── S13: ENH-12 — E2E Framer URL Pipeline (Sprint 8) ─────────────────
 
-suite('S13: ENH-12 — E2E Framer URL Pipeline', () => {
+describe('S13: ENH-12 — E2E Framer URL Pipeline', () => {
   test('ENH-12: pipeline runs on local FramerExport mirror', () => {
-    const exportDir = process.env.FRAMER_EXPORT_DIR || path.join(__dirname, '..', 'tools', 'framer-export');
-    const htmlFile = path.join(exportDir, 'index.html');
-    const xmlGlob = path.join(exportDir, '*.xml');
+    const exportDir = process.env.FRAMER_EXPORT_DIR || join(__dirname, '..', 'tools', 'framer-export');
+    const htmlFile = join(exportDir, 'index.html');
+    const xmlGlob = join(exportDir, '*.xml');
     
-    if (!fs.existsSync(htmlFile)) {
+    if (!existsSync(htmlFile)) {
       console.log('[SKIP] No FramerExport mirror found. Set FRAMER_EXPORT_DIR.');
       return;
     }
 
     // Step 1: Verify extract-framer-styles can read the export
-    const stylesOut = path.join(TMP_DIR, 'e2e-styles.json');
+    const stylesOut = join(TMP_DIR, 'e2e-styles.json');
     try {
       run('extract-framer-styles.js', ['--html', htmlFile, '--output', stylesOut]);
-      const styles = JSON.parse(fs.readFileSync(stylesOut, 'utf8'));
+      const styles = JSON.parse(readFileSync(stylesOut, 'utf8'));
       assert.ok(styles.colors || styles.tokens || styles, 'Has extracted styles');
     } catch (e) {
       console.log('[SKIP] extract-framer-styles: ' + e.message);
     }
 
     // Step 2: Verify extract-image-urls can read the export
-    const imagesOut = path.join(TMP_DIR, 'e2e-images.json');
+    const imagesOut = join(TMP_DIR, 'e2e-images.json');
     try {
       run('extract-image-urls.js', ['--html', htmlFile, '--output', imagesOut]);
-      const images = JSON.parse(fs.readFileSync(imagesOut, 'utf8'));
+      const images = JSON.parse(readFileSync(imagesOut, 'utf8'));
       assert.ok(Array.isArray(images.urls || images) || typeof images === 'object', 'Has extracted image URLs');
     } catch (e) {
       console.log('[SKIP] extract-image-urls: ' + e.message);
@@ -469,8 +469,8 @@ suite('S13: ENH-12 — E2E Framer URL Pipeline', () => {
   });
 
   test('ENH-12: generated v4-tree passes schema validation', () => {
-    const treeFile = path.join(process.env.FRAMER_EXPORT_DIR || path.join(__dirname, '..', 'tools', 'framer-export'), 'v4-tree.json');
-    if (!fs.existsSync(treeFile)) {
+    const treeFile = join(process.env.FRAMER_EXPORT_DIR || join(__dirname, '..', 'tools', 'framer-export'), 'v4-tree.json');
+    if (!existsSync(treeFile)) {
       console.log('[SKIP] No v4-tree.json found in FramerExport dir.');
       return;
     }
@@ -488,15 +488,15 @@ suite('S13: ENH-12 — E2E Framer URL Pipeline', () => {
   });
 
   test('ENH-12: quality metrics can measure v4-tree', () => {
-    const treeFile = path.join(process.env.FRAMER_EXPORT_DIR || path.join(__dirname, '..', 'tools', 'framer-export'), 'v4-tree.json');
-    if (!fs.existsSync(treeFile)) {
+    const treeFile = join(process.env.FRAMER_EXPORT_DIR || join(__dirname, '..', 'tools', 'framer-export'), 'v4-tree.json');
+    if (!existsSync(treeFile)) {
       console.log('[SKIP] No v4-tree.json found.');
       return;
     }
-    const reportOut = path.join(TMP_DIR, 'e2e-quality-report.json');
+    const reportOut = join(TMP_DIR, 'e2e-quality-report.json');
     try {
       run('measure-quality-metrics.js', [treeFile, '--output', reportOut]);
-      const report = JSON.parse(fs.readFileSync(reportOut, 'utf8'));
+      const report = JSON.parse(readFileSync(reportOut, 'utf8'));
       assert.ok(report.metrics, 'Has metrics');
       assert.ok(typeof report.metrics.dom_depth.value === 'number', 'Has DOM depth');
       assert.ok(typeof report.metrics.gc_coverage.value === 'number', 'Has GC coverage');

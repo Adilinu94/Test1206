@@ -1607,7 +1607,7 @@ const PROJECT_ROOT = dirname(SCRIPTS);
 
 // ── S34: ENH-13 — Quality Metrics (Sprint 8) ────────────────────────
 
-suite('S34: ENH-13 — Quality Metrics', () => {
+describe('S34: ENH-13 — Quality Metrics', () => {
   test('ENH-13: measures DOM depth correctly', () => {
     const tree = {
       id: 'root', widgetType: 'e-flexbox',
