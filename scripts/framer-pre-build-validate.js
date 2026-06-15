@@ -434,6 +434,142 @@ function g12_ImageSrcFormat() {
   };
 }
 
+// ── 13. BORDER_RADIUS_FORMAT ────────────────────
+function g13_BorderRadiusFormat() {
+  const invalid = [];
+  for (const node of nodes) {
+    walkValues(node.styles, (key, val, parent, p) => {
+      if (key === 'border-radius' && parent['$$type'] !== 'border-radius') {
+        // V4 erwartet ein border-radius-Objekt mit 4 Ecken, kein einfacher size/string-Wert
+        invalid.push({ path: p, nodeId: node.id, actualType: parent['$$type'], issue: `border-radius als ${parent['$$type']} — sollte border-radius-Objekt mit 4 Ecken sein` });
+      }
+    });
+  }
+  if (invalid.length === 0) {
+    return { id: 'BORDER_RADIUS_FORMAT', status: 'PASS', message: 'All border-radius properties use correct 4-corner format' };
+  }
+  return {
+    id: 'BORDER_RADIUS_FORMAT', status: 'FAIL', severity: 'error',
+    message: `${invalid.length} border-radius prop(s) not using 4-corner border-radius object`,
+    details: { invalid },
+  };
+}
+
+// ── 14. NO_EMPTY_CONTAINERS ─────────────────────
+function g14_NoEmptyContainers() {
+  const empty = [];
+  for (const node of nodes) {
+    const wt = node.widgetType || node.elType || '';
+    if (wt === 'e-flexbox' || wt === 'e-div-block' || wt === 'e-container') {
+      const children = node.elements || [];
+      if (children.length === 0) {
+        empty.push({ nodeId: node.id, widgetType: wt });
+      }
+    }
+  }
+  if (empty.length === 0) {
+    return { id: 'NO_EMPTY_CONTAINERS', status: 'PASS', message: 'No empty containers found' };
+  }
+  return {
+    id: 'NO_EMPTY_CONTAINERS', status: 'WARN', severity: 'warning',
+    message: `${empty.length} empty container(s) found (may cause layout gaps)`,
+    details: { empty },
+  };
+}
+
+// ── 15. HEADING_HIERARCHY ───────────────────────
+function g15_HeadingHierarchy() {
+  const violations = [];
+  let lastLevel = 0;
+  for (const node of nodes) {
+    if (node.widgetType === 'e-heading') {
+      const tagRaw = node.settings?.tag;
+      const tag = (typeof tagRaw === 'string') ? tagRaw : (tagRaw?.value || 'h2');
+      const level = parseInt(tag.replace('h', ''), 10);
+      if (!isNaN(level)) {
+        // h1 should only appear once at the start
+        if (level === 1 && lastLevel > 0) {
+          violations.push({ nodeId: node.id, tag, issue: 'h1 appears after other headings — only one h1 per page' });
+        }
+        // No skipping more than 1 level (h2 → h4 without h3)
+        if (lastLevel > 0 && level > lastLevel + 1) {
+          violations.push({ nodeId: node.id, tag, issue: `Heading skip: h${lastLevel} → h${level} (missing h${lastLevel + 1})` });
+        }
+        lastLevel = level;
+      }
+    }
+  }
+  if (violations.length === 0) {
+    return { id: 'HEADING_HIERARCHY', status: 'PASS', message: 'Heading hierarchy is logical (no skips, single h1)' };
+  }
+  return {
+    id: 'HEADING_HIERARCHY', status: 'WARN', severity: 'warning',
+    message: `${violations.length} heading hierarchy issue(s) found`,
+    details: { violations },
+  };
+}
+
+// ── 16. ALT_TEXT_PRESENT ────────────────────────
+function g16_AltTextPresent() {
+  const missing = [];
+  for (const node of nodes) {
+    if (node.widgetType === 'e-image') {
+      // Check all variant props for alt text
+      let hasAlt = false;
+      for (const [, styleDef] of Object.entries(node.styles || {})) {
+        for (const variant of (styleDef.variants || [])) {
+          if (variant.props?.alt) hasAlt = true;
+        }
+      }
+      // Check settings directly (unwrap $$type if needed)
+      const altRaw = node.settings?.alt;
+      const altValue = (typeof altRaw === 'string') ? altRaw : (altRaw?.value ?? '');
+      if (altValue) hasAlt = true;
+
+      if (!hasAlt) {
+        missing.push({ nodeId: node.id });
+      }
+    }
+  }
+  if (missing.length === 0) {
+    return { id: 'ALT_TEXT_PRESENT', status: 'PASS', message: 'All e-image elements have alt text' };
+  }
+  return {
+    id: 'ALT_TEXT_PRESENT', status: 'WARN', severity: 'warning',
+    message: `${missing.length} e-image element(s) missing alt text (accessibility)`,
+    details: { missing },
+  };
+}
+
+// ── 17. DOM_DEPTH ───────────────────────────────
+function g17_DomDepth() {
+  const maxDepth = 6;
+  const deepNodes = [];
+
+  function measureDepth(node, depth = 0) {
+    if (!node || typeof node !== 'object') return;
+    if (depth > maxDepth) {
+      deepNodes.push({ nodeId: node.id || '?', widgetType: node.widgetType || '?', depth });
+    }
+    const children = node.elements || node.children || [];
+    for (const child of children) {
+      measureDepth(child, depth + 1);
+    }
+  }
+
+  const roots = Array.isArray(tree) ? tree : [tree];
+  for (const root of roots) measureDepth(root, 0);
+
+  if (deepNodes.length === 0) {
+    return { id: 'DOM_DEPTH', status: 'PASS', message: `DOM depth within limit (max ${maxDepth})` };
+  }
+  return {
+    id: 'DOM_DEPTH', status: 'WARN', severity: 'warning',
+    message: `${deepNodes.length} node(s) exceed max DOM depth of ${maxDepth}`,
+    details: { maxDepth, deepNodes: deepNodes.slice(0, 10) },
+  };
+}
+
 // ─────────────────────────────────────────────
 // RUN ALL GUARDS
 // ─────────────────────────────────────────────
@@ -451,6 +587,11 @@ const guards = [
   g10_TabletVariants(),
   g11_BackgroundColorGC(),
   g12_ImageSrcFormat(),
+  g13_BorderRadiusFormat(),
+  g14_NoEmptyContainers(),
+  g15_HeadingHierarchy(),
+  g16_AltTextPresent(),
+  g17_DomDepth(),
 ];
 
 // ─────────────────────────────────────────────
