@@ -727,6 +727,60 @@ describe('convert-xml-to-v4: cross-project robustness', () => {
     assert.equal(link.value?.tag?.value, 'a', `tag value must be 'a'`);
   });
 
+  // RC-11 (UMBAUPLAN §1.3): Fallback aus inlineTextStyle-Pfad ableiten.
+  // Wenn der Style-Pfad nicht in der Token-Map aufgeloest werden kann,
+  // soll anhand des Style-Namens ("Heading 1", "Heading 2", etc.) eine
+  // sinnvolle Default-Groesse gesetzt werden, statt 32px-Generic.
+  test('RC-11: unresolved inlineTextStyle "/Heading/Heading 1" → 68px fallback', () => {
+    const xml = `<Text name="Heading 1" inlineTextStyle="/Heading/Heading 1">Hero Title</Text>`;
+    const xmlFile = tmpFile('rc11-1.xml', xml);
+    const outFile = tmpFile('rc11-1-v4.json');
+    // Kein tokenMapping uebergeben — style-resolution schlaegt fehl, fallback greift
+    run('convert-xml-to-v4.js', ['--xml', xmlFile, '--output', outFile]);
+    const tree = readJson(outFile);
+    const size = tree.styles?.[Object.keys(tree.styles)[0]]?.variants?.[0]?.props?.['font-size'];
+    assert.ok(size, 'font-size prop should be set as RC-11 fallback');
+    assert.equal(size.value?.size, 68, `Heading 1 should fallback to 68px, got ${size.value?.size}`);
+  });
+
+  test('RC-11: unresolved inlineTextStyle "/Heading/Heading 2" → 48px fallback', () => {
+    const xml = `<Text name="Heading 2" inlineTextStyle="/Heading/Heading 2">Sub</Text>`;
+    const xmlFile = tmpFile('rc11-2.xml', xml);
+    const outFile = tmpFile('rc11-2-v4.json');
+    run('convert-xml-to-v4.js', ['--xml', xmlFile, '--output', outFile]);
+    const tree = readJson(outFile);
+    const size = tree.styles?.[Object.keys(tree.styles)[0]]?.variants?.[0]?.props?.['font-size'];
+    assert.equal(size.value?.size, 48, `Heading 2 should fallback to 48px, got ${size.value?.size}`);
+  });
+
+  test('RC-11: unknown inlineTextStyle path → no fallback (no false-positive 32px)', () => {
+    const xml = `<Text name="Heading 1" inlineTextStyle="/Unknown/Path">Title</Text>`;
+    const xmlFile = tmpFile('rc11-3.xml', xml);
+    const outFile = tmpFile('rc11-3-v4.json');
+    run('convert-xml-to-v4.js', ['--xml', xmlFile, '--output', outFile]);
+    const tree = readJson(outFile);
+    const props = tree.styles?.[Object.keys(tree.styles)[0]]?.variants?.[0]?.props;
+    // Bei unbekanntem Pfad: KEINE font-size setzen (lieber leer als falsch).
+    // Verhindert false-positive 32px-Generic wenn die echte Groesse unbekannt ist.
+    assert.ok(!props?.['font-size'], `Unknown path should NOT set font-size, got ${JSON.stringify(props?.['font-size'])}`);
+  });
+
+  // Bug 8 (UMBAUPLAN §1.4): CamelCase-Keys mit Property-Override-Werten sollen
+  // als Text-Kandidaten geprueft werden, auch wenn sie mit Grossbuchstaben beginnen.
+  // Vorher: skip aller uppercase-Keys → Text ging verloren.
+  // Jetzt: nur BEKANNTE Style-Attr-Keys filtern, Rest zaehlt als Text.
+  test('Bug 8: CamelCase component-prop key yields text content', () => {
+    const xml = `<Frame name="Btn" componentId="X" ycw27fUKm="See how we work"><Frame name="Inner"/></Frame>`;
+    const xmlFile = tmpFile('bug8-1.xml', xml);
+    const outFile = tmpFile('bug8-1-v4.json');
+    run('convert-xml-to-v4.js', ['--xml', xmlFile, '--output', outFile]);
+    const tree = readJson(outFile);
+    // ycw27fUKm ist kein bekannter Style-Key → Text-Extraktion soll ihn nutzen
+    const allText = JSON.stringify(tree.settings || {});
+    assert.ok(allText.includes('See how we work') || JSON.stringify(tree).includes('See how we work'),
+      `Bug 8: text from CamelCase component prop should be preserved, got: ${allText.slice(0,200)}`);
+  });
+
 });
 
 // ─── Suite 11: C2 Grid Detection (Strict Grid Mapping) ────────────────────

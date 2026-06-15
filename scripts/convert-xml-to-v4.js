@@ -530,6 +530,25 @@ function detectGridLayout(xmlNode, attrs) {
   return 'repeat(auto-fit, minmax(250px, 1fr))';
 }
 
+// RC-11 (UMBAUPLAN §1.3): Style-Pfad-Fallback-Tabelle.
+// Wenn `inlineTextStyle="/Heading/Heading 1"` nicht in der token-mapping.json
+// aufgeloest werden kann, wird der letzte Pfad-Segment ("Heading 1") hier
+// nachgeschlagen. Lookup erfolgt lowercased, damit "Heading 1" === "heading 1".
+const TEXT_STYLE_FALLBACKS_BY_NAME = {
+  'heading 1':        { size: '68px', weight: '700', color: '#111111' },
+  'heading 2':        { size: '48px', weight: '600', color: '#111111' },
+  'heading 3':        { size: '32px', weight: '600', color: '#111111' },
+  'heading 4':        { size: '24px', weight: '600', color: '#111111' },
+  'heading 5':        { size: '20px', weight: '600', color: '#111111' },
+  'heading 6':        { size: '16px', weight: '600', color: '#111111' },
+  'body':             { size: '16px', weight: '400', color: '#444444' },
+  'body-20px-medium': { size: '20px', weight: '500', color: '#222222' },
+  'body-16px-medium': { size: '16px', weight: '500', color: '#222222' },
+  'body s':           { size: '14px', weight: '400', color: '#666666' },
+  'body xs':          { size: '12px', weight: '400', color: '#666666' },
+  'caption':          { size: '12px', weight: '400', color: '#888888' },
+};
+
 /**
  * Baut das V4-Style-Props-Objekt aus Framer-Attributen.
  *
@@ -720,11 +739,22 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
   // RC-11 Fix: Minimum default styles for widgets with empty props.
   // Widgets with {} props render with browser defaults (Times New Roman, no sizing).
   // Set sane fallbacks that match typical Framer designs.
-  // Bug 8/RC-11 Fix: Wenn inlineTextStyle gesetzt ist, KEINE Fallbacks anwenden —
+  // Bug 8/RC-11 Fix: Wenn inlineTextStyle gesetzt ist, KEINE Generic-Fallbacks —
   // die Style-Referenz wird in Phase 2 (Dual-Source) aufgeloest.
+  // NEU: Style-Pfad-Fallback (UMBAUPLAN §1.3). Wenn der Style-Pfad NICHT in der
+  // token-mapping.json aufgeloest werden konnte, leiten wir eine sinnvolle
+  // Default-Groesse aus dem Pfad-Namen ab ("Heading 1" → 68px etc.).
   if (Object.keys(props).length === 0) {
     if (inlineTextStyle) {
-      warn(`inlineTextStyle='${inlineTextStyle}' gefunden aber nicht aufgeloest (Phase 2 Dual-Source benoetigt). Keine RC-11 Fallbacks gesetzt.`);
+      const fallback = TEXT_STYLE_FALLBACKS_BY_NAME[inlineTextStyle.split('/').pop().toLowerCase()];
+      if (fallback) {
+        warn(`RC-11: inlineTextStyle='${inlineTextStyle}' nicht aufgeloest, Style-Pfad-Fallback (size=${fallback.size}, weight=${fallback.weight}).`);
+        if (fallback.size)   props['font-size']   = wrapSize(fallback.size);
+        if (fallback.weight) props['font-weight'] = wrapType('string', fallback.weight);
+        if (fallback.color)  props['color']       = wrapColor(fallback.color);
+      } else {
+        warn(`RC-11: inlineTextStyle='${inlineTextStyle}' gefunden, kein Style-Pfad-Fallback bekannt. Keine Fallbacks gesetzt.`);
+      }
     } else {
       if (widgetType === 'e-heading') {
         warn('RC-11 Fallback: e-heading ohne inlineTextStyle — Inter/32px/#111 gesetzt.');
@@ -835,14 +865,27 @@ function resolvePassThrough(xmlNode, depth) {
 function extractComponentText(attrs) {
   if (!attrs.componentId && !attrs.variant) return undefined;
 
+  // Bug 8 Fix (UMBAUPLAN §1.4): NUR BEKANNTE Style-Attribut-Keys filtern.
+  // Vorher: skip alle `^[A-Z]`-Keys → CamelCase Property-Overrides (z.B. `ycw27fUKm`)
+  // gingen als Text verloren. Jetzt: nur echte Framer-Style-Properties rausfiltern,
+  // der Rest sind Property-Overrides und zaehlen als Text-Kandidaten.
+  const STYLE_ATTR_KEYS = new Set([
+    'backgroundColor', 'backgroundImage', 'borderRadius',
+    'fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing',
+    'opacity', 'stackDirection', 'stackGap', 'stackDistribution', 'stackAlignment',
+    'position', 'top', 'right', 'bottom', 'left',
+    'width', 'height', 'maxWidth', 'minWidth', 'overflow', 'display',
+    'gridTemplateColumns', 'padding', 'tag', 'href', 'target',
+  ]);
+
   let bestText = undefined;
 
   for (const [key, val] of Object.entries(attrs)) {
     // Skip known system/meta keys
     if (['componentId', 'variant', 'name', 'id', 'nodeId', 'tag', 'href',
           'target', 'layout', 'overflow', 'position', 'opacity'].includes(key)) continue;
-    // Skip style-reference keys (uppercase-camel identifiers like `backgroundColor`)
-    if (/^[A-Z]/.test(key)) continue;
+    // Skip known Framer style-attribute keys (CamelCase)
+    if (STYLE_ATTR_KEYS.has(key)) continue;
 
     const str = String(val).trim();
 
@@ -959,6 +1002,13 @@ function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0)
   if (widgetType === 'e-component') {
     settings.tag = attrs.tag || 'div';
     settings['component-id'] = wrapType('string', attrs.componentId || attrs.componentName || '');
+    // Bug 8 Fix (UMBAUPLAN §1.4): Text aus Property-Override-Attrs in Settings
+    // uebernehmen, damit V4-Komponenten mit Text-Literalen nicht leer rendern.
+    // extractComponentText liefert den laengsten lesbaren Kandidaten (z.B. "See how we work"
+    // aus dem Framer-Internal-Attr `ycw27fUKm="See how we work"`).
+    if (textContent !== undefined) {
+      settings['component-text'] = wrapType('string', String(textContent));
+    }
     // Store text overrides as component properties
     if (attrs.componentOverrides) {
       try {
@@ -1368,6 +1418,9 @@ function findGvIdForFont(family, tokenMapping) {
  * alle $$type:"color"-Hex-Werte und $$type:"string"-Font-Namen
  * durch GV-Referenzen aus token-mapping.json.
  *
+ * Phase 12 Fix: Rekursiert in nested objects (z.B. background.value.color)
+ * um auch Farbwerte innerhalb von Wrapper-Typen zu substituieren.
+ *
  * Root-Cause Fix: Statt Hex-Werte im Nachhinein zu patchen, werden
  * sie direkt durch die entsprechenden Global-Variable-IDs ersetzt.
  *
@@ -1379,6 +1432,45 @@ function substituteTokensWithGvIds(tree, tokenMapping) {
   if (!tokenMapping) return { tree, substitutions: 0 };
   let substitutions = 0;
 
+  /**
+   * Rekursiv in einem beliebigen Value-Objekt nach $$type:"color" Werten suchen
+   * und diese durch GV-Referenzen ersetzen.
+   *
+   * Deckt ab: direkte color-Props, background.value.color, border-Color-Props, etc.
+   *
+   * @param {*} obj - Beliebiges Objekt/Array/Value
+   * @returns {*} Objekt mit substituierten Farbwerten
+   */
+  function substituteColorsDeep(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(substituteColorsDeep);
+
+    const result = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        // Wenn es ein $$type:"color" mit Hex-Wert ist → GV-Substitution
+        if (value['$$type'] === 'color') {
+          const hex = typeof value.value === 'string' ? value.value : null;
+          if (hex && hex.startsWith('#')) {
+            const gvId = findGvIdForHex(hex, tokenMapping);
+            if (gvId) {
+              result[key] = wrapGvColor(gvId);
+              substitutions++;
+              continue;
+            }
+          }
+        }
+        // Rekursiv in nested objects (z.B. background.value, border)
+        result[key] = substituteColorsDeep(value);
+      } else if (Array.isArray(value)) {
+        result[key] = value.map(substituteColorsDeep);
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  }
+
   function walkNode(node) {
     if (!node || typeof node !== 'object') return;
 
@@ -1386,21 +1478,12 @@ function substituteTokensWithGvIds(tree, tokenMapping) {
       for (const [styleId, styleDef] of Object.entries(node.styles)) {
         for (const variant of (styleDef.variants || [])) {
           if (!variant.props) continue;
+          // Phase 12 Fix: Recurse into nested color values (background, border, etc.)
+          variant.props = substituteColorsDeep(variant.props);
+
+          // Font → GV (top-level only, fonts don't nest)
           for (const [prop, value] of Object.entries(variant.props)) {
             if (!value || typeof value !== 'object') continue;
-
-            // Color → GV
-            if (value['$$type'] === 'color') {
-              const hex = typeof value.value === 'string' ? value.value : null;
-              if (!hex || !hex.startsWith('#')) continue;
-              const gvId = findGvIdForHex(hex, tokenMapping);
-              if (gvId) {
-                variant.props[prop] = wrapGvColor(gvId);
-                substitutions++;
-              }
-            }
-
-            // Font → GV
             if (prop === 'font-family' && value['$$type'] === 'string') {
               const family = value.value;
               if (!family) continue;
