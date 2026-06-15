@@ -1907,6 +1907,191 @@ describe('S38: Phase 6 — Pipeline Smoke Test', () => {
   });
 });
 
+// ─── Suite 39: Phase 7 — E2E Integration Test ───────────────────────
+
+describe('S39: Phase 7 — E2E Pipeline Integration', () => {
+  test('P7: Full pipeline chain: extract → design-system → convert → validate', async () => {
+    const testDir = join(tmpdir(), 'pipeline-test', 'p7-e2e-' + Date.now());
+    mkdirSync(testDir, { recursive: true });
+    mkdirSync(join(testDir, 'tokens'), { recursive: true });
+
+    // Step 1: Create minimal HTML with CSS variables + styles
+    writeFileSync(join(testDir, 'index.html'), `<!DOCTYPE html><html><head><style>
+      :root { --token-primary: #0e2a3b; --token-bg: #ffffff; }
+      body { font-family: 'Inter', sans-serif; }
+    </style></head><body></body></html>`, 'utf8');
+
+    // Step 2: Create XML with inlineTextStyle references
+    writeFileSync(join(testDir, 'page.xml'), `<Frame name="Hero" backgroundColor="#0e2a3b" stackDirection="vertical" stackGap="20px" padding="60px">
+      <Text name="Heading 1" inlineTextStyle="/Heading/Heading 1" text="Hello World" font-size="68px"/>
+      <Text name="Body" inlineTextStyle="/Body/Body-16px-Medium" text="Description text here"/>
+      <Image name="Hero Image" backgroundImage="url(https://framerusercontent.com/images/test.jpg)" width="600px" height="400px"/>
+    </Frame>`, 'utf8');
+
+    // Step 3: CSS token extraction
+    const tokMap = join(testDir, 'tokens', 'token-mapping.json');
+    run('extract-framer-css-tokens.js', [
+      '--html', join(testDir, 'index.html'),
+      '--output', tokMap,
+    ]);
+    const tokens = readJson(tokMap);
+    assert.ok(tokens.css_variables, 'Token map has CSS variables');
+    assert.ok(tokens.textStyles, 'Token map has text styles');
+
+    // Step 4: Design system builder
+    const dsDir = join(testDir, 'design-system');
+    mkdirSync(dsDir, { recursive: true });
+    run('design-system-builder.js', [
+      '--token-map', tokMap,
+      '--output-dir', dsDir,
+    ]);
+    const vars = readJson(join(dsDir, 'variables.json'));
+    const classes = readJson(join(dsDir, 'global-classes.json'));
+    assert.ok(vars.meta?.total >= 0, 'Variables file is valid');
+    assert.ok(classes.meta?.total >= 0, 'Global classes file is valid');
+
+    // Step 5: Convert XML to V4 with token-map
+    const v4Out = join(testDir, 'v4-output');
+    mkdirSync(v4Out, { recursive: true });
+    const updatedTok = join(dsDir, 'token-mapping-updated.json');
+    const v4Tree = join(v4Out, 'page.json');
+    run('convert-xml-to-v4.js', [
+      '--xml', join(testDir, 'page.xml'),
+      '--token-map', updatedTok,
+      '--output-dir', v4Out,
+      '--output', v4Tree,
+    ]);
+    const tree = readJson(v4Tree);
+    assert.ok(tree.widgetType, 'V4 tree has widgetType');
+    assert.ok(tree.styles, 'V4 tree has styles');
+    assert.ok(tree.elements, 'V4 tree has elements');
+
+    // Step 6: Pre-build validation (17 Guards)
+    const valReport = join(v4Out, 'pre-build-validation.json');
+    const valResult = run('framer-pre-build-validate.js', [
+      '--tree', v4Tree,
+      '--tokens', tokMap,
+      '--output', valReport,
+    ], { expectFail: true });
+    const report = readJson(valReport);
+    assert.ok(typeof report.meta?.score === 'number', 'Validation has score');
+    // Verify key guards ran
+    const guardIds = report.guards.map(g => g.id);
+    assert.ok(guardIds.includes('BORDER_RADIUS_FORMAT'), 'g13 border-radius guard ran');
+    assert.ok(guardIds.includes('BASE_VARIANT_NULL'), 'g9 base variant guard ran');
+    assert.ok(guardIds.includes('STYLE_CLASSES_BINDING'), 'g5 style binding guard ran');
+  });
+
+  test('P7: Quality gate produces valid consolidated report', () => {
+    const testDir = join(tmpdir(), 'pipeline-test', 'p7-gate-' + Date.now());
+    mkdirSync(testDir, { recursive: true });
+
+    // Minimal V4 tree
+    const tree = {
+      widgetType: 'e-flexbox',
+      id: 'root',
+      settings: {
+        classes: { '$$type': 'classes', value: ['ssection'] },
+        tag: 'section',
+      },
+      styles: {
+        ssection: {
+          '$$type': 'flexbox',
+          variants: [{
+            meta: { breakpoint: null, state: null },
+            props: { 'flex-direction': { '$$type': 'string', value: 'column' } },
+          }],
+        },
+      },
+      elements: [],
+    };
+    const treeFile = join(testDir, 'tree.json');
+    writeFileSync(treeFile, JSON.stringify(tree), 'utf8');
+
+    const qaDir = join(testDir, 'qa');
+    mkdirSync(qaDir, { recursive: true });
+
+    const gateResult = run('build-quality-gate.js', [
+      '--tree', treeFile,
+      '--output-dir', qaDir,
+      '--skip-screenshots',
+    ], { expectFail: true });
+
+    // Should produce a quality-gate-report.json
+    const reportPath = join(qaDir, 'quality-gate-report.json');
+    if (existsSync(reportPath)) {
+      const gateReport = readJson(reportPath);
+      assert.ok(gateReport.meta, 'Gate report has meta');
+      assert.ok(gateReport.summary, 'Gate report has summary');
+      assert.ok(Array.isArray(gateReport.steps), 'Gate report has steps array');
+    }
+  });
+
+  test('P7: Pre-build validation accepts $$type:size for uniform border-radius', () => {
+    // Regression: g13 must allow $$type:size for uniform border-radius (UMBAUPLAN Bug B)
+    const tree = [{
+      widgetType: 'e-flexbox',
+      id: 'card',
+      settings: { classes: { '$$type': 'classes', value: ['scard'] } },
+      styles: {
+        scard: {
+          variants: [{
+            meta: { breakpoint: null, state: null },
+            props: {
+              'border-radius': {
+                '$$type': 'size',
+                value: { size: 8, unit: 'px' },
+              },
+            },
+          }],
+        },
+      },
+      elements: [],
+    }];
+    const treeFile = tmpFile('p7-br-size.json', tree);
+    const outFile = tmpFile('p7-br-report.json');
+    run('framer-pre-build-validate.js', ['--tree', treeFile, '--output', outFile]);
+    const report = readJson(outFile);
+    const g13 = report.guards.find(g => g.id === 'BORDER_RADIUS_FORMAT');
+    assert.equal(g13.status, 'PASS',
+      `$$type:size for uniform border-radius should PASS g13, got: ${g13.status} — ${g13.message}`);
+  });
+
+  test('P7: Pre-build validation accepts $$type:border-radius for 4-corner values', () => {
+    const tree = [{
+      widgetType: 'e-flexbox',
+      id: 'card',
+      settings: { classes: { '$$type': 'classes', value: ['scard'] } },
+      styles: {
+        scard: {
+          variants: [{
+            meta: { breakpoint: null, state: null },
+            props: {
+              'border-radius': {
+                '$$type': 'border-radius',
+                value: {
+                  'top-left': { '$$type': 'size', value: { size: 8, unit: 'px' } },
+                  'top-right': { '$$type': 'size', value: { size: 16, unit: 'px' } },
+                  'bottom-right': { '$$type': 'size', value: { size: 8, unit: 'px' } },
+                  'bottom-left': { '$$type': 'size', value: { size: 16, unit: 'px' } },
+                },
+              },
+            },
+          }],
+        },
+      },
+      elements: [],
+    }];
+    const treeFile = tmpFile('p7-br-4corner.json', tree);
+    const outFile = tmpFile('p7-br-4corner-report.json');
+    run('framer-pre-build-validate.js', ['--tree', treeFile, '--output', outFile]);
+    const report = readJson(outFile);
+    const g13 = report.guards.find(g => g.id === 'BORDER_RADIUS_FORMAT');
+    assert.equal(g13.status, 'PASS',
+      `$$type:border-radius for 4-corner should PASS g13, got: ${g13.status}`);
+  });
+});
+
 function runFromRoot(script, extraArgs = [], { expectFail = false } = {}) {
   try {
     const out = execFileSync(NODE, [join(PROJECT_ROOT, script), ...extraArgs], {

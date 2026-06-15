@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-06-15T15:13:21.861Z",
+    "generated_at": "2026-06-15T16:34:40.293Z",
     "total": 7
   },
   "classes": [
@@ -142,7 +142,7 @@
     },
     {
       "id": "gc-ec7eda770eaf",
-      "label": "Body-20px-Medium",
+      "label": "Body 20px Medium",
       "type": "typography",
       "source_path": "/Body/Body-20px-Medium",
       "variants": [
@@ -176,7 +176,7 @@
     },
     {
       "id": "gc-d7f44ea9c172",
-      "label": "Body-16px-Medium",
+      "label": "Body 16px Medium",
       "type": "typography",
       "source_path": "/Body/Body-16px-Medium",
       "variants": [

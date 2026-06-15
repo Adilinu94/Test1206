@@ -439,18 +439,23 @@ function g13_BorderRadiusFormat() {
   const invalid = [];
   for (const node of nodes) {
     walkValues(node.styles, (key, val, parent, p) => {
-      if (key === 'border-radius' && parent['$$type'] !== 'border-radius') {
-        // V4 erwartet ein border-radius-Objekt mit 4 Ecken, kein einfacher size/string-Wert
-        invalid.push({ path: p, nodeId: node.id, actualType: parent['$$type'], issue: `border-radius als ${parent['$$type']} — sollte border-radius-Objekt mit 4 Ecken sein` });
+      if (key === 'border-radius') {
+        // val is the border-radius value object: {$$type:'border-radius', value:{...}}
+        // or for uniform values: {$$type:'size', value:{size:0,unit:'px'}}
+        const vt = (val && typeof val === 'object') ? val['$$type'] : undefined;
+        if (vt !== 'border-radius' && vt !== 'size' && vt !== 'custom') {
+          invalid.push({ path: p, nodeId: node.id, actualType: vt || 'undefined',
+            issue: `border-radius $$type ist ${vt || 'undefined'} — erwarte border-radius (4 Ecken) oder size (uniform)` });
+        }
       }
     });
   }
   if (invalid.length === 0) {
-    return { id: 'BORDER_RADIUS_FORMAT', status: 'PASS', message: 'All border-radius properties use correct 4-corner format' };
+    return { id: 'BORDER_RADIUS_FORMAT', status: 'PASS', message: 'All border-radius properties use correct format' };
   }
   return {
     id: 'BORDER_RADIUS_FORMAT', status: 'FAIL', severity: 'error',
-    message: `${invalid.length} border-radius prop(s) not using 4-corner border-radius object`,
+    message: `${invalid.length} border-radius prop(s) with invalid $$type`,
     details: { invalid },
   };
 }

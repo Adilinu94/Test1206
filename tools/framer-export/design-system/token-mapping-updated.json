@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-06-15T15:13:02.024Z",
+    "generated_at": "2026-06-15T16:34:08.928Z",
     "source": "https://hilarious-workshops-284047.framer.app/",
     "source_type": "live-fetch"
   },
@@ -825,134 +825,112 @@
       {
         "name": "--token-70c481ff-a9c5-46df-ae83-28c71ddf96f6",
         "value": "#061d13",
-        "hex": "#061d13",
-        "block": 2
+        "hex": "#061d13"
       },
       {
         "name": "--token-138a9220-c10a-460f-a96e-1e06cfd9ab9e",
         "value": "#dfffa3",
-        "hex": "#dfffa3",
-        "block": 2
+        "hex": "#dfffa3"
       },
       {
         "name": "--token-3f8985e5-0bbc-40e3-a158-6519fca1ba2e",
         "value": "#fff",
-        "hex": "#ffffff",
-        "block": 2
+        "hex": "#ffffff"
       },
       {
         "name": "--token-bd19fd49-3c1b-41a5-beeb-16e4bb8af9a3",
         "value": "#0b0b0b",
-        "hex": "#0b0b0b",
-        "block": 2
+        "hex": "#0b0b0b"
       },
       {
         "name": "--token-874c40cb-94e9-4bdf-a5cc-7c56ad3ce9fe",
         "value": "#f3f3f3",
-        "hex": "#f3f3f3",
-        "block": 2
+        "hex": "#f3f3f3"
       },
       {
         "name": "--token-d5cd1460-88c4-40e6-8db0-834e519755f3",
         "value": "#1a3127",
-        "hex": "#1a3127",
-        "block": 2
+        "hex": "#1a3127"
       },
       {
         "name": "--token-3b395f99-0607-47e9-9df4-c0318551a27a",
         "value": "#ffde26",
-        "hex": "#ffde26",
-        "block": 2
+        "hex": "#ffde26"
       },
       {
         "name": "--token-2701c4d9-ce56-4bd9-8286-18a45e1b9132",
         "value": "#c2c2c2",
-        "hex": "#c2c2c2",
-        "block": 2
+        "hex": "#c2c2c2"
       },
       {
         "name": "--token-23af5e11-2737-4ea4-bcc8-f1a088f82999",
         "value": "#505050",
-        "hex": "#505050",
-        "block": 2
+        "hex": "#505050"
       },
       {
         "name": "--token-38956d97-a979-47e1-890f-3665b6184df9",
         "value": "#3e3e3e",
-        "hex": "#3e3e3e",
-        "block": 2
+        "hex": "#3e3e3e"
       },
       {
         "name": "--token-66a5ea6a-47c4-4877-921c-dfb39cba80e7",
         "value": "#6f6f6f",
-        "hex": "#6f6f6f",
-        "block": 2
+        "hex": "#6f6f6f"
       },
       {
         "name": "--token-035b19db-95b9-4388-8e25-1b98e5cbc3a8",
         "value": "#edfdf6",
-        "hex": "#edfdf6",
-        "block": 2
+        "hex": "#edfdf6"
       },
       {
         "name": "--token-378cf298-c7e1-4f5a-ae52-699ad24bf560",
         "value": "#d4e3dd",
-        "hex": "#d4e3dd",
-        "block": 2
+        "hex": "#d4e3dd"
       },
       {
         "name": "--token-2ee9245d-d6fc-46ba-a64f-1f2d1a19868e",
         "value": "#efefef",
-        "hex": "#efefef",
-        "block": 2
+        "hex": "#efefef"
       },
       {
         "name": "--token-87818165-768a-4edc-b040-626f67242aae",
         "value": "#f24",
-        "hex": "#ff2244",
-        "block": 2
+        "hex": "#ff2244"
       },
       {
         "name": "--framer-font-weight",
         "value": "500",
-        "hex": "#550000",
-        "block": 2
+        "hex": "#550000"
       },
       {
         "name": "--framer-text-color",
         "value": "#000",
-        "hex": "#000000",
-        "block": 2
+        "hex": "#000000"
       },
       {
         "name": "--framer-link-text-color",
         "value": "#09f",
-        "hex": "#0099ff",
-        "block": 2
+        "hex": "#0099ff"
       },
       {
         "name": "--framer-font-weight-bold",
         "value": "700",
-        "hex": "#770000",
-        "block": 2
+        "hex": "#770000"
       },
       {
         "name": "--framer-font-weight-bold-italic",
         "value": "700",
-        "hex": "#770000",
-        "block": 2
+        "hex": "#770000"
       },
       {
         "name": "--framer-font-weight-italic",
         "value": "600",
-        "hex": "#660000",
-        "block": 2
+        "hex": "#660000"
       },
       {
         "name": "--framer-input-font-weight",
         "value": "500",
-        "hex": "#550000",
-        "block": 2
+        "hex": "#550000"
       }
     ]
   },
