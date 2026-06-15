@@ -25,6 +25,7 @@ validate-report.json
 assets/
 tokens/
 fonts/
+tools/framer-export/design-system/
 
 # Umgebungsvariablen
 .env
@@ -37,6 +38,21 @@ mcp-server-config.json
 reports/
 animation-plan.json
 rollback-plan.json
+.framer-export-cache.json
+.deploy-marker
+qa-report.json
+pre-build-validation*.json
+hero-section.json
+elements.json
+
+# Build-Output-Verzeichnisse (Working-Dir-Artefakte, nie committen)
+tools/framer-export/phase4/
+tools/framer-export/phase7/
+tools/framer-export/hero-only-v4*.json
+tools/framer-export/hero-v4-tree.json
+tools/framer-export/hero-phase4.json
+Neubau/
+tmp/
 
 # Temporaere Dateien
 *.tmp
