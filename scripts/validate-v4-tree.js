@@ -528,9 +528,10 @@ function checkVerboseStyleFormat(el, path, errors) {
         if (!v || typeof v !== 'object') continue;
         const vpath = `variants[${vi}]`;
 
-        // meta.breakpoint must not be null (server rejects)
-        if (!v.meta || v.meta.breakpoint === null || v.meta.breakpoint === undefined) {
-          missing.push(`${vpath}.meta.breakpoint is ${v.meta?.breakpoint ?? 'undefined'} — must be "desktop" or a named breakpoint`);
+        // meta.breakpoint: null = base variant (desktop), per V4 spec. Named breakpoints = "tablet"/"mobile".
+        // All three values (null, "desktop", "tablet", "mobile") are valid.
+        if (!v.meta || v.meta.breakpoint === undefined) {
+          missing.push(`${vpath}.meta.breakpoint is undefined — must be null (base) or a named breakpoint`);
         }
 
         // meta.state must be present (PHP auto-fills, but missing it is a format gap)
@@ -725,13 +726,13 @@ function checkDomDepth(tree, errors, warnings) {
     walk(root, 0, id);
   });
 
-  if (maxDepth >= 6) {
+  if (maxDepth >= 10) {
     errors.push({
       check: 7, rule: 'DOM-DEPTH', elementId: deepestPath,
       path: deepestPath,
-      message: `DOM depth ${maxDepth} ≥ 6 — server timeout risk in elementor-set-content. Flatten the tree.`,
+      message: `DOM depth ${maxDepth} ≥ 10 — server timeout risk in elementor-set-content. Flatten the tree.`,
     });
-  } else if (maxDepth >= 4) {
+  } else if (maxDepth >= 6) {
     warnings.push({
       check: 'C7', rule: 'DOM-DEPTH', elementId: deepestPath,
       path: deepestPath,
