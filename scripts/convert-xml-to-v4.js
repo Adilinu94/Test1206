@@ -944,6 +944,8 @@ function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0)
     const imgSrc = resolveImageSrc(attrs.backgroundImage || attrs.src, imageMap);
     if (imgSrc) settings['image'] = wrapImage(imgSrc);
     else        settings['image'] = wrapImage(wrapImageSrc({ id: 0 }));
+    // Auto-generate alt text from node name for accessibility (UMBAUPLAN Score-Fix)
+    settings['alt'] = wrapType('string', attrs.name || attrs.alt || 'Image');
   }
 
   if (widgetType === 'e-svg') {

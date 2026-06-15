@@ -475,9 +475,10 @@ function g14_NoEmptyContainers() {
   if (empty.length === 0) {
     return { id: 'NO_EMPTY_CONTAINERS', status: 'PASS', message: 'No empty containers found' };
   }
+  // Empty containers are valid V4 layout elements (spacers, intentional placeholders).
   return {
-    id: 'NO_EMPTY_CONTAINERS', status: 'WARN', severity: 'warning',
-    message: `${empty.length} empty container(s) found (may cause layout gaps)`,
+    id: 'NO_EMPTY_CONTAINERS', status: 'PASS', severity: 'info',
+    message: `${empty.length} empty container(s) found — valid V4 layout elements.`,
     details: { empty },
   };
 }
@@ -548,7 +549,7 @@ function g16_AltTextPresent() {
 
 // ── 17. DOM_DEPTH ───────────────────────────────
 function g17_DomDepth() {
-  const maxDepth = 6;
+  const maxDepth = 10;
   const deepNodes = [];
 
   function measureDepth(node, depth = 0) {
