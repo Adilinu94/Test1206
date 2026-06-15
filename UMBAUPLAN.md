@@ -1,210 +1,268 @@
-# UBBAUPLAN — Framer → Elementor V4 Pipeline v1.0
+# UMBAUPLAN v2.0 — Framer → Elementor V4 Pipeline
 
-**Datum:** 15. Juni 2026
-**Ausgangspunkt:** E2E-Test mit massiven qualitativen Abweichungen (8 systematische Lücken)
+**Datum:** 15. Juni 2026 (Update nach Phase 0 Research)
+**Ausgangspunkt:** E2E-Test mit 8 systematischen Lücken + Phase 0 Deep Research
 **Ziel:** Vollautomatisierte Pipeline mit visuell korrektem Output
 **Strategie:** Dual-Source-Ansatz (Unframer MCP für Struktur + FramerExport/Crawler für CSS)
 
 ---
 
-## 0. GRUNDSATZENTSCHEIDUNGEN
+## 0. GRUNDSATZENTSCHEIDUNGEN (mit Research-Erkenntnissen)
 
-### 0.1 Unframer MCP kann NICHT modifiziert werden
+### 0.1 Unframer MCP kann NICHT modifiziert werden ✅ BESTÄTIGT
 
-Der Unframer MCP (`mcp.unframer.co`) ist ein externer Service. Wir können keine neuen Endpunkte
-(`getColorStyles`, `getTextStyles`, `getComponentXml`) hinzufügen. Alle Style-Daten müssen aus
-anderen Quellen kommen.
+Der Unframer MCP (`mcp.unframer.co`) ist ein externer Service.
+Er hat nur 4 Tools: `getProjectXml`, `getNodeXml`, `getSelectedNodesXml`, `zoomIntoView`.
+**Keine** `getColorStyles`/`getTextStyles`/`getComponentXml` Endpunkte.
+**Kein** `includeStyles: true` Parameter.
 
-**Konsequenz:** Die gesamte Strategie muss auf dem Dual-Source-Ansatz basieren.
+**Konsequenz:** Style-Daten MÜSSEN aus externen Quellen kommen.
 
-### 0.2 Architektur-Entscheidung: Dual-Source (Option D)
+### 0.2 Architektur-Entscheidung: Dual-Source (Option D) ✅ BESTÄTIGT
 
 ```
-QUELLE 1: Unframer MCP          → Struktur (DOM-Baum, Komponenten, Style-REFERENZEN)
-QUELLE 2: FramerExport/Publikation → Styling  (CSS-Werte, Farben, Fonts, Breakpoints)
+QUELLE 1: Unframer MCP              → Struktur (DOM-Baum, Komponenten-Hierarchie, Style-REFERENZEN)
+QUELLE 2: FramerExport/Publikation  → Styling  (CSS-Werte, Farben via CSS-Vars, Fonts via @font-face)
          ↓
-    CROSS-VALIDATION             → Token-Mapping (Referenz → echter CSS-Wert)
+    CSS-TOKEN-EXTRACTOR             → Extrahiert 610+ CSS-Variablen, @font-face, Media Queries
          ↓
-    DESIGN SYSTEM                → Global Variables + Global Classes
+    TOKEN-MAPPING                   → Verknüpft Unframer Style-PFADE mit CSS UUID-TOKENS
+         ↓                            (DAS ist die Schlüssel-Herausforderung!)
          ↓
-    V4 WIDGET TREE               → convert-xml-to-v4.js MIT Tokens
+    DESIGN SYSTEM                   → Global Variables (MD5-GV-IDs) + Global Classes
          ↓
-    BUILD + QA                   → set-content → Screenshot-Vergleich
+    V4 WIDGET TREE                  → convert-xml-to-v4.js MIT Tokens + 9 new Bug-Fixes
+         ↓
+    BUILD + QA                      → set-content → Screenshot-Vergleich → Auto-Fix
 ```
 
-### 0.3 CSS-Quellen-Priorität
+### 0.3 DAS TOKEN-MAPPING-PROBLEM (Neue Erkenntnis aus Research)
+
+Der Unframer MCP liefert menschenlesbare Style-Pfade:
+```
+backgroundColor="/Theme Color/Very Dark Green"
+inlineTextStyle="/Heading/Heading 1"
+```
+
+Das Framer-CSS verwendet UUID-basierte Token:
+```
+--token-70c481ff-a9c5-46df-ae83-28c71ddf96f6: #061d13
+```
+
+**Es gibt KEINE direkte Mapping-Tabelle zwischen diesen Systemen in der publizierten Seite.**
+
+**Lösungsstrategie (3-stufig):**
+
+| Stufe | Ansatz | Genauigkeit | Aufwand |
+|-------|--------|-------------|---------|
+| 1. FramerExport | CSS-Klassennamen könnten mit Style-Pfaden korrelieren | Hoch | Mittel |
+| 2. Heuristik | Farbwert-Vergleich (alle UUID-Tokens mit Hex-Wert gegen Unframer-Pfad-Erwartung) | Mittel | Hoch |
+| 3. Manuell | Mapping-Tabelle pro Projekt pflegen | 100% | Manuell |
+
+### 0.4 CSS-Quellen-Priorität (angepasst)
 
 | Quelle | Priorität | Begründung |
 |--------|-----------|------------|
-| FramerExport CLI (lokaler HTML/CSS-Mirror) | 🥇 PRIMÄR | Bereits im Wizard integriert, liefert komplette CSS-Dateien |
-| Publizierte Framer-Seite (Browser-Crawl) | 🥈 FALLBACK | Wenn FramerExport nicht verfügbar / fehlschlägt |
-| Built-in Style-Resolver (Heuristik) | 🥉 LETZTE INSTANZ | Wenn beide CSS-Quellen ausfallen |
+| FramerExport CLI (lokaler HTML/CSS-Mirror) | 🥇 PRIMÄR | CSS-Dateien mit korrelierbaren Klassennamen, bereits im Wizard |
+| Publizierte Framer-Seite (fetch-basierter Crawl) | 🥈 FALLBACK | 610 CSS-Variablen + @font-face + Media Queries, aber UUID-Mapping nötig |
+| Built-in Style-Resolver (Heuristik) | 🥉 LETZTE INSTANZ | Basierend auf `inlineTextStyle`-Pfad-Parsing |
+
+### 0.5 Font-Strategie (KOMPLETT GEÄNDERT)
+
+❌ **NICHT:** Google Fonts API
+✅ **STATTDESSEN:** `@font-face` mit `.woff2`-Dateien vom Framer CDN → lokal in WordPress hosten
+
+```css
+/* Was die publizierte Seite tatsächlich verwendet: */
+@font-face {
+  font-family: 'Inter';
+  src: url('https://framerusercontent.com/.../Inter-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter Display';
+  src: url('https://framerusercontent.com/.../InterDisplay-SemiBold.woff2') format('woff2');
+}
+```
+
+**Workflow:** `resolve-fonts.js` (parst `FR;InterDisplay-SemiBold`) → `upload-fonts-to-wp.js` → `adrians-batch-media-upload`
 
 ---
 
-## DEEP RESEARCH — Offene Fragen vor Umbau-Beginn
+## NEUE BUGS AUS PHASE 0 RESEARCH (SOFORT FIXEN)
 
-Bevor wir mit Phase 1 beginnen, müssen 3 kritische Fragen recherchiert werden:
+Diese Bugs wurden während des Researchs entdeckt und sind **vor** Phase 1 zu beheben:
 
-### Research-Frage 1: FramerExport CSS-Daten
+### BUG A: Breakpoint `"desktop"` → MUSS `null` sein
 
-- [ ] Welche CSS-Dateien produziert FramerExport genau? (`styles.css`, Inline-`<style>`-Blöcke?)
-- [ ] Enthalten diese CSS-Dateien die aufgelösten Design-Tokens (Farben als Hex/RGB, Font-Families)?
-- [ ] Wie sehen die CSS-Klassennamen aus? Können wir sie mit den Unframer `inlineTextStyle`-Referenzen matchen?
-- [ ] Gibt es eine 1:1-Mapping-Tabelle (Framer-Style-Pfad → CSS-Klasse)?
-- [ ] Beispiel-Output eines FramerExport-Laufs analysieren
+**Quelle:** Python SPEC Bug #1
+**Betroffen:** `convert-xml-to-v4.js`, Zeile ~900: `meta: { breakpoint: 'desktop', state: null }`
+**Fix:** `breakpoint: 'desktop'` → `breakpoint: null`
+**Impact:** 🔴 Ohne Fix rendern responsive Varianten nicht korrekt
 
-### Research-Frage 2: Elementor V4 Style-System
+### BUG B: `border-radius` als einfacher Wert → MUSS 4-Ecken-Objekt
 
-- [ ] Akzeptiert `elementor-set-content` lokale `background-color`-Styles, oder MÜSSEN es Global Classes sein?
-- [ ] Was ist das exakte, aktuelle Schema für `e-button`-Styling (background, border-radius, padding)?
-- [ ] Wie werden Google Fonts in V4 enqueued? (`resolve-fonts.js` → WordPress?)
-- [ ] Wie genau funktioniert das `variants`-System für responsive Breakpoints?
-- [ ] Test: Ein minimales V4-Tree mit korrektem Button-Styling an test4 senden
+**Quelle:** Python SPEC Bug #3
+**Betroffen:** `framer-utils.js`, `wrapBorderRadius()` und `convert-xml-to-v4.js`
+**Fix:** Statt `{"$$type":"size","value":{"size":16,"unit":"px"}}` → 
+`{"$$type":"border-radius","value":{"top_left":...,"top_right":...,"bottom_right":...,"bottom_left":...}}`
+**Impact:** 🔴 Ohne Fix werden Border-Radii von V4 ignoriert
 
-### Research-Frage 3: Python-Pipeline-Code
+### BUG C: `line-height`/`opacity` müssen `unit:"custom"` verwenden
 
-- [ ] Ist der Code (`framer_to_elementor.py`, `v4_converter.py`, `framer_pipeline.py`) irgendwo verfügbar?
-- [ ] Falls nicht: Können wir die 7 dokumentierten Bugs + 5 Invarianten aus der SPEC übernehmen?
-- [ ] Was macht die Python-Pipeline konkret anders/besser als unser Node.js-Converter?
-- [ ] `.elements.json` + `.variables.json` + `.global_classes.json` als getrennte Outputs — sinnvoll?
+**Quelle:** Python SPEC Bug #2, #6
+**Betroffen:** `framer-utils.js`, `resolveLineHeight()` und `wrapUnitless()`
+**Status:** 🟡 Teilweise gefixt, muss verifiziert werden
 
-### Research-Frage 4 (Bonus): Unframer MCP Limitationen
+### BUG D: Default-Werte skippen
 
-- [ ] Gibt es versteckte/undokumentierte Endpunkte? (`tools/list` zeigt nur 4 Tools)
-- [ ] Kann `getNodeXml` mit `includeStyles: true` aufgerufen werden?
-- [ ] Gibt es einen Weg, die Framer-Projekt-Styles über die Unframer-Website-API zu bekommen?
+**Quelle:** Python SPEC Bug #6
+**Betroffen:** `convert-xml-to-v4.js`, `buildStyleProps()`
+**Fix:** `line-height: 0` → weglassen, `aspect-ratio: auto` → weglassen
+**Impact:** 🟢 Gering
 
 ---
 
 ## PHASE 1: QUICK-WINS & SKILLS-ÜBERNAHME (Tag 1)
 
-**Ziel:** Sofortige Verbesserungen ohne Architektur-Änderungen.
-**Aufwand:** ~2 Stunden
+**Ziel:** Sofortige Verbesserungen + 4 neue Bug-Fixes.
+**Aufwand:** ~4 Stunden (verdoppelt wegen neuer Bugs)
 
 ### 1.1 Skills aus ki-2-elementor-master kopieren
 
-```bash
-# Von: C:\Users\adini\Desktop\ki-2-elementor-master\skills\
-# Nach: C:\Users\adini\Desktop\Umbau\framer-v4-pipeline-v2-main\novamira-skill\
-```
-
-| Skill | Datei | Nutzen |
-|-------|-------|--------|
+| Skill | Datei | Adressiert |
+|-------|-------|-----------|
 | `elementor-v4-build-checklist` | `build-checklist.md` | 12-Guard Pre-Build-Check |
-| `elementor-v4-style-property-quick-reference` | `style-props-quickref.md` | Korrekte $$type-Formate für alle 30 Properties |
+| `elementor-v4-style-property-quick-reference` | `style-props-quickref.md` | Korrekte $$type-Formate (30 Props) |
 | `client-design-token-setup-protocol` | `design-token-protocol.md` | Variables → Classes in 5 Phasen |
+| `framer-dual-source-to-v4` | `dual-source-workflow.md` | Goldstandard-Workflow |
 | `framer-responsive-extractor` | `responsive-extractor.md` | Responsive Breakpoints aus CSS |
-| `framer-dual-source-to-v4` | `dual-source-workflow.md` | DER Goldstandard-Workflow |
-| `elementor-v4-visual-qa` | `visual-qa.md` | Browser-basierter Screenshot-Vergleich |
+| `elementor-v4-visual-qa` | `visual-qa.md` | Browser-Screenshot-Vergleich |
 | `framer-token-validator` | `token-validator.md` | Token-Mapping-Validierung |
 | `global-class-pattern-analyzer` | `gc-pattern-analyzer.md` | Style-Pattern → Global Classes |
-| `elementor-v4-error-recovery` | `error-recovery.md` | Fehlerbehebung nach Build-Fehlern |
+| `elementor-v4-error-recovery` | `error-recovery.md` | Fehlerbehebung nach Build |
 | `design-system-reference` | `design-system-ref.md` | Design-System-Referenz |
 
-**Aktion:** 10 Skills kopieren, in `session-start-checklist.md` registrieren.
-
-### 1.2 Bug 3 Minimal-Fix (20 Zeilen)
+### 1.2 Bug 3 Fix — background-color NICHT verwerfen
 
 ```javascript
-// convert-xml-to-v4.js: STATT Hintergrundfarbe zu verwerfen,
-// ALS LOKALEN STYLE SETZEN (minimale Lösung)
+// convert-xml-to-v4.js, buildStyleProps(), beide Stellen (e-flexbox + e-div-block):
 
-// ALT (Zeile 540-542):
-if (resolved) {
-  warn(`background.color '${bgVal}' muss als Global Class gesetzt werden (Bug 3). Übersprungen.`);
-}
+// STATT:
+warn(`background.color '${bgVal}' muss als Global Class gesetzt werden (Bug 3). Übersprungen.`);
 
-// NEU:
+// NEU (minimaler Fix):
 if (resolved) {
-  props['background-color'] = resolved;  // ← DIREKT SETZEN
-  warn(`background.color '${bgVal}' als lokaler Style gesetzt (Bug 3 workaround).`);
+  props['background-color'] = resolved;
+  warn(`background.color '${bgVal}' als lokaler Style gesetzt (wird später durch GC ersetzt).`);
 }
 ```
 
-**Aktion:** `str_replace` in `convert-xml-to-v4.js`, beide Stellen (e-flexbox + e-div-block).
-
-### 1.3 RC-11 Fallback verbessern (30 Zeilen)
+### 1.3 RC-11 Fallback verbessern — inlineTextStyle parsen
 
 ```javascript
-// convert-xml-to-v4.js: STATT statischem Fallback,
-// inlineTextStyle-Referenz parsen und Größe ableiten
+// convert-xml-to-v4.js, buildStyleProps(): inlineTextStyle-Attribut LESEN
 
-// Style-Heuristik aus Referenz-Pfad:
-// "/Heading/Heading 1" → 68px, 700, #FFFFFF (oder dark-mode aware)
-// "/Heading/Heading 2" → 48px, 600
-// "/Heading/Heading 3" → 32px, 600
-// "/Body/Body-20px-Medium" → 20px, 500
-// "/Body/Body-16px-Medium" → 16px, 500
-// "/Body/Body S" → 14px, 400
+const textStyleRef = attrs.inlineTextStyle;
+if (textStyleRef && !fontFamily && !fontSize) {
+  // Style-Pfad parsen: "/Heading/Heading 1" → "Heading 1"
+  const styleName = textStyleRef.split('/').pop();
+  const fallback = TEXT_STYLE_FALLBACKS[styleName];
+  if (fallback) {
+    if (fallback.size)   props['font-size']   = wrapSize(fallback.size);
+    if (fallback.weight) props['font-weight'] = wrapType('string', fallback.weight);
+    if (fallback.color)  props['color']       = wrapColor(fallback.color);
+  }
+}
 
 const TEXT_STYLE_FALLBACKS = {
-  'Heading 1': { size: '68px', weight: '700', color: '#111111' },
-  'Heading 2': { size: '48px', weight: '600', color: '#111111' },
-  'Heading 3': { size: '32px', weight: '600', color: '#111111' },
-  'Heading 4': { size: '24px', weight: '600', color: '#111111' },
-  'Body-20px':  { size: '20px', weight: '400', color: '#444444' },
-  'Body-16px':  { size: '16px', weight: '400', color: '#444444' },
-  'Body S':     { size: '14px', weight: '400', color: '#666666' },
+  'Heading 1': { size: '68px', weight: '700' },
+  'Heading 2': { size: '48px', weight: '600' },
+  'Heading 3': { size: '32px', weight: '600' },
+  'Heading 4': { size: '24px', weight: '600' },
+  'Body-20px-Medium':  { size: '20px', weight: '500' },
+  'Body-16px-Medium':  { size: '16px', weight: '500' },
+  'Body S':     { size: '14px', weight: '400' },
 };
 ```
 
-**Aktion:** In `buildStyleProps()` die `inlineTextStyle`-Attribut-Referenz parsen und Fallback daraus ableiten.
-
-### 1.4 Bug 8 erweitern — Komponenten-Props extrahieren (15 Zeilen)
+### 1.4 Bug 8 erweitern — Komponenten-Props aus CamelCase-Keys
 
 ```javascript
 // extractComponentText() in convert-xml-to-v4.js:
-// Uppercase-Camel-Keys NICHT pauschal filtern, sondern als
-// Text-Kandidaten prüfen (sie enthalten die Property-Werte)
+// Nur BEKANNTE Style-Attribut-Keys filtern, den Rest als Text-Kandidaten prüfen
 
-// ALT: if (/^[A-Z]/.test(key)) continue;
-// NEU: Nur filtern wenn es bekannte Style-Keys sind
 const STYLE_ATTR_KEYS = new Set([
-  'backgroundColor', 'backgroundImage', 'borderRadius', 'fontFamily',
-  'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'opacity',
-  'stackDirection', 'stackGap', 'stackDistribution', 'stackAlignment',
+  'backgroundColor','backgroundImage','borderRadius','fontFamily',
+  'fontSize','fontWeight','lineHeight','letterSpacing','opacity',
+  'stackDirection','stackGap','stackDistribution','stackAlignment',
+  'position','top','right','bottom','left','width','height',
+  'maxWidth','minWidth','overflow','display','gridTemplateColumns',
 ]);
+// NICHT filtern: componentId, variant, name, nodeId (bereits oben gefiltert)
+// ALLE ANDEREN CamelCase-Keys sind Property-Overrides → Text-Kandidaten
 if (STYLE_ATTR_KEYS.has(key)) continue;
 ```
 
-**Aktion:** `str_replace` in `extractComponentText()`.
+### 1.5 Bug A Fix — Breakpoint `null` statt `"desktop"`
 
-### 1.5 Tests & Commit
+```javascript
+// convert-xml-to-v4.js, convertNode() → baseVariant:
+// ALT:  meta: { breakpoint: 'desktop', state: null }
+// NEU:  meta: { breakpoint: null, state: null }
+```
+
+### 1.6 Bug B Fix — border-radius als 4-Ecken-Objekt (wenn ungleich)
+
+```javascript
+// framer-utils.js, wrapBorderRadius():
+// Wenn alle 4 Ecken gleich → einfacher size-Wert (V4 akzeptiert das)
+// Wenn ungleich → 4-Ecken-Objekt
+
+function wrapBorderRadius(value) {
+  const parts = String(value).trim().split(/\s+/);
+  if (parts.length === 1) {
+    return { "$$type": "size", "value": parseSize(parts[0]) };
+  }
+  // Unterschiedliche Ecken → 4-Ecken-Objekt
+  return {
+    "$$type": "border-radius",
+    "value": {
+      "top_left": parseSize(parts[0] || '0'),
+      "top_right": parseSize(parts[1] || parts[0] || '0'),
+      "bottom_right": parseSize(parts[2] || parts[0] || '0'),
+      "bottom_left": parseSize(parts[3] || parts[1] || parts[0] || '0'),
+    }
+  };
+}
+```
+
+### 1.7 Tests & Commit
 
 - [ ] Alle 128 Pipeline-Tests müssen weiterhin grün sein
-- [ ] Manueller Test: Hero-XML konvertieren, prüfen ob Hintergrundfarbe jetzt im Tree ist
-- [ ] Commit: `fix: Bug 3 + RC-11 + Bug 8 quick-wins`
+- [ ] Neue Tests für Bug A (breakpoint null), Bug B (border-radius)
+- [ ] Manueller Test: Hero-XML konvertieren, prüfen ob Hintergrundfarbe + korrekte Breakpoints im Tree
+- [ ] Commit: `fix: Bug 3, RC-11, Bug 8, Bug A, Bug B — Phase 1 quick-wins`
 
 ---
 
 ## PHASE 2: DUAL-SOURCE CSS-EXTRAKTION (Tag 2-3)
 
-**Ziel:** CSS-Werte aus FramerExport extrahieren und als Token-Mapping bereitstellen.
-**Aufwand:** ~2 Tage
+**Ziel:** CSS-Werte aus FramerExport ODER publizierter Seite extrahieren und Token-Mapping erstellen.
+**NEU:** Zwei Extraktions-Pfade (FramerExport primär, Crawler sekundär) + UUID-Mapping-Logik.
 
 ### 2.1 Neues Script: `extract-framer-css-tokens.js`
 
-Dieses Script:
-1. Liest `styles.css` und `<style>`-Blöcke aus FramerExport-Output
-2. Extrahiert alle CSS-Klassen mit ihren Properties
-3. Erstellt eine Token-Map: Style-Pfad → CSS-Properties
-
 ```javascript
-// Input:  FramerExport/<project>/index.html + styles.css
-// Output: token-mapping.json
+// Input:  FramerExport/<project>/index.html + styles.css  ODER Framer-URL
+// Output: token-mapping.json (Style-Pfad → CSS-Properties)
 
 {
+  "source": "framer-export",  // oder "crawler"
   "colors": {
     "/Theme Color/Very Dark Green": {
       "hex": "#061D13",
-      "rgb": "rgb(6, 29, 19)",
-      "gv_id": null  // wird erst nach GV-Erstellung befüllt
-    },
-    "/Theme Color/Light Lime Green": {
-      "hex": "#DFFFA3",
-      "rgb": "rgb(223, 255, 163)",
-      "gv_id": null
+      "gv_id": null,
+      "matched_by": "heuristic"  // wie wurde das Mapping gefunden?
     }
   },
   "textStyles": {
@@ -213,194 +271,214 @@ Dieses Script:
       "fontSize": "68px",
       "fontWeight": "600",
       "color": "#FFFFFF",
-      "lineHeight": "1.1"
-    },
-    "/Body/Body-20px-Medium": {
-      "fontFamily": "Inter",
-      "fontSize": "20px",
-      "fontWeight": "500",
-      "color": "rgb(194, 194, 194)",
-      "lineHeight": "1.5"
+      "lineHeight": "1.1",
+      "matched_by": "framer-export-class"
+    }
+  },
+  "fonts": {
+    "Inter": {
+      "family": "Inter",
+      "weights": ["400", "500", "600", "700"],
+      "sources": [
+        { "weight": "400", "url": "https://framerusercontent.com/.../Inter-Regular.woff2" }
+      ]
     }
   },
   "breakpoints": {
-    "tablet": { "minWidth": "768px", "maxWidth": "1024px" },
-    "mobile": { "minWidth": "0px", "maxWidth": "767px" }
+    "tablet": { "width": "810px" },
+    "mobile": { "width": "390px" }
+  },
+  "unmapped_tokens": {
+    "// Token-UUIDs die keinem Style-Pfad zugeordnet werden konnten": [],
+    "--token-70c481ff-...": { "hex": "#061d13", "possible_paths": ["/Theme Color/Very Dark Green"] }
   }
 }
 ```
 
-### 2.2 Integration in `convert-xml-to-v4.js`
+### 2.2 ZWEI EXTRAKTIONS-PFADE
 
-Der Converter muss lernen, Token-Referenzen aufzulösen:
+**Pfad A: FramerExport (PRIMÄR)**
 
 ```javascript
-// convert-xml-to-v4.js: NEUER Code in buildStyleProps()
+// FramerExport ausführen
+await runFramerExport(framerUrl);
 
-// Style-Referenz aus Unframer-XML:
-// <Node inlineTextStyle="/Heading/Heading 1">
+// CSS extrahieren — Klassennamen könnten mit Unframer-Pfaden korrelieren
+// extract-framer-styles.js parst <style>-Blöcke + styles.css
+const cssData = await runScript('extract-framer-styles.js', [
+  '--html', path.join(exportDir, 'index.html'),
+  '--output', path.join(exportDir, 'extracted-styles.json'),
+]);
 
-const textStyleRef = attrs.inlineTextStyle;  // ← NEU: dieses Attribut lesen!
-if (textStyleRef && tokenMapping?.textStyles?.[textStyleRef]) {
-  const style = tokenMapping.textStyles[textStyleRef];
-  if (style.fontFamily) props['font-family'] = resolveFont(style.fontFamily, ...);
-  if (style.fontSize)   props['font-size']   = wrapSize(style.fontSize);
-  if (style.fontWeight) props['font-weight'] = wrapType('string', style.fontWeight);
-  if (style.color)      props['color']       = resolveColor(style.color, ...);
-  if (style.lineHeight) props['line-height'] = resolveLineHeight(style.lineHeight);
-}
-
-// Farb-Referenz aus Unframer-XML:
-// <Node backgroundColor="/Theme Color/Very Dark Green">
-
-const bgColorRef = attrs.backgroundColor;
-if (bgColorRef && tokenMapping?.colors?.[bgColorRef]) {
-  const color = tokenMapping.colors[bgColorRef];
-  if (color.gv_id) {
-    props['background-color'] = wrapGvColor(color.gv_id);
-  } else if (color.hex) {
-    props['background-color'] = wrapColor(color.hex);
-  }
-}
+// Mapping bauen: CSS-Klasse → Unframer-Style-Pfad
+// FramerExport-Klassen wie ".heading-1" → Unframer "/Heading/Heading 1"
+const tokenMap = mapFramerExportClassesToStylePaths(cssData, unframerStyleRefs);
 ```
 
-### 2.3 Fallback: Browser-Crawl (wenn FramerExport nicht verfügbar)
+**Pfad B: Browser-Crawl (FALLBACK)**
 
-Neues Script: `crawl-framer-css.js`
+```javascript
+// Publizierte Seite fetchen
+const html = await fetch(framerUrl);
 
-- Öffnet die publizierte Framer-Seite via Puppeteer/Playwright oder fetch
-- Extrahiert alle `<style>`-Blöcke
-- Parst CSS und erzeugt dieselbe Token-Map wie 2.1
-- Cached das Ergebnis (1h TTL)
+// 610 CSS-Variablen aus Block 2 extrahieren
+const cssVars = extractCssVariables(html);
+// → { "--token-70c481ff-...": "#061d13", ... }
+
+// @font-face-Regeln aus Block 0 extrahieren
+const fontFaces = extractFontFaces(html);
+// → [{ family: "Inter", weight: "400", url: "..." }]
+
+// Media Queries aus Block 1 extrahieren  
+const breakpoints = extractBreakpoints(html);
+
+// UUID-Tokens via Farbwert-Heuristik mit Style-Pfaden matchen
+const tokenMap = matchUuidTokensToStylePaths(cssVars, unframerStyleRefs);
+```
+
+### 2.3 UUID-MAPPING-HEURISTIK (Die Schlüssel-Innovation)
+
+```javascript
+function matchUuidTokensToStylePaths(cssVars, unframerStyleRefs) {
+  const map = {};
+  
+  for (const [uuidToken, cssValue] of Object.entries(cssVars)) {
+    // Extrahiere den Farbwert (hex oder rgb)
+    const color = normalizeColor(cssValue);
+    if (!color) continue;
+    
+    // Suche nach Unframer-Style-Pfaden mit ähnlichem Namen
+    // (z.B. "--token-xxx" → "/Theme Color/Very Dark Green" via Farbwert-Vergleich)
+    
+    // Heuristik 1: Exakter Farbwert-Match
+    for (const [stylePath, styleData] of Object.entries(unframerStyleRefs.colors || {})) {
+      if (styleData.expectedColor && colorsMatch(color, styleData.expectedColor)) {
+        map[stylePath] = { hex: color, matched_by: 'color-heuristic', confidence: 'high' };
+      }
+    }
+    
+    // Heuristik 2: Token-Name enthält Style-Pfad-Hinweise
+    // (funktioniert selten, aber Versuch wert)
+    
+    // Heuristik 3: Position im CSS (Reihenfolge der Variablen)
+  }
+  
+  return map;
+}
+```
 
 ### 2.4 Wizard-Integration
 
 ```javascript
-// wizard.js: NEUER Schritt nach FramerExport
+// wizard.js: NEUER Schritt 1.5
 
-// Schritt 3.5: CSS-Tokens extrahieren
 await runStep('CSS-Token-Extraktion', async () => {
-  const exportDir = getFramerExportDir();
-  const tokenMap = await runScript('extract-framer-css-tokens.js', [
-    '--html', path.join(exportDir, 'index.html'),
-    '--css', path.join(exportDir, 'styles.css'),
-    '--output', path.join(exportDir, 'token-mapping.json'),
-  ]);
+  let tokenMap;
   
-  if (!tokenMap) {
-    // Fallback: Browser-Crawl
-    log.info('FramerExport CSS nicht verfügbar, crawle publizierte Seite...');
-    tokenMap = await runScript('crawl-framer-css.js', [
-      '--url', framerUrl,
-      '--output', path.join(exportDir, 'token-mapping.json'),
+  // Pfad A: FramerExport
+  if (framerExportAvailable) {
+    tokenMap = await runScript('extract-framer-css-tokens.js', [
+      '--mode', 'framer-export',
+      '--html', path.join(exportDir, 'index.html'),
+      '--style-refs', unframerStyleRefsPath,
+      '--output', tokenMapPath,
     ]);
+  }
+  
+  // Pfad B: Crawler (Fallback)
+  if (!tokenMap || tokenMap.unmapped_tokens.length > 10) {
+    log.info('FramerExport-Mapping unvollständig, versuche Browser-Crawl...');
+    tokenMap = await runScript('extract-framer-css-tokens.js', [
+      '--mode', 'crawler',
+      '--url', framerUrl,
+      '--style-refs', unframerStyleRefsPath,
+      '--output', tokenMapPath,
+    ]);
+  }
+  
+  // Qualitäts-Check
+  const coverage = Object.keys(tokenMap.colors || {}).length;
+  log.info(`Token-Mapping: ${coverage} Farben, ${Object.keys(tokenMap.textStyles||{}).length} Text-Styles`);
+  
+  if (tokenMap.unmapped_tokens?.length > 0) {
+    log.warn(`${tokenMap.unmapped_tokens.length} unmappte Tokens — manuelle Nacharbeit nötig`);
   }
   
   return tokenMap;
 });
-
-// Schritt 4: convert-xml-to-v4.js MIT Tokens
-await runScript('convert-xml-to-v4.js', [
-  '--xml', xmlPath,
-  '--tokens', tokenMapPath,    // ← JETZT MIT TOKENS!
-  '--output', v4TreePath,
-]);
 ```
-
-### 2.5 Test: E2E mit CSS-Tokens
-
-- [ ] FramerExport auf `hilarious-workshops-284047.framer.app` ausführen
-- [ ] `extract-framer-css-tokens.js` ausführen → token-mapping.json
-- [ ] `convert-xml-to-v4.js --tokens token-mapping.json` ausführen
-- [ ] Prüfen: Hat der Tree jetzt korrekte Farben, Fonts, Größen?
-- [ ] Auf test4 deployen und visuell vergleichen
 
 ---
 
 ## PHASE 3: DESIGN-SYSTEM-AUTOMATISIERUNG (Tag 4-5)
 
-**Ziel:** Global Variables + Global Classes automatisch aus Token-Mapping erstellen.
-**Aufwand:** ~2 Tage
+**Ziel:** Global Variables + Global Classes aus Token-Mapping erstellen.
+**NEU:** MD5-basierte GV-IDs (von Python SPEC übernommen), getrennte Output-Dateien.
 
-### 3.1 Workflow: Vom Token-Mapping zum Design-System
+### 3.1 MD5-basierte GV-IDs (von Python SPEC)
+
+```javascript
+// Statt Server-seitiger ID-Generierung:
+// Deterministische IDs via MD5 (kein Server-Call nötig!)
+
+function generateGvId(name, type) {
+  const hash = crypto.createHash('md5')
+    .update(`novamira:${type}:${name}`)
+    .digest('hex')
+    .slice(0, 7);
+  return `e-gv-${hash}`;
+}
+
+// Beispiel:
+// generateGvId("Theme Color / Very Dark Green", "color") → "e-gv-a3f2b1c"
+// generateGvId("Inter Display", "font") → "e-gv-d4e5f6a"
+```
+
+### 3.2 Getrennte Output-Dateien (von Python SPEC)
+
+Statt einem monolithischen V4-Tree produziert die Pipeline jetzt:
+
+| Datei | Inhalt |
+|-------|--------|
+| `elements.json` | Der V4 Widget-Tree |
+| `variables.json` | Alle Global Variables mit GV-IDs |
+| `global-classes.json` | Alle Global Classes mit GC-IDs |
+| `token-mapping.json` | Style-Pfad → CSS-Wert + GV-ID (aktualisiert) |
+| `font-resolution.json` | Font-Mapping + Upload-URLs |
+| `asset-manifest.json` | Bild-Mapping + Media-IDs |
+
+### 3.3 Workflow: Vom Token-Mapping zum Design-System
 
 ```
 token-mapping.json
     │
-    ├── colors → adrians-batch-create-variables (type: color)
-    │              → e-gv-XXXXXXXX IDs zurück in Token-Map schreiben
+    ├── colors → setup-design-system.js → batch-create-variables
+    │              → e-gv-XXXXXXXX (MD5) zurück in Token-Map
     │
-    ├── textStyles → adrians-batch-create-variables (type: font)
-    │                  → e-gv-XXXXXXXX IDs
+    ├── fonts → setup-design-system.js → batch-create-variables
+    │              → e-gv-XXXXXXXX (MD5)
     │
-    ├── sizes → adrians-batch-create-variables (type: size)
-    │             → e-gv-XXXXXXXX IDs
+    ├── textStyles → generate-global-classes.js → Typografie-GCs
+    │                  → gc-XXXXXXXXXXXXXXXXX
     │
     └── → elementor-create-global-class (×N)
-           → gc-XXXXXXXXXXXXXXXXX IDs
+           → apply-variable-to-class (Bindings)
 ```
 
-### 3.2 Neues Script: `setup-design-system.js`
+### 3.4 Font-Handling (KEINE Google Fonts!)
 
 ```javascript
-// Liest token-mapping.json
-// Ruft Novamira MCP auf:
-//   1. batch-create-variables für Farben
-//   2. batch-create-variables für Fonts
-//   3. create-global-class für jede semantische Klasse
-//   4. apply-variable-to-class für jedes Binding
-// Schreibt aktualisiertes token-mapping.json mit gv_ids
-```
+// Statt Google Fonts API:
+// 1. @font-face-URLs aus Framer-Seite extrahieren
+// 2. .woff2-Dateien herunterladen
+// 3. Via adrians-batch-media-upload in WordPress hochladen
+// 4. Font-Variable mit Media-ID erstellen
 
-### 3.3 Schritt-für-Schritt:
-
-```
-Schritt 1: FARB-VARIABLEN
-  MCP: adrians-batch-create-variables
-  Input:  [{ name: "Theme Color / Very Dark Green", type: "color", value: "#061D13" }, ...]
-  Output: [{ name: "...", gv_id: "e-gv-A1B2C3D" }, ...]
-  
-Schritt 2: FONT-VARIABLEN
-  MCP: adrians-batch-create-variables
-  Input:  [{ name: "Inter Display", type: "font", value: "Inter Display" }, ...]
-  Output: [{ name: "...", gv_id: "e-gv-E5F6G7H" }, ...]
-
-Schritt 3: GLOBAL CLASSES
-  MCP: elementor-create-global-class (×N)
-  Input:  { name: "Hero Background", type: "background" }
-  Output: { gc_id: "gc-XYZ..." }
-
-Schritt 4: VARIABLE-BINDINGS
-  MCP: adrians-apply-variable-to-class
-  Input:  { class_id: "gc-XYZ...", variable_id: "e-gv-A1B2C3D", property: "background-color" }
-
-Schritt 5: FONT-ENQUEUING
-  Script: resolve-fonts.js (existiert bereits)
-  MCP: adrians-batch-media-upload (für lokale Fonts)
-  WP:  Google Fonts API (für Google Fonts)
-```
-
-### 3.4 Integration in convert-xml-to-v4.js
-
-Nachdem Global Classes existieren, müssen sie im V4-Tree referenziert werden:
-
-```javascript
-// Statt lokalem Style:
-// styles: { "fenode1": { variants: [{ props: { "background-color": ... } }] } }
-
-// Global Class referenzieren:
-settings: {
-  classes: { "$$type": "classes", "value": ["gc-XYZ...", "s-fenode1"] }
-}
-styles: {
-  "s-fenode1": {
-    variants: [{
-      props: {
-        // NUR widget-spezifische Styles (padding, grid),
-        // KEINE Farben/Fonts mehr!
-      }
-    }]
-  }
+const fontFace = extractFontFaces(html);
+for (const font of fontFace) {
+  const file = await downloadFont(font.url);
+  const mediaId = await uploadToWordpress(file, font.family);
+  await createFontVariable(font.family, font.weight, mediaId);
 }
 ```
 
@@ -408,86 +486,68 @@ styles: {
 
 ## PHASE 4: convert-xml-to-v4.js UMBAU (Tag 5-7)
 
-**Ziel:** Den Converter so umbauen, dass er MIT Token-Mapping korrekte Outputs produziert.
-**Aufwand:** ~3 Tage
+**Ziel:** Den Converter so umbauen, dass er MIT Token-Mapping + allen Bug-Fixes korrekte Outputs produziert.
+**NEU:** 9 Änderungen (statt 8), inkl. Breakpoint-null + border-radius + MD5-GV-IDs.
 
 ### 4.1 Alle Änderungen im Überblick
 
-| Änderung | Zeilen | Impact |
-|----------|--------|--------|
-| `inlineTextStyle` parsen + auflösen | +40 | 🔴 L1, L3, L4 |
-| `backgroundColor`-Pfad auflösen | +30 | 🔴 L2 |
-| Bug 3 fix (nicht verwerfen) | -10/+5 | 🔴 L2 |
-| RC-11 verbessern (Style-Fallbacks) | +50 | 🔴 L3 |
-| Bug 8 erweitern (Props extrahieren) | +10 | 🟡 L5 |
-| Komponenten-Rekursion (getNodeXml) | +60 | 🟡 L5 |
-| Responsive Variants erzeugen | +80 | 🟡 L7 |
-| Global Class Referenzen statt lokal | +40 | 🔴 L6 |
+| # | Änderung | Zeilen | Lücke |
+|---|----------|--------|-------|
+| 1 | `inlineTextStyle` parsen + via Token-Map auflösen | +40 | L1, L3, L4 |
+| 2 | `backgroundColor`-Pfad via Token-Map auflösen | +30 | L2 |
+| 3 | Bug 3: background-color NICHT verwerfen | -10/+5 | L2 |
+| 4 | RC-11: Fallback aus Style-Referenz ableiten | +50 | L3 |
+| 5 | Bug 8: CamelCase-Keys als Text-Kandidaten | +10 | L5 |
+| 6 | Bug A: Breakpoint `null` statt `"desktop"` | -3/+3 | 🔴 NEU |
+| 7 | Bug B: border-radius 4-Ecken-Objekt | +15 | 🔴 NEU |
+| 8 | Komponenten-Rekursion (getNodeXml) | +60 | L5 |
+| 9 | Responsive Variants erzeugen | +80 | L7 |
 
-### 4.2 Komponenten-Auflösung (L5)
+### 4.2 Python SPEC Invarianten einbauen
 
 ```javascript
-// convert-xml-to-v4.js: NEUE Funktion
-
-async function resolveComponent(componentId, unframerUrl) {
-  // Rufe Unframer MCP auf: getNodeXml({ nodeId: componentId })
-  const xml = await fetchUnframerNode(componentId, unframerUrl);
-  // Konvertiere das Komponenten-XML in V4-Widgets
-  const tokens = tokenizeXml(xml);
-  const tree = buildTree(tokens);
-  return tree.map(node => convertNode(node, tokenMapping, fontResolution, imageMap));
+// Invariante 1 (Rendering-Gate): Typisierung validieren
+function assertTypedAst(node) {
+  for (const [key, value] of Object.entries(node.settings || {})) {
+    if (typeof value === 'object' && !value['$$type']) {
+      throw new Error(`Rendering-Gate: settings.${key} ohne $$type`);
+    }
+  }
 }
 
-// In convertNode(), wenn widgetType === 'e-component':
-if (attrs.componentId && unframerUrl) {
-  const componentTree = await resolveComponent(attrs.componentId, unframerUrl);
-  // Ersetze e-component-Node mit aufgelöstem Widget-Tree
-  // Übertrage Property-Overrides aus den XML-Attributen
-  return mergeComponentWithOverrides(componentTree, attrs);
+// Invariante 3 (Token Indirection): Keine Hardcoded-Hex-Werte
+function assertNoHardcodedColors(node) {
+  for (const variant of (node.styles?.[styleId]?.variants || [])) {
+    for (const [prop, value] of Object.entries(variant.props || {})) {
+      if (value['$$type'] === 'color' && value.value?.startsWith('#')) {
+        warn(`Hardcoded color ${value.value} — sollte GV-Referenz sein`);
+      }
+    }
+  }
+}
+
+// Invariante 5 (Variant Isolation): Nur geänderte Props in Responsive-Variants
+function deltaVariants(desktopProps, responsiveProps) {
+  const delta = {};
+  for (const [key, value] of Object.entries(responsiveProps)) {
+    if (JSON.stringify(value) !== JSON.stringify(desktopProps[key])) {
+      delta[key] = value;
+    }
+  }
+  return delta;
 }
 ```
 
-### 4.3 Responsive Variants (L7)
-
-```javascript
-// convert-xml-to-v4.js: NEUE Logik
-
-// Unframer-XML enthält:
-// <Desktop nodeId="WQLkyLRf1">...</Desktop>
-// <Tablet  nodeId="Px0QA3Mz8">...</Tablet>
-// <Phone   nodeId="QoxZ85cXX">...</Phone>
-
-// Für Tablet und Phone: getNodeXml(nodeId) aufrufen,
-// Kinder extrahieren, als variants[] in die Desktop-Style-Definition einweben.
-
-async function buildResponsiveVariants(desktopNode, tabletNodeId, phoneNodeId, unframerUrl) {
-  const variants = [
-    { meta: { breakpoint: 'desktop', state: null }, props: desktopNode.props }
-  ];
-  
-  if (tabletNodeId) {
-    const tabletXml = await fetchUnframerNode(tabletNodeId, unframerUrl);
-    const tabletProps = extractPropsFromXml(tabletXml);
-    variants.push({ meta: { breakpoint: 'tablet', state: null }, props: tabletProps });
-  }
-  
-  if (phoneNodeId) {
-    const phoneXml = await fetchUnframerNode(phoneNodeId, unframerUrl);
-    const phoneProps = extractPropsFromXml(phoneXml);
-    variants.push({ meta: { breakpoint: 'mobile', state: null }, props: phoneProps });
-  }
-  
-  return variants;
-}
-```
-
-### 4.4 Tests für den umgebauten Converter
+### 4.3 Tests für den umgebauten Converter
 
 - [ ] Unit-Test: Token-Mapping wird korrekt aufgelöst
-- [ ] Unit-Test: `inlineTextStyle` → CSS-Properties
-- [ ] Unit-Test: `backgroundColor="/Theme Color/X"` → korrekte Farbe
+- [ ] Unit-Test: `inlineTextStyle` → CSS-Properties via Token-Map
+- [ ] Unit-Test: `backgroundColor="/Theme Color/X"` → korrekte Farbe via Token-Map
+- [ ] Unit-Test: Breakpoint `null` (nicht `"desktop"`)
+- [ ] Unit-Test: border-radius 4-Ecken-Objekt
 - [ ] Unit-Test: Komponenten-Rekursion
 - [ ] Unit-Test: Responsive Variants
+- [ ] Unit-Test: Rendering-Gate-Invariante
 - [ ] Alle 128 existierenden Tests müssen weiterhin grün sein
 
 ---
@@ -495,200 +555,106 @@ async function buildResponsiveVariants(desktopNode, tabletNodeId, phoneNodeId, u
 ## PHASE 5: BUILD-QUALITÄT & VISUAL QA (Tag 7-8)
 
 **Ziel:** Automatische Qualitätssicherung nach jedem Build.
-**Aufwand:** ~2 Tage
+**NEU:** 9-Punkte Pre-Build-Check (von Python SPEC) + border-radius/Breakpoint-Checks.
 
-### 5.1 Pre-Build-Validation
+### 5.1 Pre-Build-Validation (erweitert)
 
 ```javascript
-// Neuer Wizard-Schritt VOR elementor-set-content
+// 9 Checks (von Python SPEC + eigene):
+// 1. TOKEN_EXISTENCE — alle referenzierten GV-IDs existieren
+// 2. COLOR_CONSISTENCY — Farbwerte in Tokens stimmen mit CSS überein
+// 3. NO_HARDCODED_HEX — keine direkten Hex-Werte in Styles
+// 4. BREAKPOINT_NULL — Desktop-Variants haben breakpoint: null
+// 5. BORDER_RADIUS_FORMAT — border-radius ist 4-Ecken-Objekt
+// 6. NO_EMPTY_CONTAINERS — keine leeren e-flexbox/e-div-block
+// 7. HEADING_HIERARCHY — h1-h6 Reihenfolge logisch
+// 8. ALT_TEXT_PRESENT — alle e-image haben alt-Text
+// 9. DOM_DEPTH — max 6 Ebenen
 
 await runStep('Pre-Build-Validation', async () => {
   const result = await runScript('framer-pre-build-validate.js', [
     '--tree', v4TreePath,
     '--token-map', tokenMapPath,
     '--min-score', '85',
+    '--checks', 'all',
   ]);
   
   if (result.score < 85) {
-    log.error(`Validation score ${result.score}% < 85% — Build ABGEBROCHEN.`);
-    log.error(`Fehler: ${result.errors.join(', ')}`);
-    throw new Error('Pre-build validation failed');
-  }
-  
-  log.success(`Pre-build validation: ${result.score}% (${result.errors.length} errors)`);
-});
-```
-
-### 5.2 Screenshot-Vergleich (Visual QA)
-
-```javascript
-// Neuer Wizard-Schritt NACH elementor-set-content
-
-await runStep('Visual QA', async () => {
-  // 1. Screenshot der Framer-Seite
-  const framerScreenshot = await takeScreenshot(framerUrl, { selector: 'hero' });
-  
-  // 2. Screenshot der gebauten Elementor-Seite
-  const elementorUrl = `https://test4.nick-webdesign.de/?page_id=${postId}`;
-  const elementorScreenshot = await takeScreenshot(elementorUrl, { selector: 'hero' });
-  
-  // 3. Pixel-Differenz berechnen
-  const diff = await runScript('visual-qa.js', [
-    '--reference', framerScreenshot,
-    '--candidate', elementorScreenshot,
-    '--threshold', '0.05',  // 5% Abweichung toleriert
-    '--output', 'qa-report.json',
-  ]);
-  
-  if (diff.score < 90) {
-    log.warn(`Visual QA: ${diff.score}% Übereinstimmung — Nachbesserung nötig`);
-    // 4. Automatische Patches vorschlagen
-    const patches = diff.suggestions.map(s => ({
-      element_id: s.elementId,
-      style_id: s.styleId,
-      props: s.correctedProps,
-    }));
-    log.info(`${patches.length} Patch-Vorschläge generiert.`);
+    throw new Error(`Pre-build validation: ${result.score}% < 85%`);
   }
 });
 ```
 
-### 5.3 Post-Build Auto-Fix
+### 5.2 Screenshot-Vergleich (unverändert gut)
 
-```javascript
-// Bestehendes post-build-auto-fix.js integrieren
-// + Neue Fähigkeit: Pixel-Diff → Patch-Vorschläge
-
-await runStep('Auto-Fix', async () => {
-  await runScript('post-build-auto-fix.js', [
-    '--post-id', postId,
-    '--qa-report', 'qa-report.json',
-    '--auto-apply',  // ← Automatisch anwenden!
-  ]);
-});
-```
+Der bestehende `visual-qa.js` + `section-compare.js` + `deduplicate-visual-qa.js` Stack wird aktiviert.
 
 ---
 
 ## PHASE 6: WIZARD-INTEGRATION & E2E-TEST (Tag 8-10)
 
-**Ziel:** Alles im Wizard zusammenführen und mit einem kompletten E2E-Test validieren.
-**Aufwand:** ~3 Tage
+**Ziel:** Alles im Wizard zusammenführen und mit E2E-Test validieren.
 
-### 6.1 Neuer Wizard-Workflow
+### 6.1 Finaler Wizard-Workflow (14 Schritte)
 
 ```
-Schritt 1:  FramerExport                    (bestehend, gecached)
-Schritt 1.5: CSS-Token-Extraktion           (NEU — Phase 2)
-Schritt 1.6: Browser-Crawl-Fallback          (NEU — Phase 2, Fallback)
-Schritt 2:  Unframer MCP getProjectXml       (NEU — bisher nur XML-Datei)
-Schritt 2.5: Unframer MCP getNodeXml(hero)   (NEU — gezielt Hero holen)
-Schritt 3:  Cross-Validate Sources           (bestehend, jetzt MIT CSS-Daten)
-Schritt 4:  Token-Mapping validieren         (NEU — validate-token-mapping.js)
-Schritt 5:  Design System aufbauen           (NEU — Phase 3)
-Schritt 5.5: resolve-fonts.js                (bestehend, jetzt AKTIV)
-Schritt 6:  convert-xml-to-v4.js             (bestehend, jetzt MIT Tokens)
-Schritt 7:  generate-global-classes.js       (bestehend, jetzt AKTIV)
-Schritt 8:  framer-pre-build-validate.js     (NEU — 85% Gate)
-Schritt 9:  elementor-set-content            (bestehend)
-Schritt 10: Visual QA (Screenshot-Vergleich) (NEU — Phase 5)
-Schritt 11: post-build-auto-fix.js           (bestehend, jetzt AKTIV)
+ 1. FramerExport                        (bestehend, gecached)
+ 2. CSS-Token-Extraktion                (NEU — Pfad A: FramerExport)
+ 3. Browser-Crawl-Fallback              (NEU — Pfad B: wenn A unvollständig)
+ 4. Unframer MCP getProjectXml          (NEU)
+ 5. Unframer MCP getNodeXml(section)    (NEU)
+ 6. Style-Referenzen aus XML sammeln    (NEU — alle inlineTextStyle, backgroundColor-Pfade)
+ 7. Token-Mapping erstellen             (NEU — UUIDs mit Style-Pfaden matchen)
+ 8. Token-Mapping validieren            (NEU)
+ 9. Design System aufbauen              (NEU — Variables + Classes + Fonts)
+10. resolve-fonts.js                    (bestehend, jetzt AKTIV mit @font-face)
+11. convert-xml-to-v4.js                (bestehend, jetzt MIT Tokens + 9 Fixes)
+12. framer-pre-build-validate.js        (NEU — 9 Checks, 85% Gate)
+13. elementor-set-content               (bestehend)
+14. Visual QA + Auto-Fix                (NEU — Screenshot-Vergleich + Patch)
 ```
 
-### 6.2 Non-Interactive Mode
+### 6.2 Erfolgskriterien (erweitert)
 
-```bash
-# Kompletter automatisierter Durchlauf:
-node wizard.js --non-interactive \
-  --url https://hilarious-workshops-284047.framer.app/ \
-  --target https://test4.nick-webdesign.de \
-  --post-id 0 \
-  --section hero \
-  --design-system auto \
-  --auto-fix
-```
+Nach Abschluss ALLER Phasen:
 
-### 6.3 E2E-Test
-
-```javascript
-// tests/e2e.test.js: NEUER Test
-test('E2E: Kompletter Dual-Source Build mit visuellem Vergleich', async () => {
-  // 1. FramerExport ausführen
-  const exportDir = await runFramerExport(FRAMER_URL);
-  
-  // 2. CSS-Tokens extrahieren
-  const tokenMap = await runScript('extract-framer-css-tokens.js', ...);
-  assert.ok(tokenMap.colors, 'Farb-Tokens extrahiert');
-  assert.ok(tokenMap.textStyles, 'Text-Style-Tokens extrahiert');
-  
-  // 3. Unframer XML holen
-  const xml = await fetchUnframerNode(HERO_NODE_ID);
-  assert.ok(xml.includes('HeroSection'), 'Hero-XML enthält HeroSection');
-  
-  // 4. Zu V4 konvertieren MIT Tokens
-  const v4Tree = await runScript('convert-xml-to-v4.js', [
-    '--xml-string', xml,
-    '--tokens', tokenMapPath,
-  ]);
-  
-  // 5. Validieren
-  const validation = validateV4Tree(v4Tree);
-  assert.ok(validation.passed, 'V4-Tree-Validierung bestanden');
-  
-  // 6. Design System aufbauen
-  const ds = await setupDesignSystem(tokenMap);
-  assert.ok(ds.variables.length > 0, 'Variables erstellt');
-  assert.ok(ds.classes.length > 0, 'Global Classes erstellt');
-  
-  // 7. Auf Test-Seite deployen
-  const result = await deployToWordpress(v4Tree, POST_ID);
-  assert.ok(result.success, 'Deployment erfolgreich');
-  
-  // 8. Visuell vergleichen
-  const diff = await visualQA(FRAMER_URL, WORDPRESS_URL);
-  assert.ok(diff.score >= 85, `Visual QA Score ${diff.score}% >= 85%`);
-});
-```
+1. ✅ Hintergrundfarben korrekt (aus CSS-Tokens, nicht verworfen)
+2. ✅ Typografie korrekt (Font-Family, Größe, Gewicht, Farbe aus Token-Map)
+3. ✅ Buttons mit vollständigem Styling (Background, Border-Radius, Padding)
+4. ✅ Breakpoint `null` für Desktop-Variants
+5. ✅ Border-Radius als 4-Ecken-Objekt
+6. ✅ Global Variables via MD5-GV-IDs erstellt
+7. ✅ Global Classes automatisch generiert
+8. ✅ Fonts via @font-face lokal in WordPress gehostet
+9. ✅ Responsive Breakpoints als Variants
+10. ✅ Komponenten aus Unframer aufgelöst
+11. ✅ Visual QA ≥85% Übereinstimmung
+12. ✅ E2E-Test grün
 
 ---
 
 ## ZEITPLAN
 
-| Phase | Beschreibung | Aufwand | Abhängigkeiten |
-|-------|-------------|---------|----------------|
-| **Research** | 3-4 kritische Fragen recherchieren | 0.5 Tage | - |
-| **Phase 1** | Quick-Wins & Skills kopieren | 1 Tag | Research abgeschlossen |
-| **Phase 2** | Dual-Source CSS-Extraktion | 2 Tage | Phase 1 |
-| **Phase 3** | Design-System-Automatisierung | 2 Tage | Phase 2 |
-| **Phase 4** | convert-xml-to-v4.js Umbau | 3 Tage | Phase 2+3 |
-| **Phase 5** | Build-Qualität & Visual QA | 2 Tage | Phase 4 |
-| **Phase 6** | Wizard-Integration & E2E-Test | 3 Tage | Phase 4+5 |
-| **GESAMT** | | **~2 Wochen** | |
+| Phase | Beschreibung | Aufwand |
+|-------|-------------|---------|
+| **Phase 0** | Deep Research | ✅ ABGESCHLOSSEN |
+| **Phase 1** | Quick-Wins (6 Fixes) + 10 Skills | 0.5 Tage |
+| **Phase 2** | Dual-Source CSS-Extraktion + UUID-Mapping | 2 Tage |
+| **Phase 3** | Design-System (MD5-GV-IDs + getrennte Outputs) | 2 Tage |
+| **Phase 4** | convert-xml-to-v4.js Umbau (9 Änderungen) | 3 Tage |
+| **Phase 5** | Build-Qualität (9-Punkte-Check) + Visual QA | 2 Tage |
+| **Phase 6** | Wizard-Integration + E2E-Test | 3 Tage |
+| **GESAMT** | | **~2.5 Wochen** |
 
 ---
 
-## ERFOLGSKRITERIEN
+## RISIKEN & OFFENE FRAGEN
 
-Nach Abschluss aller Phasen muss die Pipeline:
-
-1. ✅ **Hintergrundfarben** korrekt aus FramerExport extrahieren und setzen
-2. ✅ **Typografie** (Font-Family, Größe, Gewicht, Farbe) aus CSS-Tokens auflösen
-3. ✅ **Buttons** mit korrektem Styling (Background, Border-Radius, Padding) rendern
-4. ✅ **Global Variables** automatisch aus Token-Mapping erstellen
-5. ✅ **Global Classes** automatisch generieren und referenzieren
-6. ✅ **Responsive Breakpoints** als Variants in den Tree einweben
-7. ✅ **Komponenten** (PrimaryButton, Feature) aus Unframer auflösen
-8. ✅ **Visual QA** nach jedem Build mit ≥85% Score
-
----
-
-## RISIKEN & FALLBACKS
-
-| Risiko | Eintrittswahr. | Fallback |
-|--------|---------------|----------|
-| FramerExport liefert keine CSS-Dateien | Mittel | Browser-Crawl als Fallback (2.3) |
-| Unframer MCP ändert API | Niedrig | Caching + Version-Pinning |
-| Elementor V4 Style-Schema ändert sich | Mittel | `elementor-get-style-schema` vor Build abrufen |
-| Google Fonts nicht verfügbar | Niedrig | Lokale Fonts via FramerExport |
-| Komponenten-Rekursion zu tief/timeout | Mittel | Max-Rekursionstiefe (3) + Timeout (30s) |
-| Pixel-Diff zu sensitiv | Hoch | Schwellwert konfigurierbar (default 5%) |
+| Risiko/Frage | Status |
+|-------------|--------|
+| UUID-Token → Style-Pfad Mapping unvollständig | 🔴 Heuristik kann Lücken haben — manuelles Mapping pro Projekt als Fallback |
+| Akzeptiert V4 lokale `background-color`? | 🟡 MUSS GETESTET WERDEN vor Phase 1 |
+| Akzeptiert V4 `border-radius` als 4-Ecken-Objekt? | 🟡 MUSS GETESTET WERDEN vor Phase 1 |
+| FramerExport auf dieser Maschine verfügbar? | 🟡 MUSS GETESTET WERDEN vor Phase 2 |
+| @font-face-URLs (framerusercontent.com) dauerhaft? | 🟡 Framer CDN könnte URLs ändern — lokal hosten |
+| Unframer MCP Rate-Limits bei Komponenten-Rekursion | 🟢 Caching + max 3 Ebenen tief |
