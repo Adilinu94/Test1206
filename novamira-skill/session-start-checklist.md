@@ -18,7 +18,7 @@ MCP-Call oder Elementor-Build gestartet wird. Auch nach einer Pause von >30 Minu
 
 ## Kritische Invarianten
 
-- `adrians-setup-v4-foundation` gibt Session-live IDs zurück — diese ändern sich bei jedem Call
+- `novamira-adrianv2/setup-v4-foundation` gibt Session-live IDs zurück — diese ändern sich bei jedem Call
 - GV-IDs (`e-gv-*`) und GC-IDs (`gc-*`) aus der letzten Session sind UNGÜLTIG
 - MCP-Session-TTL: ~25–30 Minuten — danach neu initialisieren
 - Beim ersten 401 oder 419: sofort neu initialisieren, nicht wiederholen
@@ -37,10 +37,10 @@ Parameters: {}
 ```
 
 **Erwartetes Ergebnis:** Liste von ≥100 Abilities. Mindestens diese müssen vorhanden sein:
-- `novamira/adrians-setup-v4-foundation`
+- `novamira-adrianv2/setup-v4-foundation`
 - `novamira/elementor-set-content`
-- `novamira/adrians-export-design-system`
-- `novamira-adrianv2/adrians-code-injector`
+- `novamira-adrianv2/export-design-system`
+- `novamira-adrianv2/layout-audit`
 
 **Bei Fehler (Verbindung tot):**
 1. LocalWP → `solar.local` läuft? → starten
@@ -88,7 +88,7 @@ Parameters:
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira/adrians-setup-v4-foundation"
+  ability_name: "novamira-adrianv2/setup-v4-foundation"
   parameters: { "post_id": TARGET_POST_ID }
 ```
 
@@ -134,13 +134,13 @@ Für alle Builds die mit Tokens/Farben/Fonts arbeiten:
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira/adrians-export-design-system"
+  ability_name: "novamira-adrianv2/export-design-system"
   parameters: { "what": "all" }
 ```
 
 → Als `design-system-export.json` speichern (oder McpDesignSystemCache verwenden).
 
-> **Cache erlaubt:** `adrians-export-design-system` ist read-only, ändert sich nicht
+> **Cache erlaubt:** `novamira-adrianv2/export-design-system` ist read-only, ändert sich nicht
 > während einer Session. `McpDesignSystemCache` cached 5 Minuten (`.pipeline/design-system.json`).
 
 ---
@@ -151,7 +151,7 @@ Wenn ein MCP-Call mit HTTP 401 oder 419 antwortet:
 
 ```
 1. mcp-bridge.js initialisiert automatisch neu (session handshake)
-2. adrians-setup-v4-foundation ERNEUT aufrufen → neue GV/GC-IDs
+2. novamira-adrianv2/setup-v4-foundation ERNEUT aufrufen → neue GV/GC-IDs
 3. Laufenden Build-Schritt von vorne beginnen (IDs sind ungültig)
 4. NIEMALS die alten IDs wiederverwenden
 ```
@@ -192,9 +192,9 @@ Wenn ein MCP-Call mit HTTP 401 oder 419 antwortet:
   │
   ├── 1. mcp-adapter-discover-abilities      → Verbindung OK?
   ├── 2. elementor-check-setup               → V4 runtime_available?
-  ├── 3. adrians-setup-v4-foundation         → Frische GV/GC-IDs
+  ├── 3. novamira-adrianv2/setup-v4-foundation         → Frische GV/GC-IDs
   ├── 4. (optional) wpcode check             → WPCode aktiv?
-  └── 5. adrians-export-design-system        → Token-Basis für Build
+  └── 5. novamira-adrianv2/export-design-system        → Token-Basis für Build
          │
          └── [Build starten → framer-v4-pipeline Skill]
 ```

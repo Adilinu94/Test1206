@@ -27,7 +27,10 @@ cat .pipeline/bridge.log 2>/dev/null | tail -50
 ## Diagnose-Entscheidungsbaum
 
 ```
-Fehler bei PHP-Abilities?
+Fehler bei PHP-Abilities aus novamira-ability-code-injector/ (Repo-Code)?
+  → HINWEIS: Diese Abilities (novamira-adrianv2/adrians-*) sind NICHT live aktiv auf
+    solar.local — das WPCode-Snippet-CRUD-System hat kein Live-Aequivalent (Stand: Naming-Fix).
+    Fuer Animation/Code-Injection siehe animation-workflow.md (add-custom-js/add-code-snippet).
   → Ist WPCode aktiv? post_type_exists('wpcode_snippet') → false → Plugin deaktiviert
   → novamira_find_wpcode_snippet undefined? → adrians-helpers.php nicht geladen (require_once fehlt)
 
@@ -53,16 +56,24 @@ Score 0%?
 elementor-set-content gibt 401 zurück?
   → MCP-Session abgelaufen (TTL ~25-30min)
   → Neu initialisieren: mcp-bridge.js → session handshake
-  → adrians-setup-v4-foundation erneut aufrufen (gibt neue GV/GC-IDs)
+  → novamira-adrianv2/setup-v4-foundation erneut aufrufen (gibt neue GV/GC-IDs)
 
 elementor-set-content gibt leere Seite?
   → GV-IDs stale: e-gv-* IDs aus vorheriger Session
-  → adrians-setup-v4-foundation nie cachen → fresh IDs holen
+  → novamira-adrianv2/setup-v4-foundation nie cachen → fresh IDs holen
   → GC-IDs in styles{} aber nicht in elements? → styles[] muss parallel zu elements[] sein
 
-adrians-batch-inject-snippets schlägt fehl?
-  → >20 Snippets? Batch-Limit ist 20
-  → Nutze --single-mode Flag für Debugging einzelner Snippets
+novamira-adrianv2/adrians-* not found (z.B. adrians-get-snippet, adrians-fix-color-contrast)?
+  → ❌ FALSCHES PRAEFIX — "adrians-" existiert in novamira-adrianv2/* NICHT mehr
+  → Fix: Praefix entfernen -> novamira-adrianv2/get-snippet wuerde aber AUCH nicht existieren,
+    da das WPCode-Snippet-CRUD-System kein Live-Aequivalent hat
+  → Siehe animation-workflow.md / font-workflow.md fuer die korrekte Alternative
+    (add-custom-js / add-custom-css / add-code-snippet)
+
+add-custom-js / add-code-snippet schlägt fehl?
+  → post_id fehlt bei add-custom-js? -> Ability ist post_id-scoped (HTML-Widget auf der Seite)
+  → add-code-snippet braucht Elementor Pro Custom Code -> list-code-snippets zur Verifikation
+  → GSAP laedt nicht? -> CDN-Script-Tag UND Inline-Code im selben Snippet pruefen
 
 GC transform-functions PHP Warning?
   → Bekannter Bug: gc-* mit malformiertem transform-functions prop
@@ -77,14 +88,15 @@ GC transform-functions PHP Warning?
 | Symptom | Ursache | Fix | Commit |
 |---------|---------|-----|--------|
 | CI alle Jobs "green" aber nichts geprüft | working-directory: framer-v4-pipeline-v2-main | CI fix | 5bb2d3d |
-| PHP Fatal: undefined function novamira_find_wpcode_snippet | require_once helpers fehlt | adrians-helpers.php | 5bb2d3d |
+| PHP Fatal: undefined function novamira_find_wpcode_snippet | require_once helpers fehlt | adrians-helpers.php (Repo-Datei) | 5bb2d3d |
 | Score 0% beide Fixtures identisch | homepage.xml = hero-section.xml (identisch) | Fixture fix | 5bb2d3d |
 | novamira-extra/* 404 | Falscher Namespace — Plugin heißt novamira-adrianv2 | post-build-auto-fix.js fix | Runde 2 |
-| GSAP-Snippet bricht bei Backticks | addslashes() statt wp_json_encode() | Code-Injector fix | 5bb2d3d |
+| novamira-adrianv2/adrians-* not found | Praefix "adrians-" existiert live nicht mehr | Skills auf novamira-adrianv2/* (ohne Praefix) umgeschrieben | Naming-Fix |
+| GSAP-Snippet bricht bei Backticks | addslashes() statt wp_json_encode() | Code-Injector fix (Repo-Datei) | 5bb2d3d |
 | inject-animation N×MCP-Calls | forEach loop statt Batch-Ability | inject-animation-code.js fix | Runde 2 |
 | DOM-Depth kein Check | validate-v4-tree.js fehlte C7 | checkDomDepth() | 5bb2d3d |
 | GC-Generierung wird übersprungen | wizard.js Step 5 war "Optional" | Pflichtschritt | 5bb2d3d |
-| meta-tags/schema nicht gesetzt | novamira-extra PHP fehlte | adrians-generate-*.php | Runde 2 |
+| meta-tags/schema nicht gesetzt | Native Live-Abilities existieren bereits | novamira-adrianv2/generate-meta-tags + generate-schema-markup (ohne Praefix) | Naming-Fix |
 
 ---
 
