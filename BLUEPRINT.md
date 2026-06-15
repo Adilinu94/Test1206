@@ -1,6 +1,6 @@
 # 🚀 Framer → Elementor V4 Pipeline V2: Master Blueprint
 
-> **Version:** v0.12.0 | **Stand:** 2026-06-14
+> **Version:** v0.20.0 | **Stand:** 2026-06-14
 
 ## 🎯 Overview
 Ziel: Umsetzung eines stabilen, token-effizienten Framer-zu-V4-Workflows basierend auf einer **3-Wege-Symbiose**:
@@ -27,7 +27,9 @@ framer-v4-pipeline-v2/
 ├── schemas/
 │   └── v4-prop-type-schema.json          # Widget-Pflichtfelder fuer Validator
 ├── tests/
-│   └── pipeline.test.js                  # 105 Regressionstests in 33 Suiten, node --test
+│   └── pipeline.test.js                  # 128 Regressionstests in 37 Suiten, node --test
+├── tests/
+│   └── e2e.test.js                       # 18 E2E-Tests (inkl. 3 S14 ENH-16)
 └── scripts/
     ├── lib/
     │   ├── framer-utils.js               # Gemeinsame Utilities (wrapSize, walkTree, ...)
@@ -43,6 +45,7 @@ framer-v4-pipeline-v2/
     ├── extract-framer-forms.js           # A3: Form Extraction (→ V4 Atomic Forms)
     ├── preflight-check.js                # Standalone Preflight System-Checks (S6)
     ├── measure-quality-metrics.js        # ENH-13: Quality Metrics (DOM, GC, GV, Grid, Components)
+    ├── profile-pipeline.js               # ENH-14: Pipeline Performance Profiler (7 Phasen + Bottleneck)
     └── wizard/
         ├── shared.js                     # Shared helpers (log, runFile, recovery)
         ├── cmd-preflight.js              # Preflight sub-command
@@ -148,9 +151,18 @@ framer-v4-pipeline-v2/
 - [x] **FIX-7**: `mcp-bridge.js` callParallel() p-limit (concurrency=3, Worker-Pool, MCP_CONCURRENCY env var)
 - [x] **ENH-11**: `convert-xml-to-v4.js` JSDoc für 9 Kernfunktionen
 - [x] **wizard.js batch**: `--pages` + `--post-ids` Multi-Page Subcommand (S6)
-- [x] `tests/pipeline.test.js`: **105 Tests in 33 Suiten** (node --test), alle gruen
+- [x] `tests/pipeline.test.js`: **128 Tests in 37 Suiten** (node --test), alle gruen
 - [x] `tests/e2e.test.js`: **15 Tests**, alle gruen (+3 S13 ENH-12)
 - [x] `tests/integration.test.js`: **7 Tests** (4 pass, 3 skip ohne --live)
+- [x] **Sprint 9**: ENH-14 Profile-Pipeline, ENH-15 axe-core A11y (--a11y/--a11y-output), FIX-15 WCAG 2.2 PHPUnit, FIX-16/17 Media-Security
+- [x] **ENH-16 FramerExport CLI**: Wizard --non-interactive läuft vollständig durch. FramerExport v4.3.8, spawnWithRetry mit shell:true-Eskalation für Bash/Windows-Kompatibilität.
+- [x] **Sprint 10**: CI PHPUnit Hardening, WCAG Contrast Merge, Deploy-Script, CI PHPUnit Integration (8. Job)
+- [x] **Sprint 11**: Archive Cleanup (7 files), CI Consolidation (11 jobs in 1 workflow)
+- [x] **Sprint 12**: Plugin README (REST endpoints, test infra, deploy docs)
+- [x] **Sprint 14**: Concurrency 3→5, MCP_CONCURRENCY_PROFILE presets, FramerExport caching
+- [x] **Sprint 15**: Corrupt cache JSON resilience, dead fallback fix, caching tests (114→128)
+- [x] **Sprint 16**: --no-cache CLI flag in non-interactive mode, cache hit/miss logic
+- [x] **Sprint 17**: FramerExport caching in interactive wizard mode, --no-cache unified
 - [x] GSD-Projekt: `.planning/` mit PROJECT.md, REQUIREMENTS.md, ROADMAP.md, PLAN-1-7.md, STATE.md, config.json
 - [x] `--help` Blocks: A1, A2, A3 mit einheitlichem CLI-Pattern (parseArgs help Option)
 
@@ -191,7 +203,7 @@ framer-v4-pipeline-v2/
 - [x] .planning/ Docs synchronisiert (REQUIREMENTS, ROADMAP, STATE, PROJECT)
 
 ### Phase 1.4+ — CI, Performance, UX, Advanced, A11y (abgeschlossen ✅)
-- [x] **1.4:** `.github/workflows/ci.yml` — 7 Jobs (test, e2e, schema, mcp-mock, visual, lint, syntax)
+- [x] **1.4:** `.github/workflows/ci.yml` — 11 Jobs (test, e2e, schema, mcp-mock, visual, lint, syntax, test-all, phpcs, psalm, phpunit)
 - [x] **1.4:** `tests/mcp-mock-server.js` — lokaler Mock (15 Ability-Responses)
 - [x] **2.1:** `class-execute-build-plan.php` — Mega-Ability (1 Call statt 18+ Agent-Turns)
 - [x] **2.2:** `scripts/parallel-pre-build.js` — Promise.allSettled für 5 Sub-Steps
@@ -237,9 +249,11 @@ framer-v4-pipeline-v2/
 ## ✅ Lokale Verifikation
 
 ```bash
-npm test                # 105 pipeline tests (33 Suiten)
-npm run test:e2e        # 15 e2e tests
-npm run test:all        # 127 tests total (105 pipeline + 15 e2e + 7 integration)
+npm test                # 128 pipeline tests (37 Suiten)
+npm run test:e2e        # 18 e2e tests (inkl. 3 S14 ENH-16)
+npm run test:all        # 153 tests total (128 pipeline + 18 e2e + 7 integration)
+cd novamira-adrianv2 && php composer.phar vendor/bin/phpunit  # 52 PHPUnit tests
+bash novamira-adrianv2/scripts/deploy-plugin.sh   # Deploy plugin to solar.local
 npm run test:integration # 7 integration tests (4 pass, 3 skip ohne --live)
 npm run test:bridge     # mcp-bridge.js --self-test
 npm run test:mcp-mock   # Integration tests gegen Mock-Server
@@ -259,4 +273,5 @@ npm run measure-quality  # ENH-13: Quality Metrics Measurement
 npm run test:integration-live # FIX-13: Live Integration Tests
 node --check wizard.js
 node --check scripts/lib/mcp-bridge.js
+npm run deploy-plugin  # (alias: bash novamira-adrianv2/scripts/deploy-plugin.sh)
 ```

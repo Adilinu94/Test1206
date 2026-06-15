@@ -65,7 +65,7 @@
 - [x] `wizard.js`: GC-Generierung aus "Optional" in Pflichtschritt upgraden
 - [x] `validate-v4-tree.js`: `checkDomDepth()` als C7 hinzugefügt (warning ≥4, error ≥6)
 - [x] 2 neue Tests in `tests/pipeline.test.js` für DOM-Depth-Check (Suite 10)
-- [ ] `PIPELINE_AUDIT_REPORT.md`: P0-1 und P0-2 als `[x] erledigt` markieren — optional/manuell
+- [x] `PIPELINE_AUDIT_REPORT.md`: P0-1 und P0-2 als `[x] erledigt` markieren ✅
 
 ### P1-5 — `adrians-list-snippets.php`: DB-Query-Filter statt PHP-Filter
 - [x] WP_Query um `meta_query` für `filter_type` erweitert
@@ -85,7 +85,7 @@
 ### PHP-2 — `adrians-batch-inject-snippets` (Batch-Modus für Animations-Workflow)
 - [x] `adrians-batch-inject-snippets.php` implementiert (max 20 Snippets, delegiert an code-injector)
 - [x] Fix committed
-- [ ] `inject-animation-code.js` anpassen: N einzelne Calls → 1 Batch-Call (JS-seitige Optimierung, separater Task)
+- [x] `inject-animation-code.js` anpassen: N einzelne Calls → 1 Batch-Call (JS-seitige Optimierung, separater Task)
 
 ### PHP-3 — `adrians-delete-snippet`: `mode: "activate"` fehlt
 - [x] `activate`-Branch in `adrians-delete-snippet.php` hinzugefügt (inkl. WPCode-Transient-Clear)
@@ -126,6 +126,7 @@
 - [x] `framer-v4-pipeline.md`: `version: "0.7.0"` + `pipeline_min_version: "0.7.0"` gesetzt
 - [x] Cache-Hinweis: `McpDesignSystemCache` statt `mcp-bridge.js` + korrekter Pfad
 - [x] Fix committed
+- [x] `framer-v4-pipeline.md` auf v0.20.0 aktualisiert (Version + Test-Zähler) ✅
 
 ---
 
@@ -145,7 +146,7 @@
 
 ## Offene Nice-to-have (nicht im ursprünglichen Audit)
 
-- [ ] `inject-animation-code.js`: JS-seitig auf `adrians-batch-inject-snippets` umstellen (N→1 Calls)
+- [x] `inject-animation-code.js`: JS-seitig auf `adrians-batch-inject-snippets` umstellen (N→1 Calls)
 - [ ] `PIPELINE_AUDIT_REPORT.md`: P0-Einträge als erledigt markieren
 - [ ] `lint:version`-ähnliches Script: Test-Count in README automatisch prüfen
 

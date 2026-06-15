@@ -24,9 +24,7 @@
 Siehe `tasks/todo.md` für die vollständige Aufgabenliste.
 
 Kurzübersicht Restarbeiten:
-- `inject-animation-code.js`: N einzelne Calls → 1 `adrians-batch-inject-snippets`-Call refactoren
-- Skill-Datei `framer-v4-pipeline.md`: Version und Cache-Hinweis aktualisieren (DX-4)
-- `lint:version` Script: Analog dazu Test-Count-Lint prüfen (P1-3)
+- (keine — alle Nice-to-haves erledigt ✅)
 
 ---
 

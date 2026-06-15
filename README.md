@@ -13,8 +13,8 @@ Standalone-Pipeline zur Konvertierung von **Framer-Websites** in **Elementor V4 
 
 ```bash
 node wizard.js          # Interaktiver CLI-Wizard (empfohlen)
-npm test                # 105 Pipeline-Tests (33 Suiten)
-npm run test:e2e        # 15 E2E-Tests
+npm test                # 128 Pipeline-Tests (37 Suiten)
+npm run test:e2e        # 18 E2E-Tests
 ```
 
 ## Pipeline-Phasen
@@ -35,9 +35,9 @@ npm run test:e2e        # 15 E2E-Tests
 
 ```bash
 # Tests
-npm test                  # 105 Pipeline-Tests in 33 Suiten (framer-utils, converter, guards…)
-npm run test:e2e          # 15 E2E-Tests (kompletter Pipeline-Durchlauf)
-npm run test:all          # 127 Tests (105 pipeline + 15 e2e + 7 integration)
+npm test                  # 128 Pipeline-Tests in 37 Suiten (framer-utils, converter, guards…)
+npm run test:e2e          # 18 E2E-Tests (kompletter Pipeline-Durchlauf)
+npm run test:all          # 153 Tests (128 pipeline + 18 e2e + 7 integration)
 npm run measure-quality  # Qualitaets-Metriken messen
 npm run test:integration-live # Integration --live
 
@@ -400,8 +400,8 @@ framer-v4-pipeline-v2/
 │   ├── build-dependency-graph.js        # Kahn-Algorithmus Build-Reihenfolge
 │   └── export-mcp-xml.js                # getNodeXml Plan-Generator
 └── tests/
-    ├── pipeline.test.js                 # 105 Pipeline-Tests in 33 Suiten
-    └── e2e.test.js                      # 15 E2E-Tests
+    ├── pipeline.test.js                 # 128 Pipeline-Tests in 37 Suiten
+    └── e2e.test.js                      # 18 E2E-Tests
 ```
 
 ## Changelog
@@ -418,4 +418,4 @@ framer-v4-pipeline-v2/
 | 5 | Duplicate Widget-IDs (`node-7` 5×) | `uniqueWidgetId()` mit Counter — analog zu `uniqueStyleId()` |
 | 6 | SVG-Circles → `e-flexbox` statt `e-svg` | `determineWidgetType` erkennt SVG-Tags/Attribute; `serializeSvgNode()` serialisiert Sub-Tree zurück zu Markup |
 
-**Alle 105 Pipeline-Tests weiterhin grün (33 Suiten).**
+**Alle 128 Pipeline-Tests weiterhin grün (37 Suiten).**
