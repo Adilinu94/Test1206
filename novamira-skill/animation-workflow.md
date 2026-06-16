@@ -1,50 +1,48 @@
 ---
 slug: animation-workflow
-title: GSAP/CSS Animation Workflow (novamira-adrianv2)
-description: Workflow fuer GSAP- und CSS-Animation-Injection nach einem Framer -> Elementor V4 Build, ausgerichtet auf die nativen novamira-adrianv2 Code-Injection-Abilities (add-custom-js, add-custom-css, add-code-snippet, list-code-snippets). Das WPCode-Snippet-CRUD-System (adrians-code-injector etc.) hat KEIN Live-Aequivalent und wird hier NICHT verwendet.
+title: GSAP Animation Injection Workflow
+description: Vollständiger Workflow für GSAP/CSS-Animations-Injection nach einem Framer → Elementor V4 Build. Deckt Extraktion aus Framer HTML-Export, Plan-Generierung via inject-animation-code.js und Batch-Injection via adrians-batch-inject-snippets ab. Inkl. Conflict-Strategie, Plugin-Erkennung und Debugging via --single-mode.
 version: "0.7.0"
 pipeline_min_version: "0.7.0"
-tags: [gsap, animation, css, novamira, adrianv2, add-custom-js, add-code-snippet]
+tags: [gsap, animation, inject, wpcode, framer, batch, scrolltrigger]
 ---
 
-# GSAP/CSS Animation Workflow (novamira-adrianv2)
+# GSAP Animation Injection Workflow
 
 ## Wann diesen Skill verwenden
-Nach jedem Framer -> Elementor V4 Build, wenn Scroll-Animationen, Hover-Effekte oder
-CSS-Keyframe-Animationen aus dem Framer-Export uebernommen werden sollen.
+Nach jedem Framer → Elementor V4 Build wenn Animationen aus dem Framer-Export
+übernommen werden sollen, oder wenn manuell GSAP-Code auf eine Seite aufgespielt
+werden soll. Dieser Skill beschreibt den gesamten Ablauf von Extraktion bis Live.
 
-## Ground Truth
-
-Das fruehere WPCode-Snippet-CRUD-System (`novamira-adrianv2/adrians-code-injector`,
-`adrians-batch-inject-snippets`, `adrians-get/update/delete/list-snippets`) hat
-**KEIN Live-Aequivalent** auf solar.local. Stattdessen werden 4 native Abilities genutzt:
-
-| Ability | Scope | Wofuer |
-|---------|-------|--------|
-| `novamira-adrianv2/add-custom-js` | Pro Seite (post_id + parent_id) | Animation-Calls (gsap.from, ScrollTrigger.create, ...) |
-| `novamira-adrianv2/add-custom-css` | Page- oder Element-Level | @keyframes, transition, hover-states |
-| `novamira-adrianv2/add-code-snippet` | Sitewide (Elementor Pro) | GSAP-Core+Plugins via CDN, globale @keyframes |
-| `novamira-adrianv2/list-code-snippets` | Sitewide (Elementor Pro) | Verifikation bestehender Sitewide-Snippets |
+---
 
 ## Kritische Regeln
 
-1. **Two-Tier-Architektur**: GSAP-Core+Plugins EINMAL sitewide laden (`add-code-snippet`),
-   Animationscode PRO SEITE via `add-custom-js`
-2. `add-custom-js` braucht **`parent_id`** (Pflichtfeld!) — eine existierende `element_id`
-   aus dem v4-tree (z.B. die Hero-Section-ID aus convert-xml-to-v4.js)
-3. `add-custom-js` umschliesst Code AUTOMATISCH mit `<script>` — eigene `<script>`-Tags
-   im `js`-Parameter sind FALSCH
-4. `add-code-snippet` braucht VOLLE Tags (`<script>`, `<style>`) im `code`-Parameter
-5. `add-custom-css`/`add-code-snippet` (sitewide) erfordern **Elementor Pro** —
-   `add-custom-js` funktioniert auch ohne Pro
-6. `wrap_dom_ready:true` bei `add-custom-js` setzen, wenn GSAP via sitewide-Snippet
-   geladen wird (Timing-Sicherheit)
+1. Animations-Injection IMMER nach dem Build — nie davor (GC-Klassen müssen existieren)
+2. Snippet-Titel sind der Lookup-Key — identischer Titel = Update (upsert), nie Duplikat
+3. `adrians-batch-inject-snippets` statt N Einzelcalls — max. 20 Snippets pro Batch
+4. `on_conflict: "replace"` als Standard — verhindert veraltete Animations-Code-Rückstände
+5. GSAP wird via WPCode als PHP-Snippet enqueued — KEIN direktes `<script>` in Elementor HTML
+6. Nach Injection: Browser-Cache leeren und Seite im Inkognito-Tab verifizieren
+
+---
+
+## Animations-Typen
+
+Der Extraktor erkennt 4 Typen aus Framer HTML-Exporten:
+
+| Typ | Quelle | WPCode-Typ | Location |
+|-----|--------|-----------|---------|
+| `gsap` | Inline `<script>` mit `gsap.`, `ScrollTrigger` etc. | `js` (mit PHP-Enqueue) | `site_wide_footer` |
+| `css` | `@keyframes`, `animation:`, `transition:` Regeln | `css` | `site_wide_header` |
+| `js` | Andere Inline-Scripts ohne GSAP | `js` | `site_wide_footer` |
+| `framer` | `data-framer-appear-id` Scroll-Trigger Elemente | `gsap` (konvertiert) | `site_wide_footer` |
 
 ---
 
 ## 3-Schritt Workflow
 
-### Schritt 1 — Animationen aus Framer-Export extrahieren (unveraendert gueltig)
+### Schritt 1: Animation-Plan aus Framer-Export extrahieren
 
 ```bash
 node scripts/framer-animation-extractor.js \
@@ -55,139 +53,201 @@ node scripts/framer-animation-extractor.js \
   --verbose
 ```
 
-**Output `animation-plan.json`** (Format unveraendert):
+**Output `animation-plan.json`:**
 ```json
 [
   {
     "title": "Hero — GSAP ScrollReveal",
     "type": "gsap",
-    "code": "gsap.from('.s-shero .e-heading', { opacity: 0, y: 80, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: '.s-shero', start: 'top 80%', once: true } });",
+    "code": "gsap.from('.s-shero .e-heading', { opacity: 0, y: 80, ... })",
     "post_id": 4943,
     "gsap_version": "3.12.5",
-    "gsap_plugins": ["ScrollTrigger"]
+    "gsap_plugins": ["ScrollTrigger"],
+    "on_conflict": "replace",
+    "tags": ["framer", "hero", "gsap"]
   },
   {
-    "title": "Global — Fade-Up Keyframes",
+    "title": "Global — Animation CSS Basis",
     "type": "css",
-    "code": "@keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }"
+    "code": "@keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }",
+    "location": "site_wide_header",
+    "on_conflict": "replace",
+    "tags": ["framer", "css"]
   }
 ]
 ```
 
-> **Hinweis:** `inject-animation-code.js` generiert weiterhin Pläne für
-> `novamira-adrianv2/adrians-batch-inject-snippets` — diese Ability existiert NICHT.
-> Nutze `animation-plan.json` als Input und führe die MCP-Calls direkt gemäß
-> Schritt 2+3 unten aus, statt den generierten Plan zu verwenden.
+> **Kein Framer-HTML?** Manuellen Snippet direkt via CLI übergeben:
+> ```bash
+> node scripts/inject-animation-code.js \
+>   --title "Hero GSAP" \
+>   --type gsap \
+>   --code "gsap.from('.e-heading', { opacity:0, y:40, duration:1 })" \
+>   --post-id 4943 \
+>   --gsap-plugins ScrollTrigger
+> ```
 
 ---
 
-### Schritt 2 — GSAP-Core sitewide laden (EINMAL pro Projekt)
+### Schritt 2: MCP-Plan generieren (Batch — Standard)
 
-```
-Tool: novamira-solar-local:mcp-adapter-execute-ability
-Parameters:
-  ability_name: "novamira-adrianv2/add-code-snippet"
-  parameters:
-    title: "GSAP Core + ScrollTrigger (CDN)"
-    code: |
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-      <script>
-        gsap.registerPlugin(ScrollTrigger);
-      </script>
-    location: "head"
-    priority: 1
-    status: "publish"
+```bash
+node scripts/inject-animation-code.js \
+  --plan animation-plan.json \
+  --output animation-mcp-plan.json
 ```
 
-> **GSAP-Plugins aus `animation-plan.json`**: `gsap_plugins` Feld enumeriert benoetigte
-> Plugins (`ScrollTrigger`, `SplitText`, `Flip`, `Observer`, ...). Fuer jedes zusaetzlich
-> ein `<script src=".../PluginName.min.js">` Tag + im `registerPlugin()`-Call ergaenzen.
+**Output `animation-mcp-plan.json` (Batch-Modus):**
+```json
+{
+  "description": "Novamira adrians-batch-inject-snippets MCP-Plan (Batch)",
+  "mode": "batch",
+  "total": 3,
+  "steps": [{
+    "step": 1,
+    "ability": "novamira-adrianv2/adrians-batch-inject-snippets",
+    "parameters": {
+      "snippets": [
+        { "title": "Hero — GSAP ScrollReveal", "type": "gsap", ... },
+        { "title": "Features — Card Stagger", "type": "gsap", ... },
+        { "title": "Global — Animation CSS Basis", "type": "css", ... }
+      ]
+    }
+  }]
+}
+```
 
-**Verifikation:**
-```
-Tool: novamira-solar-local:mcp-adapter-execute-ability
-Parameters:
-  ability_name: "novamira-adrianv2/list-code-snippets"
-  parameters:
-    location: "head"
-    status: "any"
-```
+> **Debug-Modus (Einzelschritte):**
+> ```bash
+> node scripts/inject-animation-code.js --plan animation-plan.json --single-mode
+> ```
+> Generiert N individuelle `adrians-code-injector` Calls statt 1 Batch-Call.
+
+> **Direkt aus Framer-Export:**
+> ```bash
+> node scripts/inject-animation-code.js --from-framer-export --dir exports/framer-page/
+> ```
+> Kombiniert Extraktion + Plan-Generierung in einem Schritt.
 
 ---
 
-### Schritt 3 — Animationscode pro Seite injizieren
+### Schritt 3: MCP-Batch-Call ausführen
 
-Fuer jeden `type:"gsap"` Eintrag aus `animation-plan.json`:
+Führe **Step 1** aus `animation-mcp-plan.json` aus:
 
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira-adrianv2/add-custom-js"
+  ability_name: "novamira-adrianv2/adrians-batch-inject-snippets"
   parameters:
-    post_id: 4943
-    parent_id: "hero-section"   ← element_id aus v4-tree.json (Root der Section)
-    js: |
-      gsap.from('.s-shero .e-heading', {
-        opacity: 0, y: 80, duration: 1.2, ease: 'power3.out',
-        scrollTrigger: { trigger: '.s-shero', start: 'top 80%', once: true }
-      });
-    wrap_dom_ready: true
+    snippets:
+      - title: "Hero — GSAP ScrollReveal"
+        type: "gsap"
+        code: "gsap.from('.s-shero .e-heading', { ... })"
+        post_id: 4943
+        gsap_version: "3.12.5"
+        gsap_plugins: ["ScrollTrigger"]
+        on_conflict: "replace"
+        tags: ["framer", "hero", "gsap"]
+      - ...
 ```
 
-> **Kein `<script>`-Tag im `js`-Parameter!** `add-custom-js` wrapped automatisch.
-> `parent_id` bestimmt nur WO das unsichtbare HTML-Widget im DOM liegt — die
-> GSAP-Selektoren (`.s-shero ...`) greifen unabhaengig davon global.
-
----
-
-### Schritt 4 — CSS-Keyframes injizieren
-
-**Global (auf allen Seiten verfuegbar)** — `type:"css"` ohne `post_id`:
-```
-Tool: novamira-solar-local:mcp-adapter-execute-ability
-Parameters:
-  ability_name: "novamira-adrianv2/add-code-snippet"
-  parameters:
-    title: "Global — Fade-Up Keyframes"
-    code: "<style>@keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }</style>"
-    location: "head"
-    priority: 2
-```
-
-**Page-Level** — `type:"css"` mit `post_id`:
-```
-Tool: novamira-solar-local:mcp-adapter-execute-ability
-Parameters:
-  ability_name: "novamira-adrianv2/add-custom-css"
-  parameters:
-    post_id: 4943
-    css: "@keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } } .fade-up { animation: fadeUp 0.6s ease-out; }"
-```
-
-**Element-Level** (mit `selector`-Platzhalter):
-```
-Tool: novamira-solar-local:mcp-adapter-execute-ability
-Parameters:
-  ability_name: "novamira-adrianv2/add-custom-css"
-  parameters:
-    post_id: 4943
-    element_id: "hero-heading"
-    css: "selector:hover { transform: scale(1.05); transition: transform 0.3s ease; }"
+**Erwartete Antwort:**
+```json
+{
+  "success": true,
+  "total": 3,
+  "failed": 0,
+  "results": [
+    { "success": true, "snippet_id": 47, "title": "Hero — GSAP ScrollReveal", "action": "created" },
+    { "success": true, "snippet_id": 48, "title": "Features — Card Stagger", "action": "updated" },
+    { "success": true, "snippet_id": 49, "title": "Global — Animation CSS Basis", "action": "created" }
+  ]
+}
 ```
 
 ---
 
-## GSAP Plugin-Erkennung (aus framer-animation-extractor.js, unveraendert)
+## Conflict-Strategie (on_conflict)
 
-`gsap_plugins` im `animation-plan.json` erkennt automatisch:
+| Wert | Verhalten | Wann verwenden |
+|------|-----------|---------------|
+| `"replace"` | Überschreibt Code komplett (Standard) | Immer bei Framer-Export-Updates |
+| `"skip"` | Nichts tun wenn Snippet existiert | Einmalige Basis-Snippets (CSS-Reset) |
+| `"append"` | Code anhängen | Nie — führt zu Duplikaten bei wiederholtem Run |
+
+---
+
+## GSAP Plugin-Erkennung (automatisch)
+
+`framer-animation-extractor.js` erkennt folgende Plugins aus dem Code automatisch:
 
 ```
-ScrollTrigger, SplitText, ScrollToPlugin, Flip, Observer, Draggable, MotionPathPlugin
+ScrollTrigger     → gsap_plugins: ["ScrollTrigger"]
+SplitText         → gsap_plugins: ["SplitText"]
+ScrollToPlugin    → gsap_plugins: ["ScrollToPlugin"]
+Flip              → gsap_plugins: ["Flip"]
+Observer          → gsap_plugins: ["Observer"]
+Draggable         → gsap_plugins: ["Draggable"]
+MotionPathPlugin  → gsap_plugins: ["MotionPathPlugin"]
 ```
 
-Jedes erkannte Plugin -> zusaetzliches `<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/{Plugin}.min.js">`
-im sitewide GSAP-Snippet (Schritt 2) + `registerPlugin(...)` Liste erweitern.
+Der generierte PHP-Snippet registriert alle erkannten Plugins automatisch:
+```js
+gsap.registerPlugin(ScrollTrigger, SplitText);
+```
+
+---
+
+## Snippet verifizieren und aktualisieren
+
+```
+# Snippet prüfen (vor Update):
+novamira-adrianv2/adrians-get-snippet
+  title: "Hero — GSAP ScrollReveal"
+
+# Snippet aktualisieren (in-place, ID bleibt erhalten):
+novamira-adrianv2/adrians-update-snippet
+  title: "Hero — GSAP ScrollReveal"
+  new_code: "gsap.from('.s-shero .e-heading', { opacity: 0, y: 60, duration: 1.4 })"
+
+# Snippet temporär deaktivieren:
+novamira-adrianv2/adrians-delete-snippet
+  title: "Hero — GSAP ScrollReveal"
+  mode: "deactivate"
+
+# Snippet wieder aktivieren:
+novamira-adrianv2/adrians-delete-snippet
+  title: "Hero — GSAP ScrollReveal"
+  mode: "activate"
+
+# Alle Animations-Snippets auflisten:
+novamira-adrianv2/adrians-list-snippets
+  filter_tag: "gsap"
+  include_code: false
+```
+
+---
+
+## Example: Manuelles Hero-Build (ohne Framer-Export)
+
+```json
+// examples/gsap-hero-example.json — Format-Referenz
+{
+  "snippets": [
+    {
+      "title": "Framer Hero — GSAP ScrollReveal",
+      "type": "gsap",
+      "code": "gsap.from('.s-shero .e-heading', { opacity: 0, y: 80, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: '.s-shero', start: 'top 80%', once: true } }); gsap.from('.s-shero .e-paragraph', { opacity: 0, y: 40, duration: 1, delay: 0.3, ease: 'power2.out', scrollTrigger: { trigger: '.s-shero', start: 'top 80%', once: true } });",
+      "post_id": 0,
+      "gsap_version": "3.12.5",
+      "gsap_plugins": ["ScrollTrigger"],
+      "on_conflict": "replace",
+      "tags": ["framer", "hero", "gsap"]
+    }
+  ]
+}
+```
 
 ---
 
@@ -195,17 +255,21 @@ im sitewide GSAP-Snippet (Schritt 2) + `registerPlugin(...)` Liste erweitern.
 
 | Symptom | Ursache | Fix |
 |---------|---------|-----|
-| `parent_id` Fehler bei add-custom-js | element_id existiert nicht im Tree | element_id aus v4-tree.json / elementor-get-content pruefen |
-| `gsap is not defined` | Sitewide-Snippet nicht aktiv oder Reihenfolge falsch | `list-code-snippets` -> priority des GSAP-Snippets < Animation-Snippet |
-| Animation laeuft, aber zu frueh/spaet | `wrap_dom_ready` nicht gesetzt | `wrap_dom_ready: true` bei add-custom-js |
-| add-custom-css 403/Fehler | Elementor Pro nicht aktiv | `add-custom-js` als Fallback (CSS via `<style>` in JS injizieren) |
-| `<script>`-Tags im Output doppelt | Eigene `<script>`-Tags im `js`-Parameter | Tags entfernen — add-custom-js wrapped automatisch |
-| Keyframes wirken nicht | `@keyframes` page-level aber Klasse fehlt | `.fade-up { animation: fadeUp ... }` Regel zusaetzlich definieren |
+| Animation läuft nicht | WPCode-Snippet inaktiv | `adrians-delete-snippet mode:"activate"` |
+| Backtick-JS bricht | `addslashes()` statt `wp_json_encode()` | Bereits gefixt in Commit 5bb2d3d |
+| `failed: 1` im Batch | Einzelner Snippet-Fehler | `--single-mode` für Detail-Fehler |
+| GSAP nicht geladen | Plugin-Registrierung fehlt | `gsap_plugins` im Plan prüfen |
+| Animation auf falscher Seite | `post_id: 0` = sitewide | Korrekten `post_id` setzen |
+| Snippet wird nicht gefunden | Titel-Schreibweise | `adrians-list-snippets` → exakten Titel prüfen |
+| Doppelte Animation | on_conflict fehlt | Explizit `"on_conflict": "replace"` setzen |
 
 ---
 
 ## npm-Shortcuts
 
 ```bash
-npm run extract-animations  # framer-animation-extractor.js (Schritt 1, unveraendert)
+npm run extract-animations  # framer-animation-extractor.js
+npm run inject-animations   # inject-animation-code.js --plan animation-plan.json
+npm run inject-from-export  # inject-animation-code.js --from-framer-export
+npm run inject-code         # inject-animation-code.js (interaktiv)
 ```

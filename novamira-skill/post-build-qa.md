@@ -10,7 +10,7 @@ tags: [qa, layout-audit, visual-qa, responsive, wcag, section-compare, auto-fix]
 # Post-Build QA Workflow
 
 ## Wann diesen Skill verwenden
-IMMER nach `elementor-set-content` oder `novamira-adrianv2/batch-build-page`. Kein Build
+IMMER nach `elementor-set-content` oder `adrians-batch-build-page`. Kein Build
 gilt als abgeschlossen ohne vollständige QA. Die QA-Kette ist Pflicht, nicht optional.
 
 ---
@@ -18,77 +18,10 @@ gilt als abgeschlossen ohne vollständige QA. Die QA-Kette ist Pflicht, nicht op
 ## Kritische Regeln
 
 1. QA NACH dem Build — nie überspringen oder auf „später" verschieben
-2. `novamira-adrianv2/layout-audit` ist PFLICHT (Schritt 1) — ohne Layout-Audit fehlt der Server-seitige Check
+2. `adrians-layout-audit` ist PFLICHT (Schritt 1) — ohne Layout-Audit fehlt der Server-seitige Check
 3. `run-post-build-qa.js` generiert NUR einen Report — er führt keine MCP-Calls aus
-4. Patches via `novamira-adrianv2/patch-element-styles` — nie Tree rebuilden für Style-Fixes
+4. Patches via `adrians-patch-element-styles` — nie Tree rebuilden für Style-Fixes
 5. `section-compare.js` braucht Playwright oder Puppeteer — in CI: `--dry-run`
-
----
-
-## 🔵 Browser-basierte QA (agent-browser, empfohlen)
-
-Zusätzlich zu den Server-seitigen Checks: Browser-Automation mit `agent-browser`.
-
-### Voraussetzungen
-- `agent-browser` global installiert: `npm install -g agent-browser`
-- Chrome installiert
-- Frontend-URL öffentlich erreichbar
-
-### Desktop/Mobile Screenshots
-
-```
-agent-browser snapshot --url https://test4.nick-webdesign.de/?p=POST_ID --device desktop
-agent-browser snapshot --url https://test4.nick-webdesign.de/?p=POST_ID --device mobile
-```
-
-### Accessibility Tree prüfen
-
-```
-agent-browser snapshot --url https://test4.nick-webdesign.de/?p=POST_ID --a11y
-```
-
-Prüft: Heading-Hierarchie, Alt-Texte, ARIA-Labels, Form-Labels.
-
-### Design-Referenz (vor dem Build)
-
-```
-agent-browser screenshot --url https://client.framer.app/ --output framer-reference.png
-```
-
-### Regression Testing (V3 → V4)
-
-```
-agent-browser compare \
-  --before https://oldsite.com/page \
-  --after https://newsite.com/page \
-  --output diff-report.html
-```
-
-### Responsive Audit (Browser)
-
-```
-agent-browser responsive --url https://test4.nick-webdesign.de/?p=POST_ID \
-  --breakpoints 1920,1440,1024,768,480,375
-```
-
-Prüft: Layout-Umbruch, Font-Größen, Padding-Anpassungen, kein Horizontal-Scroll.
-
-### Functional Testing
-
-| Test | Befehl |
-|------|--------|
-| Link-Check | `agent-browser links --url URL --check-broken` |
-| Form-Submit | `agent-browser submit --url URL --form '#contact-form' --data '{"name":"Test"}'` |
-| Navigation | `agent-browser click --url URL --selector 'nav a' --screenshot` |
-| Cookie-Banner | `agent-browser click --url URL --selector '.cookie-accept'` |
-
-### Asset-Verifikation
-
-| Check | Was |
-|-------|-----|
-| Bilder geladen | Console: keine 404 für Bild-URLs |
-| Fonts geladen | Console: keine CORS/CSP-Fehler für Font-Dateien |
-| Keine Console-Errors | `agent-browser console --url URL` → 0 Errors |
 
 ---
 
@@ -97,14 +30,13 @@ Prüft: Layout-Umbruch, Font-Größen, Padding-Anpassungen, kein Horizontal-Scro
 ```
 Build fertig
     │
-    ├── 1. novamira-adrianv2/layout-audit      (Server, Pflicht)
-    ├── 2. novamira-adrianv2/visual-qa         (Server, Pflicht)
-    ├── 3. novamira-adrianv2/responsive-audit  (Server, Pflicht)
-    ├── 4. novamira-adrianv2/variable-audit    (Server, empfohlen)
-    ├── 5. elementor-get-content (skeleton)    (Server, Verifikation)
-    ├── 6. visual-qa.js / agent-browser        (Browser, empfohlen)
-    ├── 7. section-compare.js                  (Browser, optional)
-    └── 8. post-build-auto-fix.js              (Konsolidierung + Auto-Patch)
+    ├── 1. adrians-layout-audit      (Server, Pflicht)
+    ├── 2. adrians-visual-qa         (Server, Pflicht)
+    ├── 3. adrians-responsive-audit  (Server, Pflicht)
+    ├── 4. adrians-variable-audit    (Server, empfohlen)
+    ├── 5. visual-qa.js              (Browser, empfohlen)
+    ├── 6. section-compare.js        (Browser, optional)
+    └── 7. post-build-auto-fix.js    (Konsolidierung + Auto-Patch)
 ```
 
 ---
@@ -114,7 +46,7 @@ Build fertig
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira-adrianv2/layout-audit"
+  ability_name: "novamira/adrians-layout-audit"
   parameters: { "post_id": POST_ID }
 ```
 
@@ -140,7 +72,7 @@ Parameters:
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira-adrianv2/patch-element-styles"
+  ability_name: "novamira/adrians-patch-element-styles"
   parameters:
     post_id: POST_ID
     patches:
@@ -155,7 +87,7 @@ Parameters:
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira-adrianv2/visual-qa"
+  ability_name: "novamira/adrians-visual-qa"
   parameters:
     post_id: POST_ID
     breakpoints: ["desktop", "tablet", "mobile"]
@@ -182,7 +114,7 @@ Parameters:
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira-adrianv2/responsive-audit"
+  ability_name: "novamira/adrians-responsive-audit"
   parameters: { "post_id": POST_ID }
 ```
 
@@ -190,7 +122,7 @@ Parameters:
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira-adrianv2/add-global-class-variant"
+  ability_name: "novamira/adrians-add-global-class-variant"
   parameters:
     class_id: "gc-abc123"
     breakpoint: "mobile"
@@ -206,7 +138,7 @@ Parameters:
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira-adrianv2/variable-audit"
+  ability_name: "novamira/adrians-variable-audit"
   parameters: { "report": "drift" }
 ```
 
@@ -215,7 +147,7 @@ Parameters:
 **Fix bei Drift:**
 ```bash
 # Design-System neu exportieren:
-MCP: novamira-adrianv2/export-design-system { "what": "all" }
+MCP: novamira/adrians-export-design-system { "what": "all" }
 
 # Token-Mapping aktualisieren:
 node scripts/design-token-extractor.js \
@@ -312,11 +244,11 @@ node scripts/section-compare.js \
 ```bash
 # qa-results.json Format:
 {
-  "layout":     { /* Ergebnis von novamira-adrianv2/layout-audit */ },
-  "visual":     { /* Ergebnis von novamira-adrianv2/visual-qa */ },
-  "responsive": { /* Ergebnis von novamira-adrianv2/responsive-audit */ },
-  "variables":  { /* Ergebnis von novamira-adrianv2/variable-audit */ },
-  "page":       { /* Ergebnis von novamira-adrianv2/page-audit (optional) */ }
+  "layout":     { /* Ergebnis von adrians-layout-audit */ },
+  "visual":     { /* Ergebnis von adrians-visual-qa */ },
+  "responsive": { /* Ergebnis von adrians-responsive-audit */ },
+  "variables":  { /* Ergebnis von adrians-variable-audit */ },
+  "page":       { /* Ergebnis von adrians-page-audit (optional) */ }
 }
 ```
 
@@ -334,11 +266,11 @@ node scripts/post-build-auto-fix.js \
 
 | Typ | Ability | Was wird gefixt |
 |-----|---------|----------------|
-| `contrast` | `novamira-adrianv2/fix-color-contrast` | WCAG AA Kontrast < 4.5:1 |
-| `alt-text` | `novamira-adrianv2/add-alt-text-from-context` | Bilder ohne Alt-Text |
-| `seo` | `novamira-adrianv2/generate-meta-tags` | Fehlende Meta-Tags |
-| `layout` | `novamira-adrianv2/patch-element-styles` | Fixed Heights, Overflow |
-| `variables` | `novamira-adrianv2/patch-element-styles` | GV-Drift Patches |
+| `contrast` | `novamira-adrianv2/adrians-fix-color-contrast` | WCAG AA Kontrast < 4.5:1 |
+| `alt-text` | `novamira-adrianv2/adrians-add-alt-text-from-context` | Bilder ohne Alt-Text |
+| `seo` | `novamira-adrianv2/adrians-generate-meta-tags` | Fehlende Meta-Tags |
+| `layout` | `novamira/adrians-patch-element-styles` | Fixed Heights, Overflow |
+| `variables` | `novamira/adrians-patch-element-styles` | GV-Drift Patches |
 
 ### 7c: Auto-Fix-Plan ausführen
 
@@ -358,7 +290,7 @@ node scripts/post-build-auto-fix.js \
   "dry_run": 0,
   "failed": 0,
   "details": [
-    { "ability": "novamira-adrianv2/fix-color-contrast", "status": "ok" }
+    { "ability": "novamira-adrianv2/adrians-fix-color-contrast", "status": "ok" }
   ]
 }
 ```
@@ -369,12 +301,12 @@ node scripts/post-build-auto-fix.js \
 
 | Symptom | Schritt | Fix |
 |---------|---------|-----|
-| `passed: false` in layout-audit | 1 | `novamira-adrianv2/patch-element-styles` mit `action:"remove"` für Pass-through |
+| `passed: false` in layout-audit | 1 | `adrians-patch-element-styles` mit `action:"remove"` für Pass-through |
 | Bilder laden nicht (V4) | 5 | `patch-v4-tree-media-ids.js` erneut ausführen |
 | Horizontaler Scroll mobil (V5) | 5 | `overflow: hidden` auf Container patchen |
-| `axe-core critical: 1` (A1) | 5 | WCAG Fix via `novamira-adrianv2/fix-color-contrast` |
+| `axe-core critical: 1` (A1) | 5 | WCAG Fix via `adrians-fix-color-contrast` |
 | GV-Drift | 4 | Design-System neu exportieren + `design-token-extractor.js` |
-| Fehlende Breakpoints | 3 | `novamira-adrianv2/add-global-class-variant` (kein Tree-Rebuild!) |
+| Fehlende Breakpoints | 3 | `adrians-add-global-class-variant` (kein Tree-Rebuild!) |
 | 401/419 während QA | — | Session-Start-Checkliste Schritt 3 wiederholen |
 | Score < 85% | validate | `validate-v4-tree.js --mode=warn` für Details |
 

@@ -2,31 +2,12 @@
 slug: session-start-checklist
 title: Session-Start Checkliste
 description: Pflicht-Checkliste für den Beginn jeder Claude Desktop Session mit Novamira MCP. Definiert welche Checks, Calls und Verifikationen vor dem ersten Pipeline-Schritt durchgeführt werden müssen. Verhindert stale Session IDs, fehlende MCP-Verbindungen und falsche GV/GC-Referenzen.
-version: "0.8.0"
-pipeline_min_version: "0.8.0"
+version: "0.7.0"
+pipeline_min_version: "0.7.0"
 tags: [session, checklist, mcp, preflight, solar-local, setup]
 ---
 
 # Session-Start Checkliste
-
-## 🔵 Registrierte Skills (Phase 1)
-
-| Skill | Datei | Wann laden |
-|-------|-------|------------|
-| `elementor-v4-build` | `elementor-v4-build.md` | Immer (Ground Truth) |
-| `post-build-qa` | `post-build-qa.md` | Nach jedem Build |
-| `framer-pipeline-debug` | `framer-pipeline-debug.md` | Bei Fehlern |
-| `session-start-checklist` | `session-start-checklist.md` | Immer (Session-Start) |
-| `animation-workflow` | `animation-workflow.md` | Bei GSAP/Animation |
-| `font-workflow` | `font-workflow.md` | Bei Font-Upload |
-| `framer-v4-pipeline` | `framer-v4-pipeline.md` | Bei Framer→V4 Build |
-| 🆕 `style-props-quickref` | `style-props-quickref.md` | Vor jedem Build ($$type Wrapper) |
-| 🆕 `design-token-protocol` | `design-token-protocol.md` | Bei FramerExport CSS-Extraktion |
-| 🆕 `dual-source-workflow` | `dual-source-workflow.md` | Bei Framer→V4 (Struktur+CSS) |
-| 🆕 `responsive-extractor` | `responsive-extractor.md` | Bei responsive Breakpoints |
-| 🆕 `token-validator` | `token-validator.md` | Nach Token-Mapping |
-
-> 🆕 = Neu aus ki-2-elementor übernommen (Phase 1)
 
 ## Wann diesen Skill verwenden
 IMMER am Beginn einer neuen Claude Desktop Session, bevor irgendein Pipeline-Script,
@@ -37,7 +18,7 @@ MCP-Call oder Elementor-Build gestartet wird. Auch nach einer Pause von >30 Minu
 
 ## Kritische Invarianten
 
-- `novamira-adrianv2/setup-v4-foundation` gibt Session-live IDs zurück — diese ändern sich bei jedem Call
+- `adrians-setup-v4-foundation` gibt Session-live IDs zurück — diese ändern sich bei jedem Call
 - GV-IDs (`e-gv-*`) und GC-IDs (`gc-*`) aus der letzten Session sind UNGÜLTIG
 - MCP-Session-TTL: ~25–30 Minuten — danach neu initialisieren
 - Beim ersten 401 oder 419: sofort neu initialisieren, nicht wiederholen
@@ -56,10 +37,10 @@ Parameters: {}
 ```
 
 **Erwartetes Ergebnis:** Liste von ≥100 Abilities. Mindestens diese müssen vorhanden sein:
-- `novamira-adrianv2/setup-v4-foundation`
+- `novamira/adrians-setup-v4-foundation`
 - `novamira/elementor-set-content`
-- `novamira-adrianv2/export-design-system`
-- `novamira-adrianv2/layout-audit`
+- `novamira/adrians-export-design-system`
+- `novamira-adrianv2/adrians-code-injector`
 
 **Bei Fehler (Verbindung tot):**
 1. LocalWP → `solar.local` läuft? → starten
@@ -107,7 +88,7 @@ Parameters:
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira-adrianv2/setup-v4-foundation"
+  ability_name: "novamira/adrians-setup-v4-foundation"
   parameters: { "post_id": TARGET_POST_ID }
 ```
 
@@ -153,13 +134,13 @@ Für alle Builds die mit Tokens/Farben/Fonts arbeiten:
 ```
 Tool: novamira-solar-local:mcp-adapter-execute-ability
 Parameters:
-  ability_name: "novamira-adrianv2/export-design-system"
+  ability_name: "novamira/adrians-export-design-system"
   parameters: { "what": "all" }
 ```
 
 → Als `design-system-export.json` speichern (oder McpDesignSystemCache verwenden).
 
-> **Cache erlaubt:** `novamira-adrianv2/export-design-system` ist read-only, ändert sich nicht
+> **Cache erlaubt:** `adrians-export-design-system` ist read-only, ändert sich nicht
 > während einer Session. `McpDesignSystemCache` cached 5 Minuten (`.pipeline/design-system.json`).
 
 ---
@@ -170,7 +151,7 @@ Wenn ein MCP-Call mit HTTP 401 oder 419 antwortet:
 
 ```
 1. mcp-bridge.js initialisiert automatisch neu (session handshake)
-2. novamira-adrianv2/setup-v4-foundation ERNEUT aufrufen → neue GV/GC-IDs
+2. adrians-setup-v4-foundation ERNEUT aufrufen → neue GV/GC-IDs
 3. Laufenden Build-Schritt von vorne beginnen (IDs sind ungültig)
 4. NIEMALS die alten IDs wiederverwenden
 ```
@@ -211,9 +192,9 @@ Wenn ein MCP-Call mit HTTP 401 oder 419 antwortet:
   │
   ├── 1. mcp-adapter-discover-abilities      → Verbindung OK?
   ├── 2. elementor-check-setup               → V4 runtime_available?
-  ├── 3. novamira-adrianv2/setup-v4-foundation         → Frische GV/GC-IDs
+  ├── 3. adrians-setup-v4-foundation         → Frische GV/GC-IDs
   ├── 4. (optional) wpcode check             → WPCode aktiv?
-  └── 5. novamira-adrianv2/export-design-system        → Token-Basis für Build
+  └── 5. adrians-export-design-system        → Token-Basis für Build
          │
          └── [Build starten → framer-v4-pipeline Skill]
 ```
