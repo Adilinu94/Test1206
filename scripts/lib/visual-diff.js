@@ -21,6 +21,7 @@
  */
 
 import { createHash } from 'node:crypto';
+import { inflateSync } from 'node:zlib';
 
 // ─────────────────────────────────────────────
 // PNG DECODING (Pure-Node, minimal subset)
