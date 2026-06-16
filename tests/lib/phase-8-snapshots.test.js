@@ -191,7 +191,7 @@ test('Regression Bug #6: styles-Format mit class-id-Struktur + variants', () => 
   assert.ok(sc, 'styles must contain the classId');
   assert.equal(sc.id, 'few');
   assert.ok(Array.isArray(sc.variants), 'variants[] must exist');
-  assert.equal(sc.variants[0].meta.breakpoint, 'desktop');
+  assert.equal(sc.variants[0].meta.breakpoint, null);
   assert.equal(sc.variants[0].custom_css, null);
 });
 
@@ -241,7 +241,7 @@ test('Regression: buildStyleClass default hat custom_css:null (Invariant V)', ()
 
 test('Regression: buildDesktopVariant folgt desktop-Breakpoint + state null', () => {
   const v = buildDesktopVariant({ stackGap: '16px' }, 'e-flexbox');
-  assert.equal(v.meta.breakpoint, 'desktop');
+  assert.equal(v.meta.breakpoint, null);
   assert.equal(v.meta.state, null);
   assert.equal(v.props['display'].value, 'flex');
   assert.equal(v.custom_css, null);

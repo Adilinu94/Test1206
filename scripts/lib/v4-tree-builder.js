@@ -113,7 +113,7 @@ export function buildStyleClass({
   const finalVariants = variants && variants.length > 0
     ? variants
     : [{
-        meta: { breakpoint: 'desktop', state: null },
+        meta: { breakpoint: null, state: null },
         props: {},
         custom_css: null, // Invariant V
       }];
@@ -198,7 +198,7 @@ export function mapFramerStyleToV4Props(attrs, widgetType, opts = {}) {
  */
 export function buildDesktopVariant(attrs, widgetType, opts) {
   return {
-    meta: { breakpoint: 'desktop', state: null },
+    meta: { breakpoint: null, state: null },
     props: mapFramerStyleToV4Props(attrs, widgetType, opts),
     custom_css: null, // Invariant V
   };

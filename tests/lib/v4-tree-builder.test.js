@@ -166,7 +166,7 @@ test('Phase 1.4 buildStyleClass: default desktop variant has custom_css:null (In
   assert.equal(sc.type, 'class');
   assert.ok(Array.isArray(sc.variants));
   assert.equal(sc.variants.length, 1);
-  assert.equal(sc.variants[0].meta.breakpoint, 'desktop');
+  assert.equal(sc.variants[0].meta.breakpoint, null);
   assert.equal(sc.variants[0].meta.state, null);
   assert.deepEqual(sc.variants[0].props, {});
   assert.equal(sc.variants[0].custom_css, null);
@@ -236,7 +236,7 @@ test('Phase 1.4 buildDesktopVariant: returns full variant structure', () => {
     { stackDirection: 'horizontal', stackGap: '32px', padding: '20px' },
     'e-flexbox',
   );
-  assert.equal(v.meta.breakpoint, 'desktop');
+  assert.equal(v.meta.breakpoint, null);
   assert.equal(v.meta.state, null);
   assert.equal(v.props.display.value, 'flex');
   assert.equal(v.custom_css, null); // Invariant V
