@@ -36,6 +36,8 @@ import {
   pipelineDir, repoDir,
 } from './shared.js';
 import { getFramerCacheStats } from '../lib/framer-cache.js';
+import { detectElementorVersion } from '../lib/elementor-version.js';
+import { detectActiveTheme } from '../lib/wp-theme.js';
 
 /**
  * Gibt die Hilfe fuer dieses Subcommand aus.
@@ -53,6 +55,7 @@ OPTIONS:
   --no-cache            FramerExport-Cache umgehen
   --skip-qa             QA-Gate ueberspringen (schnellerer Build)
   --dry-run             Keine MCP-Calls, nur Plan generieren
+  --site <id>          Site-ID fuer MCP-Detection (default: 'default')
   --verbose             Ausfuehrliche Logs
 
 OPTIMIZATIONS:
@@ -79,6 +82,7 @@ export async function runPipeline({
   skipQa = false,
   dryRun = false,
   verbose = false,
+  siteId = 'default',
 }) {
   const rootDir = findWorkspaceRoot();
   const startTime = Date.now();
@@ -118,11 +122,11 @@ export async function runPipeline({
     if (mcpBridge) {
       // Parallel detection
       const [elRes, thRes] = await Promise.all([
-        detectElementorVersion({ mcpBridge, siteId: 'solar-local', cacheRoot: rootDir }).catch(err => {
+        detectElementorVersion({ mcpBridge, siteId, cacheRoot: rootDir }).catch(err => {
           log.warn(`Elementor-Detection fehlgeschlagen: ${err.message}`);
           return null;
         }),
-        detectActiveTheme({ mcpBridge, siteId: 'solar-local', cacheRoot: rootDir }).catch(err => {
+        detectActiveTheme({ mcpBridge, siteId, cacheRoot: rootDir }).catch(err => {
           log.warn(`Theme-Detection fehlgeschlagen: ${err.message}`);
           return null;
         }),
@@ -179,9 +183,17 @@ export async function runPipeline({
         const pkgJson = await readJsonIfExists(path.join(framerExportDir, 'package.json'));
         const before = await findIndexHtmlDirs(framerExportDir);
 
-        if (pkgJson?.scripts?.dev) {
+        const distEntry = path.join(framerExportDir, 'dist', 'cli', 'index.js');
+        if (existsSync(distEntry)) {
+          log.info('FramerExport: nutze prebuilt dist/cli/index.js');
+          await runFile(npmBin, ['run', 'build'], 'FramerExport build', framerExportDir);
+          const nodeBin = process.execPath;
+          await runFile(nodeBin, [distEntry, framerUrl, '--platform', 'framer'], 'FramerExport', framerExportDir);
+        } else if (pkgJson?.scripts?.dev) {
+          log.info('FramerExport: kein dist/, nutze npm run dev (langsamer)');
           await runFile(npmBin, ['run', 'dev', '--', framerUrl], 'FramerExport', framerExportDir);
         } else if (existsSync(path.join(framerExportDir, 'src', 'cli', 'index.ts'))) {
+          log.info('FramerExport: nutze tsx src/cli/index.ts (Fallback)');
           await runFile(npxBin, ['tsx', 'src/cli/index.ts', framerUrl, '--platform', 'framer'], 'FramerExport', framerExportDir);
         } else {
           throw new Error('Kein unterstuetzter FramerExport-Einstieg gefunden.');
@@ -439,15 +451,19 @@ export async function runPipeline({
     for (const xmlFile of xmlFiles) {
       const pageName = path.basename(xmlFile, '.xml');
       try {
-        await runFile(nodeBin, [
+        const convertArgs = [
           path.join(pipelineDir, 'convert-xml-to-v4.js'),
           '--xml', xmlFile,
-          '--token-map', tokenMapArg,
-          '--output-dir', outputDir,
           '--output', path.join(outputDir, `${pageName}.json`),
           ...(elementorEnv ? ['--is-pro-active', String(elementorEnv.is_pro_active)] : []),
           ...(verbose ? ['--verbose'] : []),
-        ], `convert-xml-to-v4: ${pageName}`, pipelineDir);
+        ];
+        // Converter expects --tokens (not --token-map). Insert after --xml arg.
+        if (existsSync(tokenMapArg)) {
+          const xmlIdx = convertArgs.indexOf('--xml');
+          if (xmlIdx >= 0) convertArgs.splice(xmlIdx + 2, 0, '--tokens', tokenMapArg);
+        }
+        await runFile(nodeBin, convertArgs, `convert-xml-to-v4: ${pageName}`, pipelineDir);
         convertResults.push({ page: pageName, status: 'ok' });
       } catch (err) {
         log.warn(`Konvertierung ${pageName} fehlgeschlagen: ${err.message}`);
@@ -455,6 +471,30 @@ export async function runPipeline({
       }
     }
     steps.push({ step: 11, name: 'convert-xml-to-v4.js', status: convertResults.every(r => r.status === 'ok') ? 'ok' : 'warning', detail: convertResults });
+
+    // Combine individual page outputs into elements.json for validation + QA
+    // Delete stale elements.json first so we always work with fresh output
+    if (existsSync(v4TreePath)) {
+      try { await fs.unlink(v4TreePath); } catch {}
+    }
+      try {
+        const outputFiles = (await fs.readdir(outputDir))
+          .filter(f => f.endsWith('.json') && f !== 'elements.json');
+        if (outputFiles.length > 0) {
+          const allElements = [];
+          for (const f of outputFiles) {
+            try {
+              const content = JSON.parse(await fs.readFile(path.join(outputDir, f), 'utf8'));
+              const arr = Array.isArray(content) ? content : [content];
+              allElements.push(...arr);
+            } catch {}
+          }
+          if (allElements.length > 0) {
+            await fs.writeFile(v4TreePath, JSON.stringify(allElements, null, 2), 'utf8');
+            log.success(`Combined ${outputFiles.length} pages → elements.json (${allElements.length} elements)`);
+          }
+        }
+      } catch {}
   } else {
     log.warn('Keine XML-Dateien gefunden. Überspringe V4-Konvertierung.');
     steps.push({ step: 11, name: 'convert-xml-to-v4.js', status: 'skipped', detail: 'No XML files found' });
