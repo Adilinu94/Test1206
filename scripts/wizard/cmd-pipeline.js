@@ -86,6 +86,9 @@ export async function runPipeline({
   let tokenMapPath = null;
   let designSystemDir = null;
   let v4TreePath = null;
+  // Phase 4: Detection-Cache (wird in Step 0 befuellt)
+  let elementorEnv = null;
+  let themeEnv = null;
 
   console.log(`\n${'═'.repeat(60)}`);
   console.log('  🚀 FULL 14-STEP PIPELINE (OPTIMIZED)');
@@ -94,6 +97,56 @@ export async function runPipeline({
   console.log(`  Post-ID: ${postId || 'auto'}`);
   console.log(`  Mode:    ${dryRun ? 'DRY-RUN' : 'LIVE'}`);
   console.log(`${'═'.repeat(60)}\n`);
+
+  // ════════════════════════════════════════════
+  // STEP 0: Phase-4 Detection (Elementor-Version + Theme)  [UMBAUPLAN §4.1, §4.2]
+  // ════════════════════════════════════════════
+
+  log.step('Step 0/14: Elementor-Version + Theme-Detection...');
+  let step0Status = 'ok';
+  let step0Detail = {};
+  try {
+    let mcpBridge = null;
+    try {
+      const { McpBridge } = await import('../lib/mcp-bridge.js');
+      mcpBridge = await McpBridge.fromConfig();
+    } catch (bridgeErr) {
+      log.warn(`MCP-Bridge nicht verfuegbar: ${bridgeErr.message} — Detection laeuft im Fallback-Modus`);
+    }
+
+    if (mcpBridge) {
+      // Parallel detection
+      const [elRes, thRes] = await Promise.all([
+        detectElementorVersion({ mcpBridge, siteId: 'solar-local', cacheRoot: rootDir }).catch(err => {
+          log.warn(`Elementor-Detection fehlgeschlagen: ${err.message}`);
+          return null;
+        }),
+        detectActiveTheme({ mcpBridge, siteId: 'solar-local', cacheRoot: rootDir }).catch(err => {
+          log.warn(`Theme-Detection fehlgeschlagen: ${err.message}`);
+          return null;
+        }),
+      ]);
+      elementorEnv = elRes;
+      themeEnv = thRes;
+      if (elRes) {
+        log.success(`Elementor: ${elRes.version} (${elRes.strategy?.mode || 'unknown'})`);
+        step0Detail.elementor = { version: elRes.version, strategy: elRes.strategy?.mode, _cache: elRes._cache };
+      }
+      if (thRes) {
+        log.success(`Theme: ${thRes.name} ${thRes.version} (${thRes.classification?.tier})`);
+        step0Detail.theme = { name: thRes.name, tier: thRes.classification?.tier, _cache: thRes._cache };
+      }
+      if (!elRes && !thRes) step0Status = 'warning';
+    } else {
+      step0Status = 'skipped';
+      step0Detail = { reason: 'no-mcp-bridge' };
+    }
+  } catch (err) {
+    step0Status = 'warning';
+    step0Detail = { error: err.message };
+    log.warn(`Step 0 fehlgeschlagen: ${err.message}`);
+  }
+  steps.push({ step: 0, name: 'Phase-4 Detection', status: step0Status, detail: step0Detail });
 
   // ════════════════════════════════════════════
   // STEP 1: FramerExport
@@ -391,6 +444,7 @@ export async function runPipeline({
           '--token-map', tokenMapArg,
           '--output-dir', outputDir,
           '--output', path.join(outputDir, `${pageName}.json`),
+          ...(elementorEnv ? ['--is-pro-active', String(elementorEnv.is_pro_active)] : []),
           ...(verbose ? ['--verbose'] : []),
         ], `convert-xml-to-v4: ${pageName}`, pipelineDir);
         convertResults.push({ page: pageName, status: 'ok' });

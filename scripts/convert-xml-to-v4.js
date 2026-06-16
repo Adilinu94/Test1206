@@ -24,7 +24,7 @@ const __dirname  = path.dirname(__filename);
 import {
   normalizeHex, resolveCssVar, generateStyleId,
   wrapSize, wrapUnitless, wrapDimensions, wrapBorderRadius, wrapGvColor, wrapGvFont,
-  wrapColor, wrapType, wrapImageSrc, isDimensionValue, wrapImage, wrapHtmlContent, wrapBackground,
+  wrapColor, wrapType, wrapImageSrc, isDimensionValue, wrapImage, wrapHtmlContent,
 } from './lib/framer-utils.js';
 
 // ─────────────────────────────────────────────
@@ -39,17 +39,20 @@ const { values: args } = parseArgs({
     fonts:          { type: 'string' },
     'image-map':    { type: 'string' },
     output:         { type: 'string' },
-    'output-dir':   { type: 'string' },   // Phase 4: separate output files
-    'component-cache': { type: 'string' }, // Phase 4: component cache JSON
     validate:       { type: 'boolean', default: false },
     verbose:        { type: 'boolean', default: false },
     'gc':           { type: 'boolean', default: false },
     'gc-output':    { type: 'string' },
     'gc-min-dups':  { type: 'string', default: '2' },
     'tokens-report': { type: 'boolean', default: false },
+    'pro-fallback':  { type: 'boolean', default: true },
+    'is-pro-active': { type: 'string', default: '' },  // 'true' or 'false' (parsed below)
   },
   strict: false,
 });
+
+const isProActive = (args['is-pro-active'] || '').toLowerCase() === 'true';
+const proFallbackEnabled = args['pro-fallback'] !== false;
 
 // Help
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log('Usage: node scripts/convert-xml-to-v4.js [--help for options]'); console.log('Run with --help for full usage.'); process.exit(0); }
@@ -364,46 +367,6 @@ function serializeSvgNode(xmlNode) {
 }
 
 // ─────────────────────────────────────────────
-// PHASE 4: TOKEN-MAP STYLE PATH RESOLUTION
-// ─────────────────────────────────────────────
-
-/**
- * Löst einen Framer-Style-Pfad (z.B. "/Heading/Heading 1") gegen
- * tokenMapping.textStyles oder tokenMapping.colors auf.
- *
- * @param {string} stylePath - Framer-Style-Pfad (z.B. "/Heading/Heading 1")
- * @param {object|null} tokenMapping - Token-Mapping mit textStyles + colors
- * @returns {object|null} Aufgelöste Style-Properties oder null
- */
-function resolveStylePathFromTokenMap(stylePath, tokenMapping) {
-  if (!stylePath || !tokenMapping) return null;
-
-  // Prüfe ob es ein Style-Pfad ist (beginnt mit "/")
-  const path = String(stylePath).trim();
-  if (!path.startsWith('/')) return null;
-
-  // Suche in textStyles
-  if (tokenMapping.textStyles?.[path]) {
-    return { source: 'textStyles', data: tokenMapping.textStyles[path], path };
-  }
-  // Suche in colors
-  if (tokenMapping.colors?.[path]) {
-    return { source: 'colors', data: tokenMapping.colors[path], path };
-  }
-
-  // Versuche Normalisierung (z.B. "/Heading / Heading 1" → "/Heading/Heading 1")
-  const normalized = path.replace(/\s*\/\s*/g, '/').replace(/\s+/g, ' ');
-  if (tokenMapping.textStyles?.[normalized]) {
-    return { source: 'textStyles', data: tokenMapping.textStyles[normalized], path: normalized };
-  }
-  if (tokenMapping.colors?.[normalized]) {
-    return { source: 'colors', data: tokenMapping.colors[normalized], path: normalized };
-  }
-
-  return null;
-}
-
-// ─────────────────────────────────────────────
 // COLOR RESOLUTION
 // ─────────────────────────────────────────────
 
@@ -500,15 +463,9 @@ function resolveImageSrc(bgImageAttr, imageMap) {
 function resolveLineHeight(lineHeight) {
   if (!lineHeight) return null;
   const raw = String(lineHeight).trim();
-  // Bug 6 Fix: line-height immer mit unit:'custom', nie 'px'
   if (/^-?[\d.]+$/.test(raw)) return wrapUnitless(raw);
   if (/^-?[\d.]+%$/.test(raw)) return wrapUnitless(parseFloat(raw) / 100);
-  // px-Werte: Groesse uebernehmen, aber unit:'custom' (keine px unit)
-  const pxMatch = raw.match(/^(-?[\d.]+)px$/);
-  if (pxMatch) return wrapUnitless(parseFloat(pxMatch[1]));
-  // Fallback: unbekanntes Format — warnen
-  warn(`resolveLineHeight: unbekanntes Format '${raw}' — parseFloat als custom verwendet.`);
-  return { '$$type': 'size', value: { size: parseFloat(raw) || 0, unit: 'custom' } };
+  return wrapSize(raw);
 }
 
 // ─────────────────────────────────────────────
@@ -529,25 +486,6 @@ function detectGridLayout(xmlNode, attrs) {
   if (childCount === 4) return '1fr 1fr 1fr 1fr';
   return 'repeat(auto-fit, minmax(250px, 1fr))';
 }
-
-// RC-11 (UMBAUPLAN §1.3): Style-Pfad-Fallback-Tabelle.
-// Wenn `inlineTextStyle="/Heading/Heading 1"` nicht in der token-mapping.json
-// aufgeloest werden kann, wird der letzte Pfad-Segment ("Heading 1") hier
-// nachgeschlagen. Lookup erfolgt lowercased, damit "Heading 1" === "heading 1".
-const TEXT_STYLE_FALLBACKS_BY_NAME = {
-  'heading 1':        { size: '68px', weight: '700', color: '#111111' },
-  'heading 2':        { size: '48px', weight: '600', color: '#111111' },
-  'heading 3':        { size: '32px', weight: '600', color: '#111111' },
-  'heading 4':        { size: '24px', weight: '600', color: '#111111' },
-  'heading 5':        { size: '20px', weight: '600', color: '#111111' },
-  'heading 6':        { size: '16px', weight: '600', color: '#111111' },
-  'body':             { size: '16px', weight: '400', color: '#444444' },
-  'body-20px-medium': { size: '20px', weight: '500', color: '#222222' },
-  'body-16px-medium': { size: '16px', weight: '500', color: '#222222' },
-  'body s':           { size: '14px', weight: '400', color: '#666666' },
-  'body xs':          { size: '12px', weight: '400', color: '#666666' },
-  'caption':          { size: '12px', weight: '400', color: '#888888' },
-};
 
 /**
  * Baut das V4-Style-Props-Objekt aus Framer-Attributen.
@@ -581,8 +519,7 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
           position, top, right, bottom, left,
           color, 'font-family': fontFamily, 'font-size': fontSize,
           'font-weight': fontWeight, 'line-height': lineHeight,
-          'letter-spacing': letterSpacing, opacity,
-          inlineTextStyle } = attrs;  // Bug 8 Fix: inlineTextStyle gelesen
+          'letter-spacing': letterSpacing, opacity } = attrs;
 
   // ── Layout (flexbox / grid) ──
   if (widgetType === 'e-div-block') {
@@ -603,21 +540,9 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
 
     const bgVal = backgroundColor || bgColor;
     if (bgVal) {
-      // Phase 4: backgroundColor als Style-Pfad via Token-Map auflösen
-      let resolved;
-      if (String(bgVal).startsWith('/')) {
-        const styleResolved = resolveStylePathFromTokenMap(bgVal, tokenMapping);
-        if (styleResolved?.source === 'colors' && styleResolved.data.hex) {
-          resolved = resolveColor(styleResolved.data.hex, tokenMapping);
-          log(`  Resolved backgroundColor='${bgVal}' → ${styleResolved.data.hex}`);
-        } else {
-          warn(`backgroundColor='${bgVal}' ist Style-Pfad aber nicht in tokenMapping.colors gefunden.`);
-        }
-      }
-      if (!resolved) resolved = resolveColor(bgVal, tokenMapping);
+      const resolved = resolveColor(bgVal, tokenMapping);
       if (resolved) {
-        // Bug 3 Fix: background als Objekt-Format emittieren (nicht skippen)
-        props['background'] = wrapBackground(resolved);
+        warn(`background.color '${bgVal}' muss als Global Class gesetzt werden (Bug 3). \u00dcbersprungen.`);
       }
     }
   }
@@ -639,64 +564,25 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
 
     const bgVal = backgroundColor || bgColor;
     if (bgVal) {
-      // Phase 4: backgroundColor als Style-Pfad via Token-Map auflösen
-      let resolved;
-      if (String(bgVal).startsWith('/')) {
-        const styleResolved = resolveStylePathFromTokenMap(bgVal, tokenMapping);
-        if (styleResolved?.source === 'colors' && styleResolved.data.hex) {
-          resolved = resolveColor(styleResolved.data.hex, tokenMapping);
-          log(`  Resolved backgroundColor='${bgVal}' → ${styleResolved.data.hex}`);
-        } else {
-          warn(`backgroundColor='${bgVal}' ist Style-Pfad aber nicht in tokenMapping.colors gefunden.`);
-        }
-      }
-      if (!resolved) resolved = resolveColor(bgVal, tokenMapping);
+      // Bug 3: background.color NUR in Global Classes, nie in lokalen Styles
+      const resolved = resolveColor(bgVal, tokenMapping);
       if (resolved) {
-        // Bug 3 Fix: background als Objekt-Format emittieren (nicht skippen)
-        props['background'] = wrapBackground(resolved);
+        warn(`background.color '${bgVal}' muss als Global Class gesetzt werden (Bug 3). Übersprungen.`);
       }
     }
   }
 
   // ── Typography (heading / text) ──
   if (widgetType === 'e-heading' || widgetType === 'e-paragraph') {
-    // Phase 4: inlineTextStyle via Token-Map auflösen
-    let textStyleProps = null;
-    if (inlineTextStyle) {
-      const resolved = resolveStylePathFromTokenMap(inlineTextStyle, tokenMapping);
-      if (resolved?.source === 'textStyles') {
-        const td = resolved.data;
-        textStyleProps = td;
-        log(`  Resolved inlineTextStyle='${inlineTextStyle}' → size:${td.size} weight:${td.weight} color:${td.color}`);
-      } else {
-        warn(`inlineTextStyle='${inlineTextStyle}' nicht in tokenMapping.textStyles gefunden.`);
-      }
-    }
-
-    // Token-Map Werte haben Vorrang vor XML-Attributen
-    if (textStyleProps?.size)   props['font-size']   = wrapSize(textStyleProps.size);
-    else if (fontSize)           props['font-size']   = wrapSize(fontSize);
-
-    if (textStyleProps?.weight) props['font-weight'] = wrapType('string', textStyleProps.weight);
-    else if (fontWeight)         props['font-weight'] = wrapType('string', fontWeight);
-
-    if (textStyleProps?.lineHeight) props['line-height'] = resolveLineHeight(textStyleProps.lineHeight);
-    else if (lineHeight)             props['line-height'] = resolveLineHeight(lineHeight);
-
+    if (fontSize)      props['font-size']    = wrapSize(fontSize);
+    if (fontWeight)    props['font-weight']  = wrapType('string', fontWeight);
+    if (lineHeight)    props['line-height']  = resolveLineHeight(lineHeight);
     if (letterSpacing) props['letter-spacing'] = wrapSize(letterSpacing);
-
-    if (textStyleProps?.fontFamily) {
-      const resolved = resolveFont(textStyleProps.fontFamily, tokenMapping, fontResolution);
-      if (resolved) props['font-family'] = resolved;
-    } else if (fontFamily) {
+    if (fontFamily) {
       const resolved = resolveFont(fontFamily.split(',')[0].trim().replace(/['"]/g,''), tokenMapping, fontResolution);
       if (resolved) props['font-family'] = resolved;
     }
-
-    if (textStyleProps?.color) {
-      const resolved = resolveColor(textStyleProps.color, tokenMapping);
-      if (resolved) props['color'] = resolved;
-    } else if (color) {
+    if (color) {
       const resolved = resolveColor(color, tokenMapping);
       if (resolved) props['color'] = resolved;
     }
@@ -739,47 +625,21 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
   // RC-11 Fix: Minimum default styles for widgets with empty props.
   // Widgets with {} props render with browser defaults (Times New Roman, no sizing).
   // Set sane fallbacks that match typical Framer designs.
-  // Bug 8/RC-11 Fix: Wenn inlineTextStyle gesetzt ist, KEINE Generic-Fallbacks —
-  // die Style-Referenz wird in Phase 2 (Dual-Source) aufgeloest.
-  // NEU: Style-Pfad-Fallback (UMBAUPLAN §1.3). Wenn der Style-Pfad NICHT in der
-  // token-mapping.json aufgeloest werden konnte, leiten wir eine sinnvolle
-  // Default-Groesse aus dem Pfad-Namen ab ("Heading 1" → 68px etc.).
   if (Object.keys(props).length === 0) {
-    if (inlineTextStyle) {
-      const fallback = TEXT_STYLE_FALLBACKS_BY_NAME[inlineTextStyle.split('/').pop().toLowerCase()];
-      if (fallback) {
-        warn(`RC-11: inlineTextStyle='${inlineTextStyle}' nicht aufgeloest, Style-Pfad-Fallback (size=${fallback.size}, weight=${fallback.weight}).`);
-        if (fallback.size)   props['font-size']   = wrapSize(fallback.size);
-        if (fallback.weight) props['font-weight'] = wrapType('string', fallback.weight);
-        if (fallback.color)  props['color']       = wrapColor(fallback.color);
-      } else {
-        warn(`RC-11: inlineTextStyle='${inlineTextStyle}' gefunden, kein Style-Pfad-Fallback bekannt. Keine Fallbacks gesetzt.`);
-      }
-    } else {
-      if (widgetType === 'e-heading') {
-        warn('RC-11 Fallback: e-heading ohne inlineTextStyle — Inter/32px/#111 gesetzt.');
-        props['font-family'] = wrapType('string', 'Inter');
-        props['font-size'] = wrapSize('32px');
-        props['font-weight'] = wrapType('string', '600');
-        props['color'] = wrapColor('#111111');
-      } else if (widgetType === 'e-paragraph') {
-        warn('RC-11 Fallback: e-paragraph ohne inlineTextStyle — Inter/16px/#444 gesetzt.');
-        props['font-family'] = wrapType('string', 'Inter');
-        props['font-size'] = wrapSize('16px');
-        props['line-height'] = wrapUnitless(1.6);
-        props['color'] = wrapColor('#444444');
-      } else if (widgetType === 'e-button') {
-        warn('RC-11 Fallback: e-button ohne inlineTextStyle — #fff gesetzt.');
-        props['color'] = wrapColor('#ffffff');
-      }
+    if (widgetType === 'e-heading') {
+      props['font-family'] = wrapType('string', 'Inter');
+      props['font-size'] = wrapSize('32px');
+      props['font-weight'] = wrapType('string', '600');
+      props['color'] = wrapColor('#111111');
+    } else if (widgetType === 'e-paragraph') {
+      props['font-family'] = wrapType('string', 'Inter');
+      props['font-size'] = wrapSize('16px');
+      props['line-height'] = wrapUnitless(1.6);
+      props['color'] = wrapColor('#444444');
+    } else if (widgetType === 'e-button') {
+      props['color'] = wrapColor('#ffffff');
     }
   }
-
-  // Bug 7 Fix: Browser-Defaults skippen (font-weight:400, font-style:normal, etc.)
-  if (props['font-weight']?.value === '400') delete props['font-weight'];
-  if (props['font-style']?.value === 'normal') delete props['font-style'];
-  if (props['text-decoration']?.value === 'none') delete props['text-decoration'];
-  if (props['text-transform']?.value === 'none') delete props['text-transform'];
 
   return props;
 }
@@ -865,27 +725,14 @@ function resolvePassThrough(xmlNode, depth) {
 function extractComponentText(attrs) {
   if (!attrs.componentId && !attrs.variant) return undefined;
 
-  // Bug 8 Fix (UMBAUPLAN §1.4): NUR BEKANNTE Style-Attribut-Keys filtern.
-  // Vorher: skip alle `^[A-Z]`-Keys → CamelCase Property-Overrides (z.B. `ycw27fUKm`)
-  // gingen als Text verloren. Jetzt: nur echte Framer-Style-Properties rausfiltern,
-  // der Rest sind Property-Overrides und zaehlen als Text-Kandidaten.
-  const STYLE_ATTR_KEYS = new Set([
-    'backgroundColor', 'backgroundImage', 'borderRadius',
-    'fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing',
-    'opacity', 'stackDirection', 'stackGap', 'stackDistribution', 'stackAlignment',
-    'position', 'top', 'right', 'bottom', 'left',
-    'width', 'height', 'maxWidth', 'minWidth', 'overflow', 'display',
-    'gridTemplateColumns', 'padding', 'tag', 'href', 'target',
-  ]);
-
   let bestText = undefined;
 
   for (const [key, val] of Object.entries(attrs)) {
     // Skip known system/meta keys
     if (['componentId', 'variant', 'name', 'id', 'nodeId', 'tag', 'href',
           'target', 'layout', 'overflow', 'position', 'opacity'].includes(key)) continue;
-    // Skip known Framer style-attribute keys (CamelCase)
-    if (STYLE_ATTR_KEYS.has(key)) continue;
+    // Skip style-reference keys (uppercase-camel identifiers like `backgroundColor`)
+    if (/^[A-Z]/.test(key)) continue;
 
     const str = String(val).trim();
 
@@ -987,8 +834,6 @@ function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0)
     const imgSrc = resolveImageSrc(attrs.backgroundImage || attrs.src, imageMap);
     if (imgSrc) settings['image'] = wrapImage(imgSrc);
     else        settings['image'] = wrapImage(wrapImageSrc({ id: 0 }));
-    // Auto-generate alt text from node name for accessibility (UMBAUPLAN Score-Fix)
-    settings['alt'] = wrapType('string', attrs.name || attrs.alt || 'Image');
   }
 
   if (widgetType === 'e-svg') {
@@ -1002,13 +847,6 @@ function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0)
   if (widgetType === 'e-component') {
     settings.tag = attrs.tag || 'div';
     settings['component-id'] = wrapType('string', attrs.componentId || attrs.componentName || '');
-    // Bug 8 Fix (UMBAUPLAN §1.4): Text aus Property-Override-Attrs in Settings
-    // uebernehmen, damit V4-Komponenten mit Text-Literalen nicht leer rendern.
-    // extractComponentText liefert den laengsten lesbaren Kandidaten (z.B. "See how we work"
-    // aus dem Framer-Internal-Attr `ycw27fUKm="See how we work"`).
-    if (textContent !== undefined) {
-      settings['component-text'] = wrapType('string', String(textContent));
-    }
     // Store text overrides as component properties
     if (attrs.componentOverrides) {
       try {
@@ -1024,7 +862,7 @@ function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0)
 
   // ── Style variants (VERBOSE format: id/type/label required by elementor-set-content) ──
   const baseVariant = {
-    meta:  { breakpoint: null, state: null },  // Bug 4 Fix: desktop → null
+    meta:  { breakpoint: 'desktop', state: null },
     props: Object.keys(props).length > 0 ? props : {},
     custom_css: null,
   };
@@ -1055,336 +893,23 @@ function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0)
   }
 
   // ── Determine elType (required by elementor-set-content) ──
-  // Atomic containers (e-flexbox, e-div-block) and components are Elementor element types.
-  // Atomic widgets (e-heading, e-paragraph, ...) use elType:"widget" + widgetType.
-  const ATOMIC_ELEMENT_TYPES = new Set(['e-flexbox', 'e-div-block', 'e-component']);
+  // Atomic containers (e-flexbox, e-div-block) are Elementor element types.
+  // All other widgets (e-heading, e-paragraph, e-button, e-image, e-svg, e-component, e-divider)
+  // use elType:"widget" + widgetType. Phase 1 Fix: e-component is treated as a widget,
+  // not an element type, to match the Elementor 4.1.0-beta1 working-pages schema
+  // (verified against 1953/1859/1950 — no e-component instances there, but Elementor's
+  // e-component server-renderer expects elType:"widget" + widgetType:"e-component").
+  const ATOMIC_ELEMENT_TYPES = new Set(['e-flexbox', 'e-div-block']);
   const elType = ATOMIC_ELEMENT_TYPES.has(widgetType) ? widgetType : 'widget';
 
   // RC-01 Fix: type field required by server-side batch-build-page.php
   // Without 'type', the server falls back to 'container' for ALL widgets
   // Also: elementor-set-content uses elType+widgetType, batch-build-page uses type
   // Adding 'type' makes the output compatible with BOTH abilities (RC-03 Fix)
-const node = { type: widgetType, elType, widgetType, id: widgetId, settings, styles };
+  const node = { type: widgetType, elType, widgetType, id: widgetId, settings, styles };
   if (v4Children.length > 0) node.elements = v4Children;
 
   return node;
-}
-
-// ─────────────────────────────────────────────
-// PHASE 4: COMPONENT RECURSION (e-component → widget tree)
-// ─────────────────────────────────────────────
-
-/**
- * Löst e-component-Nodes im V4-Tree auf.
- *
- * Strategie: e-component wird zu e-flexbox downgegradet mit:
- *   - Dem componentId als Label
- *   - Text aus Property-Overrides als e-heading inline
- *   - Dem gelösten Component-Tree aus der Cache wenn verfügbar
- *
- * In der Vollversion (Wizard): getNodeXml(componentId) via Unframer MCP
- * aufrufen und den komponenten-Tree rekursiv einbetten.
- *
- * @param {object} node - V4-Node
- * @param {object|null} componentCache - { componentId: v4Tree } Cache
- * @returns {object} Aufgelöster Node
- */
-function resolveComponentNode(node, componentCache) {
-  if (node.widgetType !== 'e-component') return node;
-
-  const componentId = node.settings?.['component-id']?.value;
-  log(`  Resolving component: ${componentId || 'unknown'}`);
-
-  // Wenn kein Cache vorhanden: e-component unverändert lassen
-  // (Komponenten-Rekursion erfordert Unframer MCP — Phase 5/Wizard)
-  if (!componentCache) {
-    warn(`Component '${componentId}' — kein Component-Cache geladen. e-component bleibt erhalten.`);
-    return node;
-  }
-
-  // Wenn Component-Tree gecached ist → einbetten
-  if (componentId && componentCache[componentId]) {
-    const cached = componentCache[componentId];
-    // Preserve text overrides from the component instance
-    const overrides = {};
-    for (const [key, val] of Object.entries(node.settings || {})) {
-      if (key.startsWith('property-')) overrides[key.replace('property-', '')] = val;
-    }
-    // Deep-clone cached tree and apply overrides
-    const resolved = JSON.parse(JSON.stringify(cached));
-    if (Object.keys(overrides).length > 0) {
-      applyComponentOverrides(resolved, overrides);
-    }
-    log(`    → Embedded from cache (${componentId})`);
-    return resolved;
-  }
-
-  // Fallback: Downgrade to e-flexbox with inline text
-  warn(`Component '${componentId}' nicht im Cache — downgrade zu e-flexbox mit Text.`);
-  return downgradeComponentToFlexbox(node);
-}
-
-function applyComponentOverrides(node, overrides) {
-  // Apply text overrides to the first e-heading or e-paragraph in the tree
-  if (!node) return;
-  if (node.widgetType === 'e-heading' && overrides.text) {
-    node.settings.title = wrapHtmlContent(String(overrides.text.value || overrides.text));
-  }
-  if (node.widgetType === 'e-paragraph' && overrides.text) {
-    node.settings.paragraph = wrapHtmlContent(String(overrides.text.value || overrides.text));
-  }
-  if (node.elements) {
-    for (const child of node.elements) applyComponentOverrides(child, overrides);
-  }
-}
-
-function downgradeComponentToFlexbox(node) {
-  const name = node.settings?.['component-id']?.value || 'component';
-  const props = { display: wrapType('string', 'flex'), 'flex-direction': 'column' };
-  const styleId = 'fe' + name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 17);
-
-  const settings = {
-    classes: { '$$type': 'classes', value: [styleId] },
-    tag: 'div',
-  };
-
-  // Extract text from property overrides
-  const overrides = {};
-  for (const [key, val] of Object.entries(node.settings || {})) {
-    if (key.startsWith('property-')) overrides[key.replace('property-', '')] = val;
-  }
-
-  const children = [];
-  if (overrides.text || overrides.content || overrides.title) {
-    const text = String((overrides.text || overrides.content || overrides.title).value || overrides.text || overrides.content || overrides.title || '');
-    children.push({
-      type: 'e-heading', elType: 'widget', widgetType: 'e-heading',
-      id: `comp-${name}-text`,
-      settings: { classes: { '$$type': 'classes', value: ['fecomptext'] }, tag: 'h2', title: wrapHtmlContent(text) },
-      styles: { fecomptext: { id: 'fecomptext', type: 'class', label: 'local', variants: [{ meta: { breakpoint: null, state: null }, props: {} }] } },
-    });
-  }
-
-  return {
-    type: 'e-flexbox', elType: 'e-flexbox', widgetType: 'e-flexbox',
-    id: node.id,
-    settings,
-    styles: { [styleId]: { id: styleId, type: 'class', label: 'local', variants: [{ meta: { breakpoint: null, state: null }, props }] } },
-    elements: children.length > 0 ? children : undefined,
-  };
-}
-
-/**
- * Rekursiv alle e-component-Nodes im Tree auflösen.
- *
- * @param {object|Array} tree - V4-Tree
- * @param {object|null} componentCache - { componentId: v4Tree }
- * @returns {object|Array} Aufgelöster Tree
- */
-function resolveComponents(tree, componentCache) {
-  if (Array.isArray(tree)) return tree.map(n => resolveComponents(n, componentCache));
-  if (!tree || typeof tree !== 'object') return tree;
-
-  // Resolve this node if it's a component
-  let resolved = tree;
-  if (tree.widgetType === 'e-component') {
-    resolved = resolveComponentNode(tree, componentCache);
-  }
-
-  // Recurse into children
-  if (resolved.elements) {
-    resolved.elements = resolved.elements.map(c => resolveComponents(c, componentCache));
-  }
-
-  return resolved;
-}
-
-// ─────────────────────────────────────────────
-// PHASE 4: RESPONSIVE VARIANTS
-// ─────────────────────────────────────────────
-
-/**
- * Fügt responsive Variants (tablet, mobile) zu allen Styles im Tree hinzu.
- *
- * Heuristik: Skaliert font-size, padding, gap, margin um Faktoren:
- *   - Tablet: 0.75x
- *   - Mobile: 0.6x
- *
- * Nur Props die sich vom Desktop-Wert unterscheiden werden gesetzt
- * (Invariante 5: Variant Isolation / Delta-Only).
- *
- * @param {object|Array} tree - V4-Tree
- * @param {Array} breakpoints - [{label:'tablet', width:'810px'}, {label:'mobile', width:'390px'}]
- * @returns {object|Array} Tree mit responsiven Variants
- */
-function addResponsiveVariants(tree, breakpoints) {
-  if (!breakpoints || breakpoints.length === 0) return tree;
-  if (Array.isArray(tree)) return tree.map(n => addResponsiveVariants(n, breakpoints));
-
-  if (tree.styles) {
-    for (const [styleId, styleDef] of Object.entries(tree.styles)) {
-      if (!styleDef.variants || styleDef.variants.length === 0) continue;
-
-      const desktopProps = styleDef.variants[0].props || {};
-      const existingBreakpoints = new Set(styleDef.variants.map(v => v.meta?.breakpoint));
-
-      for (const bp of breakpoints) {
-        if (bp.label === 'desktop') continue;
-        if (existingBreakpoints.has(bp.label)) continue;
-
-        // Delta: nur Props die sich ändern (Invariante 5)
-        const bpProps = {};
-        const SCALE = bp.label === 'tablet' ? 0.75 : bp.label === 'mobile' ? 0.6 : 0.8;
-
-        for (const [prop, value] of Object.entries(desktopProps)) {
-          if (!value || typeof value !== 'object') continue;
-
-          // Scale size values
-          if (value['$$type'] === 'size') {
-            const size = value.value?.size;
-            if (typeof size === 'number' && size > 0) {
-              const scaled = Math.round(size * SCALE);
-              if (scaled !== size) {
-                bpProps[prop] = { ...value, value: { ...value.value, size: scaled } };
-              }
-            }
-          }
-          // Scale dimension values
-          if (value['$$type'] === 'dimensions') {
-            const scaled = {};
-            let changed = false;
-            for (const [side, sv] of Object.entries(value.value || {})) {
-              if (sv?.['$$type'] === 'size' && typeof sv.value?.size === 'number' && sv.value.size > 0) {
-                const newSize = Math.round(sv.value.size * SCALE);
-                if (newSize !== sv.value.size) {
-                  scaled[side] = { ...sv, value: { ...sv.value, size: newSize } };
-                  changed = true;
-                } else {
-                  scaled[side] = sv;
-                }
-              } else {
-                scaled[side] = sv;
-              }
-            }
-            if (changed) bpProps[prop] = { ...value, value: scaled };
-          }
-          // Scale gap values
-          if (prop === 'gap' && value['$$type'] === 'size') {
-            const size = value.value?.size;
-            if (typeof size === 'number') {
-              const scaled = Math.round(size * SCALE);
-              if (scaled !== size && scaled > 0) {
-                bpProps[prop] = { ...value, value: { ...value.value, size: scaled } };
-              }
-            }
-          }
-        }
-
-        if (Object.keys(bpProps).length > 0) {
-          styleDef.variants.push({
-            meta: { breakpoint: bp.label, state: null },
-            props: bpProps,
-          });
-          log(`  Added ${bp.label} variant to ${styleId} (${Object.keys(bpProps).length} scaled props)`);
-        }
-      }
-    }
-  }
-
-  if (tree.elements) tree.elements = tree.elements.map(c => addResponsiveVariants(c, breakpoints));
-  return tree;
-}
-
-// ─────────────────────────────────────────────
-// PHASE 4: PYTHON SPEC INVARIANTEN VALIDATION
-// ─────────────────────────────────────────────
-
-/**
- * Validiert die 5 architektonischen Invarianten aus der Python SPEC.
- *
- * I1 (Rendering-Gate): Jedes Property muss $$type haben
- * I2 (Typed AST): Keine rohen Strings/Numbers als Property-Values
- * I3 (Token Indirection): Keine hardcoded Hex-Werte wenn tokenMapping vorhanden
- * I4 (Namespace-Trennung): settings vs styles strikt getrennt
- * I5 (Variant Isolation): Responsive Variants nur mit Delta-Props
- *
- * @param {object|Array} tree - V4-Tree
- * @param {object|null} tokenMapping - Token-Mapping (für I3)
- * @returns {{ passed: boolean, violations: Array }}
- */
-function validateInvariants(tree, tokenMapping) {
-  const violations = [];
-
-  function walk(node, path) {
-    if (!node || typeof node !== 'object') return;
-
-    // I1/I2: Typed AST — alle settings und style props müssen $$type haben
-    if (node.settings) {
-      for (const [key, value] of Object.entries(node.settings)) {
-        // Skip settings that are plain values by design (not $$type-wrapped)
-        if (key === 'classes') continue;
-        if (key === 'elements') continue;
-        if (key === 'tag') continue;       // plain string like 'div', 'section'
-        if (key === 'type') continue;      // plain string like 'container'
-        if (value && typeof value === 'object' && !value['$$type']) {
-          violations.push({ invariant: 'I1-Rendering-Gate', path: `${path}.settings.${key}`, message: `Property ohne $$type: ${JSON.stringify(value).slice(0,80)}` });
-        }
-      }
-    }
-
-    // I3: Token Indirection — keine hardcoded Hex wenn tokenMapping geladen
-    if (tokenMapping && node.styles) {
-      for (const [styleId, styleDef] of Object.entries(node.styles)) {
-        for (const variant of (styleDef.variants || [])) {
-          for (const [prop, value] of Object.entries(variant.props || {})) {
-            if (value?.['$$type'] === 'color' && typeof value.value === 'string' && value.value.startsWith('#')) {
-              violations.push({ invariant: 'I3-TokenIndirection', path: `${path}.styles.${styleId}.${prop}`, message: `Hardcoded color ${value.value} — sollte GV-Referenz sein.` });
-            }
-          }
-        }
-      }
-    }
-
-    // I4: Namespace-Trennung — font-size/color/etc. dürfen nicht in settings sein
-    const STYLE_ONLY_PROPS = new Set(['font-size', 'font-family', 'font-weight', 'color', 'background', 'background-color', 'padding', 'margin', 'width', 'height', 'display', 'flex-direction', 'gap', 'border-radius', 'line-height', 'letter-spacing']);
-    if (node.settings) {
-      for (const key of Object.keys(node.settings)) {
-        if (STYLE_ONLY_PROPS.has(key)) {
-          violations.push({ invariant: 'I4-NamespaceTrennung', path: `${path}.settings.${key}`, message: `Style-Property '${key}' in settings statt styles.` });
-        }
-      }
-    }
-
-    // I5: Variant Isolation — responsive variants nur mit Delta
-    if (node.styles) {
-      for (const [styleId, styleDef] of Object.entries(node.styles)) {
-        const variants = styleDef.variants || [];
-        if (variants.length > 1) {
-          const desktopProps = variants[0].props || {};
-          for (let i = 1; i < variants.length; i++) {
-            for (const [prop, value] of Object.entries(variants[i].props || {})) {
-              if (JSON.stringify(value) === JSON.stringify(desktopProps[prop])) {
-                violations.push({ invariant: 'I5-VariantIsolation', path: `${path}.styles.${styleId}.variants[${i}].${prop}`, message: `Responsive prop gleicht Desktop-Wert — Delta-Only verletzt.` });
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // Recurse
-    const children = node.elements || [];
-    for (let i = 0; i < children.length; i++) {
-      walk(children[i], `${path}.elements[${i}]`);
-    }
-  }
-
-  const roots = Array.isArray(tree) ? tree : [tree];
-  for (let i = 0; i < roots.length; i++) {
-    walk(roots[i], `root[${i}]`);
-  }
-
-  return { passed: violations.length === 0, violations };
 }
 
 // ─────────────────────────────────────────────
@@ -1418,9 +943,6 @@ function findGvIdForFont(family, tokenMapping) {
  * alle $$type:"color"-Hex-Werte und $$type:"string"-Font-Namen
  * durch GV-Referenzen aus token-mapping.json.
  *
- * Phase 12 Fix: Rekursiert in nested objects (z.B. background.value.color)
- * um auch Farbwerte innerhalb von Wrapper-Typen zu substituieren.
- *
  * Root-Cause Fix: Statt Hex-Werte im Nachhinein zu patchen, werden
  * sie direkt durch die entsprechenden Global-Variable-IDs ersetzt.
  *
@@ -1432,45 +954,6 @@ function substituteTokensWithGvIds(tree, tokenMapping) {
   if (!tokenMapping) return { tree, substitutions: 0 };
   let substitutions = 0;
 
-  /**
-   * Rekursiv in einem beliebigen Value-Objekt nach $$type:"color" Werten suchen
-   * und diese durch GV-Referenzen ersetzen.
-   *
-   * Deckt ab: direkte color-Props, background.value.color, border-Color-Props, etc.
-   *
-   * @param {*} obj - Beliebiges Objekt/Array/Value
-   * @returns {*} Objekt mit substituierten Farbwerten
-   */
-  function substituteColorsDeep(obj) {
-    if (!obj || typeof obj !== 'object') return obj;
-    if (Array.isArray(obj)) return obj.map(substituteColorsDeep);
-
-    const result = {};
-    for (const [key, value] of Object.entries(obj)) {
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        // Wenn es ein $$type:"color" mit Hex-Wert ist → GV-Substitution
-        if (value['$$type'] === 'color') {
-          const hex = typeof value.value === 'string' ? value.value : null;
-          if (hex && hex.startsWith('#')) {
-            const gvId = findGvIdForHex(hex, tokenMapping);
-            if (gvId) {
-              result[key] = wrapGvColor(gvId);
-              substitutions++;
-              continue;
-            }
-          }
-        }
-        // Rekursiv in nested objects (z.B. background.value, border)
-        result[key] = substituteColorsDeep(value);
-      } else if (Array.isArray(value)) {
-        result[key] = value.map(substituteColorsDeep);
-      } else {
-        result[key] = value;
-      }
-    }
-    return result;
-  }
-
   function walkNode(node) {
     if (!node || typeof node !== 'object') return;
 
@@ -1478,12 +961,21 @@ function substituteTokensWithGvIds(tree, tokenMapping) {
       for (const [styleId, styleDef] of Object.entries(node.styles)) {
         for (const variant of (styleDef.variants || [])) {
           if (!variant.props) continue;
-          // Phase 12 Fix: Recurse into nested color values (background, border, etc.)
-          variant.props = substituteColorsDeep(variant.props);
-
-          // Font → GV (top-level only, fonts don't nest)
           for (const [prop, value] of Object.entries(variant.props)) {
             if (!value || typeof value !== 'object') continue;
+
+            // Color → GV
+            if (value['$$type'] === 'color') {
+              const hex = typeof value.value === 'string' ? value.value : null;
+              if (!hex || !hex.startsWith('#')) continue;
+              const gvId = findGvIdForHex(hex, tokenMapping);
+              if (gvId) {
+                variant.props[prop] = wrapGvColor(gvId);
+                substitutions++;
+              }
+            }
+
+            // Font → GV
             if (prop === 'font-family' && value['$$type'] === 'string') {
               const family = value.value;
               if (!family) continue;
@@ -1718,47 +1210,10 @@ if (xmlRoots.length === 0) {
 
 log(`XML nodes parsed: ${xmlRoots.length} root node(s)`);
 
-// Helper: flat list of all node IDs for counting
-function countNodes(node) {
-  if (!node || typeof node !== 'object') return [];
-  const nodes = [node.id || node.widgetType || '?'];
-  if (node.elements) for (const c of node.elements) nodes.push(...countNodes(c));
-  return nodes;
-}
-
 // Convert each root node
-let v4Tree = xmlRoots
+const v4Tree = xmlRoots
   .filter(n => n.tagName && n.tagName !== '_root')
   .map(n => convertNode(n, tokenMapping, fontResolution, imageMap, 0));
-
-// ── Phase 4: Component Recursion ──
-let componentCache = null;
-if (args['component-cache']) {
-  if (fs.existsSync(args['component-cache'])) {
-    componentCache = JSON.parse(fs.readFileSync(args['component-cache'], 'utf8'));
-    log(`Component cache loaded: ${Object.keys(componentCache).length} components`);
-  }
-}
-const beforeComponents = v4Tree.flatMap(n => countNodes(n));
-v4Tree = v4Tree.map(n => resolveComponents(n, componentCache));
-const afterComponents = v4Tree.flatMap(n => countNodes(n));
-log(`Component resolution: ${beforeComponents.length} → ${afterComponents.length} nodes`);
-
-// ── Phase 4: Responsive Variants ──
-if (tokenMapping?.breakpoints && tokenMapping.breakpoints.length > 0) {
-  v4Tree = v4Tree.map(n => addResponsiveVariants(n, tokenMapping.breakpoints));
-  log(`Responsive variants added for ${tokenMapping.breakpoints.length} breakpoints`);
-}
-
-// ── Phase 4: Invarianten-Validation ──
-const invResult = validateInvariants(v4Tree, tokenMapping);
-if (!invResult.passed) {
-  warn(`${invResult.violations.length} Invarianten-Verletzungen gefunden:`);
-  for (const v of invResult.violations.slice(0, 10)) {
-    warn(`  [${v.invariant}] ${v.path}: ${v.message}`);
-  }
-  if (invResult.violations.length > 10) warn(`  ... und ${invResult.violations.length - 10} weitere.`);
-}
 
 // C6: Token-to-GV Substitution Pass (Root-Cause Fix)
 // Replaces hardcoded hex values with e-gv-XXXXXXXX references
@@ -1790,54 +1245,6 @@ if (outputPath) {
   fs.mkdirSync(path.dirname(path.resolve(outputPath)), { recursive: true });
   fs.writeFileSync(outputPath, output, 'utf8');
   if (args.output) process.stderr.write(`Saved to ${outputPath}\n`);
-}
-
-// Phase 4: Separate output files (when --output-dir is set)
-if (args['output-dir']) {
-  const outDir = path.resolve(args['output-dir']);
-  fs.mkdirSync(outDir, { recursive: true });
-
-  // elements.json — the V4 widget tree
-  const elementsPath = path.join(outDir, 'elements.json');
-  fs.writeFileSync(elementsPath, output, 'utf8');
-  process.stderr.write(`✓ elements.json → ${elementsPath}\n`);
-
-  // variables.json — extract GV references
-  if (tokenMapping) {
-    const gvIds = new Set();
-    // Reuse extractGvIds from framer-utils if available, else use inline scan
-    const scan = (obj) => {
-      if (!obj || typeof obj !== 'object') return;
-      if (Array.isArray(obj)) { obj.forEach(scan); return; }
-      for (const val of Object.values(obj)) {
-        if (typeof val === 'string' && val.startsWith('e-gv-')) gvIds.add(val);
-        else if (val && typeof val === 'object') scan(val);
-      }
-    };
-    scan(result);
-    const varPath = path.join(outDir, 'variables.json');
-    fs.writeFileSync(varPath, JSON.stringify({ meta: { total: gvIds.size }, gv_ids: [...gvIds] }, null, 2), 'utf8');
-    process.stderr.write(`✓ variables.json → ${varPath} (${gvIds.size} GV-IDs)\n`);
-
-    // token-mapping.json — copy enriched with gv_ids
-    const tmPath = path.join(outDir, 'token-mapping.json');
-    fs.writeFileSync(tmPath, JSON.stringify(tokenMapping, null, 2), 'utf8');
-    process.stderr.write(`✓ token-mapping.json → ${tmPath}\n`);
-  }
-
-  // fonts.json — font resolution
-  if (fontResolution) {
-    const fp = path.join(outDir, 'font-resolution.json');
-    fs.writeFileSync(fp, JSON.stringify(fontResolution, null, 2), 'utf8');
-    process.stderr.write(`✓ font-resolution.json → ${fp}\n`);
-  }
-
-  // asset-manifest.json — image map
-  if (imageMap) {
-    const ap = path.join(outDir, 'asset-manifest.json');
-    fs.writeFileSync(ap, JSON.stringify(imageMap, null, 2), 'utf8');
-    process.stderr.write(`✓ asset-manifest.json → ${ap}\n`);
-  }
 }
 
 // --validate: run validate-v4-tree.js on the output
