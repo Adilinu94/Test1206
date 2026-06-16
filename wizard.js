@@ -34,7 +34,7 @@ const pipelineDir = __dirname;
 // ── Shared imports (Sprint 6: modularized from scripts/wizard/shared.js) ──
 import {
   log, findWorkspaceRoot, findFramerExportDir,
-  runFile, runParallel, findIndexHtmlDirs, readJsonIfExists,
+  runFile, findIndexHtmlDirs, readJsonIfExists,
   promptErrorRecovery, runWithRecovery,
   nodeBin, npxBin, npmBin,
   checkFramerExportCache, writeFramerExportCache,
@@ -48,6 +48,7 @@ import { runPromote,  printHelp as phPromote }  from './scripts/wizard/cmd-promo
 import { runBatch,    printHelp as phBatch }    from './scripts/wizard/cmd-batch.js';
 import { runServe,    printHelp as phServe }    from './scripts/wizard/cmd-serve.js';
 import { runPipeline, printHelp as phPipeline } from './scripts/wizard/cmd-pipeline.js';
+import { runDoctor,   printHelp as phDoctor }   from './scripts/wizard/cmd-doctor.js';
 
 const cmdHelp = {
   preflight: phPreflight,
@@ -57,6 +58,7 @@ const cmdHelp = {
   batch:     phBatch,
   serve:     phServe,
   pipeline:  phPipeline,
+  doctor:    phDoctor,
 };
 
 // ── Root dir ───────────────────────────────────────────────────────────────
@@ -67,31 +69,29 @@ const rl = readline.createInterface({ input, output });
 
 function showHelp() {
   console.log(`
-Framer -> Elementor V4 Pipeline Wizard v0.12.0
+Framer -> Elementor V4 Pipeline Wizard v0.11.0
 
 SUBCOMMANDS:
   (default)    Interaktiver Build-Wizard mit Recovery-Mode
-  pipeline     Vollstaendige 14-Step Pipeline (NEU Phase 6)
   preflight    System-Checks vor dem Build (8 Checks)
   dry-run      Build-Plan ohne Schreibzugriff generieren
   preview      Preview-Page von bestehender Seite erstellen
   promote      Preview auf Live-Seite promovieren
-  batch        Multi-Page Batch-Build
+  batch        Multi-Page Batch-Build (NEU Sprint 6)
   serve        HTTP-API starten (default Port 7123)
+  pipeline     Vollstaendige 14-Step Pipeline (non-interactive)
+  doctor       Erweiterte Diagnose (6 Checks)
   help         Diese Hilfe
 
 OPTIONEN:
-  --post-id <ID>       Post-ID für preview/pipeline
+  --post-id <ID>       Post-ID für preview
   --preview-id <ID>    Preview-ID für promote
   --target-id <ID>     Ziel-Post-ID für promote
   --pages <file,...>   Komma-separierte Dateien (batch)
   --post-ids <id,...>  Komma-separierte Post-IDs (batch)
   --format=json        JSON-Output (preflight)
   --port <PORT>        Port für serve (default 7123)
-  --no-cache           FramerExport-Cache umgehen
-  --skip-qa            QA-Gate ueberspringen (pipeline)
-  --dry-run            Keine MCP-Calls (pipeline)
-  --verbose            Ausfuehrliche Logs
+  --no-cache           FramerExport-Cache umgehen (non-interactive)
 `);
 }
 
@@ -271,9 +271,7 @@ async function main() {
     await fs.mkdir(assetsDir, { recursive: true });
     const extractionSteps = [
       { args: ['scripts/extract-image-urls.js', '--html', exportHtml, '--output', path.join(assetsDir, 'image-manifest.json')], desc: 'Extrahiere Bild-URLs aus Framer-Export' },
-      ...(process.argv.includes('--pipeline')
-        ? [] // Pipeline step 10 handles fonts — skip here to avoid duplicate
-        : [{ args: ['scripts/resolve-fonts.js', '--html', exportHtml, '--fonts-dir', path.join(assetsDir, 'fonts'), '--output', path.join(tokensDir, 'font-resolution.json')], desc: 'Löse Font-Referenzen auf' }]),
+      { args: ['scripts/resolve-fonts.js', '--html', exportHtml, '--fonts-dir', path.join(assetsDir, 'fonts'), '--output', path.join(tokensDir, 'font-resolution.json')], desc: 'Löse Font-Referenzen auf' },
       { args: ['scripts/extract-responsive-breakpoints.js', '--css', exportHtml, '--output', path.join(tokensDir, 'responsive-breakpoints.json')], desc: 'Extrahiere Responsive Breakpoints' },
       { args: ['scripts/extract-framer-styles.js', '--html', exportHtml, '--output', path.join(tokensDir, 'extracted-styles.json')], desc: 'Extrahiere CSS-Properties und Variablen' },
       { args: ['scripts/design-token-extractor.js', '--html', exportHtml, '--output', path.join(tokensDir, 'token-mapping.json'), '--variables-plan', path.join(tokensDir, 'variables-plan.json')], desc: 'Erzeuge Design-Token-Mapping und Variablen-Plan' },
@@ -287,30 +285,6 @@ async function main() {
       await runWithRecovery(step.desc, async () => {
         await runFile(nodeBin, step.args, step.desc, pipelineDir);
       }, rl);
-    }
-
-    // ── Phase 6: CSS Token Extraction + Design System ──────────────
-    const shouldRunFullPipeline = process.argv.includes('--pipeline') ? 'true' :
-      (await rl.question('\n🔗 Vollständige Pipeline (CSS-Tokens → Design-System → V4-Konvertierung) ausführen? (j/N): ')).toLowerCase();
-    if (shouldRunFullPipeline === 'j' || shouldRunFullPipeline === 'y' || shouldRunFullPipeline === 'true') {
-      const skipQa = process.argv.includes('--skip-qa');
-      const verbose = process.argv.includes('--verbose');
-
-      const result = await runPipeline({
-        framerUrl,
-        postId: targetPostId === 'new' ? null : targetPostId,
-        exportDir,
-        noCache: false,
-        skipQa,
-        dryRun: false,
-        verbose,
-      });
-
-      if (result.status === 'FAILED') {
-        log.error('Pipeline fehlgeschlagen — siehe Logs.');
-      } else {
-        log.success(`Pipeline abgeschlossen: ${result.results.ok}/${result.results.total} Schritte OK`);
-      }
     }
 
     const treePath = path.join(rootDir, 'v4-tree.json');
@@ -484,24 +458,6 @@ if (process.argv.includes('--non-interactive')) {
   const noCache = process.argv.includes('--no-cache');
   if (noCache) log.info('--no-cache: FramerExport-Cache umgangen.');
 
-  // Phase 6: Use the full 14-step pipeline if --pipeline flag is set
-  if (process.argv.includes('--pipeline')) {
-    const skipQa = process.argv.includes('--skip-qa');
-    const dryRun = process.argv.includes('--dry-run');
-    const verbose = process.argv.includes('--verbose');
-
-    const result = await runPipeline({
-      framerUrl,
-      postId: targetPostId,
-      noCache,
-      skipQa,
-      dryRun,
-      verbose,
-    });
-
-    process.exit(result.status === 'FAILED' ? 1 : 0);
-  }
-
   // Run the same phases as interactive mode but without prompts
   try {
     // Phase 0.2: Schema Sync
@@ -578,18 +534,15 @@ if (process.argv.includes('--non-interactive')) {
       { args: ['scripts/html-to-widget-plan.js', '--html', exportHtml, '--output', path.join(tokensDir, 'widget-plan.json')], desc: 'Widget-Plan' },
     ];
 
-    // Parallel extraction (all steps are independent, read from same HTML)
-    // design-token-extractor and extract-framer-styles are REQUIRED (critical inputs)
-    await runParallel(
-      extractionSteps.map((s, i) => ({
-        command: nodeBin,
-        args: s.args,
-        description: s.desc,
-        cwd: pipelineDir,
-        // Only image-urls, responsive-breakpoints, animations are truly optional
-        optional: i !== 3 && i !== 4,  // indices 3=extract-framer-styles, 4=design-token-extractor are REQUIRED
-      }))
-    );
+    for (const step of extractionSteps) {
+      log.step('Extrahiere ' + step.desc + '...');
+      try {
+        await runFile(nodeBin, step.args, step.desc, pipelineDir);
+        log.success(step.desc + ' abgeschlossen.');
+      } catch (err) {
+        log.warn(step.desc + ' fehlgeschlagen: ' + String(err).slice(0, 100));
+      }
+    }
 
     // Generate manifest
     const manifest = {
@@ -620,45 +573,8 @@ if (process.argv.includes('--non-interactive')) {
 
 const sub = process.argv[2];
 
-// ── help <sub> or <sub> --help (MUST come before sub-command validation) ──
+// ── help <sub> or <sub> --help ────────────────────────────────────────
 const hasHelpFlag = process.argv.includes('--help') || process.argv.includes('-h');
-
-// ── pipeline sub-command (Phase 6) ────────────────────────────────────
-if (sub === 'pipeline') {
-  if (hasHelpFlag) {
-    phPipeline();
-    process.exit(0);
-  }
-
-  const urlIdx = process.argv.indexOf('--url');
-  const postIdIdx = process.argv.indexOf('--post-id');
-  const exportDirIdx = process.argv.indexOf('--export-dir');
-  const framerUrl = urlIdx >= 0 ? process.argv[urlIdx + 1] : null;
-  const postId = postIdIdx >= 0 ? process.argv[postIdIdx + 1] : null;
-  const exportDir = exportDirIdx >= 0 ? process.argv[exportDirIdx + 1] : null;
-  const noCache = process.argv.includes('--no-cache');
-  const skipQa = process.argv.includes('--skip-qa');
-  const dryRun = process.argv.includes('--dry-run');
-  const verbose = process.argv.includes('--verbose');
-
-  if (!framerUrl && !exportDir) {
-    console.error('Error: --url <framer-url> oder --export-dir <dir> erforderlich.\n');
-    phPipeline();
-    process.exit(2);
-  }
-
-  const result = await runPipeline({
-    framerUrl,
-    postId,
-    exportDir,
-    noCache,
-    skipQa,
-    dryRun,
-    verbose,
-  });
-
-  process.exit(result.status === 'FAILED' ? 1 : 0);
-}
 
 if (hasHelpFlag) {
   // <sub> --help → show sub-command help
@@ -717,6 +633,37 @@ if (sub === 'dry-run' || process.argv.includes('--dry-run')) {
 if (sub === 'serve') {
   const port = parseInt(process.argv[3] || '7123', 10);
   await runServe(port);
+  process.exit(0);
+}
+
+if (sub === 'pipeline') {
+  const urlIdx = process.argv.indexOf('--url');
+  const postIdIdx = process.argv.indexOf('--post-id');
+  const exportDirIdx = process.argv.indexOf('--export-dir');
+  const siteIdx = process.argv.indexOf('--site');
+  const framerUrl = urlIdx >= 0 ? process.argv[urlIdx + 1] : null;
+  const postId = postIdIdx >= 0 ? process.argv[postIdIdx + 1] : null;
+  const exportDir = exportDirIdx >= 0 ? process.argv[exportDirIdx + 1] : null;
+  const siteId = siteIdx >= 0 ? process.argv[siteIdx + 1] : (process.env.MCP_SITE_ID || 'default');
+  const noCache = process.argv.includes('--no-cache');
+  const skipQa = process.argv.includes('--skip-qa');
+  const dryRun = process.argv.includes('--dry-run');
+  const verbose = process.argv.includes('--verbose');
+
+  if (!framerUrl && !exportDir) {
+    log.error('pipeline requires --url <framer-url> or --export-dir <dir>');
+    phPipeline();
+    process.exit(2);
+  }
+
+  await runPipeline({ framerUrl, postId, exportDir, siteId, noCache, skipQa, dryRun, verbose });
+  process.exit(0);
+}
+
+if (sub === 'doctor') {
+  const formatJson = process.argv.includes('--format=json');
+  const fix = process.argv.includes('--fix');
+  await runDoctor(formatJson, fix);
   process.exit(0);
 }
 
