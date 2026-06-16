@@ -35,6 +35,7 @@ import {
   checkFramerExportCache, writeFramerExportCache,
   pipelineDir, repoDir,
 } from './shared.js';
+import { getFramerCacheStats } from '../lib/framer-cache.js';
 
 /**
  * Gibt die Hilfe fuer dieses Subcommand aus.
@@ -606,6 +607,15 @@ export async function runPipeline({
 
   console.log(`\n${'═'.repeat(60)}`);
   console.log(`  📊 PIPELINE COMPLETE in ${elapsed}s`);
+
+  // Phase-5 Cache-Stats
+  try {
+    const stats = getFramerCacheStats({ cacheRoot: rootDir });
+    if (stats.exists && stats.total_files > 0) {
+      const projectList = Object.keys(stats.per_project);
+      console.log(`  💾 Framer-Cache: ${stats.total_files} files, ${(stats.total_bytes / 1024).toFixed(1)} KiB (${projectList.length} projects: ${projectList.join(', ')})`);
+    }
+  } catch { /* stats are non-critical */ }
   console.log(`${'═'.repeat(60)}`);
   console.log(`  ✅ ${okSteps} ok  ⚠️ ${warnSteps} warnings  ⏭️ ${skipSteps} skipped  ❌ ${failSteps} failed`);
   console.log(`  📄 Summary: ${path.relative(rootDir, summaryPath)}`);
