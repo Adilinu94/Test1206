@@ -121,6 +121,23 @@ export function isValidStyleId(id) {
   return /^[a-z][a-z0-9_]*$/.test(id);
 }
 
+// UMBAUPLAN v2.0 Phase 1.5 — Invariant III Style-ID-Format Sanitizer
+// Erlaubt nur [a-z][a-z0-9_]*. Bindestriche, Uppercase, leading-digits werden normalisiert.
+// Existierende generateStyleId ist bereits konform; sanitizeStyleId ist für
+// Caller, die rohe Strings reinreichen (z.B. aus Framer componentId oder custom paths).
+export function sanitizeStyleId(name) {
+  if (!name) return 'fenode';
+  let s = String(name).toLowerCase();
+  s = s.replace(/-/g, '_');             // Bindestrich → Underscore
+  s = s.replace(/[^a-z0-9_]/g, '');     // Alles andere raus
+  s = s.replace(/_+/g, '_');            // Doppelte Underscores mergen
+  s = s.replace(/^_+|_+$/g, '');        // Trim Underscores
+  if (/^[0-9]/.test(s)) s = 'fe_' + s;  // Leading digit → Prefix
+  if (!s) s = 'fenode';
+  if (s.length > 24) s = s.slice(0, 24);
+  return s;
+}
+
 // ─────────────────────────────────────────────
 // $$TYPE WRAPPERS  (V4 Typed AST)
 // ─────────────────────────────────────────────
@@ -170,37 +187,41 @@ export function wrapDimensions(shorthand) {
   };
 }
 
-/** "12px" / "12px 8px" → V4 four-corner border-radius object.
- * Bug 5 Fix: physische Ecknamen (top-left, top-right, bottom-right, bottom-left)
- * statt logischer Properties (start-start etc.) die Elementor V4 nicht akzeptiert. */
+/** "12px" / "12px 8px" → V4 four-corner border-radius object */
 export function wrapBorderRadius(shorthand) {
   const p = String(shorthand).trim().split(/\s+/);
-  let [tl, tr, br, bl] = ['0px', '0px', '0px', '0px'];
+  let [ss, se, ee, es] = ['0px', '0px', '0px', '0px'];
   switch (p.length) {
-    case 1: tl = tr = br = bl = p[0]; break;
-    case 2: tl = br = p[0]; tr = bl = p[1]; break;
-    case 3: tl = p[0]; tr = bl = p[1]; br = p[2]; break;
-    case 4: [tl, tr, br, bl] = p; break;
+    case 1: ss = se = ee = es = p[0]; break;
+    case 2: ss = ee = p[0]; se = es = p[1]; break;
+    case 3: ss = p[0]; se = es = p[1]; ee = p[2]; break;
+    case 4: [ss, se, ee, es] = p; break;
   }
   return {
     '$$type': 'border-radius',
     value: {
-      'top-left':     wrapSize(tl),
-      'top-right':    wrapSize(tr),
-      'bottom-right': wrapSize(br),
-      'bottom-left':  wrapSize(bl),
+      'start-start': wrapSize(ss),
+      'start-end':   wrapSize(se),
+      'end-end':     wrapSize(ee),
+      'end-start':   wrapSize(es),
     },
   };
-}
-
-/** Bug 3 Fix: V4 background-Objekt (color im value-Objekt, nicht als String). */
-export function wrapBackground(colorProp) {
-  return { '$$type': 'background', value: { color: colorProp } };
 }
 
 export function wrapColor(hex)    { return { '$$type': 'color',                 value: hex   }; }
 export function wrapGvColor(gvId) { return { '$$type': 'global-color-variable', value: gvId  }; }
 export function wrapGvFont(gvId)  { return { '$$type': 'global-font-variable',  value: gvId  }; }
+
+// UMBAUPLAN v2.0 Phase 1.3 — Classes-Setting als Object wrappen.
+// Elementor V4 verlangt { $$type: 'classes', value: [...] } statt rohem Array.
+// Sanitized jedes Element via sanitizeStyleId.
+export function wrapClasses(classIds) {
+  if (!Array.isArray(classIds)) classIds = [];
+  return {
+    '$$type': 'classes',
+    value: classIds.map(id => isValidStyleId(id) ? id : sanitizeStyleId(id)),
+  };
+}
 
 export function wrapImageSrc({ id = null, url = null } = {}) {
   const value = {};
