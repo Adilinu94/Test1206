@@ -48,6 +48,19 @@ fs.mkdirSync(outDir, { recursive: true });
 const NS = args.namespace;
 
 // ─────────────────────────────────────────────
+// FONT-FORMAT NORMALIZATION
+// ─────────────────────────────────────────────
+// The extractor produces fonts as an array [{family, weights, sources}, …].
+// The pipeline enrichment (Step 7b) converts it to an object keyed by family
+// name. This helper normalizes both formats back to an array for iteration.
+function getFontsArray(tokenMap) {
+  const fonts = tokenMap.fonts;
+  if (!fonts) return [];
+  if (Array.isArray(fonts)) return fonts;
+  return Object.values(fonts).filter(Boolean);
+}
+
+// ─────────────────────────────────────────────
 // MD5-BASED GV-ID GENERATION (deterministisch)
 // ─────────────────────────────────────────────
 
@@ -91,7 +104,7 @@ function buildVariables(tokenMap) {
   }
 
   // Font variables
-  for (const font of (tokenMap.fonts || [])) {
+  for (const font of getFontsArray(tokenMap)) {
     const gvId = generateGvId(font.family, 'font');
     variables.push({
       id: gvId,
@@ -202,7 +215,7 @@ function buildBatchCreatePlan(variables) {
 
 function buildFontResolution(tokenMap) {
   const fonts = [];
-  for (const font of (tokenMap.fonts || [])) {
+  for (const font of getFontsArray(tokenMap)) {
     for (const src of font.sources) {
       fonts.push({
         family: font.family,

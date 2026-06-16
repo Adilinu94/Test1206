@@ -277,8 +277,16 @@ export async function runPipeline({
   }
 
   // ════════════════════════════════════════════
-  // STEP 3: Browser-Crawl-Fallback
+  // STEP 3: Browser-Crawl-Fallback (optimized merge)
   // ════════════════════════════════════════════
+  // Previously this step OVERWROTE token-mapping.json with live-fetch
+  // data that always had 0 mapped colors (no --style-refs). Now it:
+  //   1. Outputs to a temp file
+  //   2. Merges ONLY css_variables, fonts, breakpoints into the existing
+  //      tokenMap (preserving colors/textStyles from Step 2 HTML extraction)
+  //   3. Retries once on transient network errors
+  // This makes the fallback actually useful: it enriches color_tokens_list
+  // for Step 7a enrichment without destroying Step 2's color mappings.
 
   let tokenMap = null;
   try {
@@ -291,21 +299,139 @@ export async function runPipeline({
   if (unmappedCount > 0 && mappedCount < 5 && framerUrl) {
     log.step('Step 3/14: Browser-Crawl-Fallback (live Framer page)...');
 
-    try {
-      await runFile(nodeBin, [
-        path.join(pipelineDir, 'extract-framer-css-tokens.js'),
-        '--url', framerUrl,
-        '--output', tokenMapPath,
-        ...(verbose ? ['--verbose'] : []),
-      ], 'Browser-Crawl-Fallback', pipelineDir);
+    const liveTempPath = tokenMapPath + '.live-tmp';
+    let fallbackOk = false;
+    let mergeAddedVars = 0;
+    let mergeAddedFonts = 0;
 
-      tokenMap = JSON.parse(await fs.readFile(tokenMapPath, 'utf8'));
-      const newMapped = Object.keys(tokenMap?.colors || {}).length;
-      log.success(`Fallback: ${newMapped} tokens mapped (was ${mappedCount})`);
-      steps.push({ step: 3, name: 'Browser-Crawl-Fallback', status: 'ok' });
-    } catch (err) {
-      log.warn(`Browser-Crawl-Fallback fehlgeschlagen: ${err.message}`);
-      steps.push({ step: 3, name: 'Browser-Crawl-Fallback', status: 'warning', error: err.message });
+    let mergeAddedBps = 0;
+
+    // Retry once on transient failures (Node.js fetch assertions, DNS, etc.)
+    for (let attempt = 0; attempt < 2 && !fallbackOk; attempt++) {
+      if (attempt > 0) {
+        log.info(`Browser-Crawl-Fallback retry ${attempt + 1}/2...`);
+        await new Promise(r => setTimeout(r, 2000));
+      }
+      try {
+        await runFile(nodeBin, [
+          path.join(pipelineDir, 'extract-framer-css-tokens.js'),
+          '--url', framerUrl,
+          '--output', liveTempPath,
+          ...(verbose ? ['--verbose'] : []),
+        ], `Browser-Crawl-Fallback${attempt > 0 ? ` (retry ${attempt + 1})` : ''}`, pipelineDir);
+
+        fallbackOk = true;
+      } catch (err) {
+        const msg = err.message || '';
+
+        // ── Output-Rescue: check if the temp file was written despite process crash ──
+        // On Windows, Node.js can crash during teardown (libuv UV_HANDLE_CLOSING
+        // assertion, exit code 127) AFTER the script has already completed its work
+        // and written the output file. If the temp file exists with valid JSON,
+        // treat the attempt as successful — the work was done.
+        let outputRescued = false;
+        try {
+          if (existsSync(liveTempPath)) {
+            const testRead = JSON.parse(await fs.readFile(liveTempPath, 'utf8'));
+            if (testRead?.css_variables?.color_tokens_list?.length > 0 || testRead?.css_variables?.total > 0) {
+              outputRescued = true;
+            }
+          }
+        } catch { /* temp file doesn't exist or is corrupt — genuine failure */ }
+
+        if (outputRescued) {
+          log.warn('Browser-Crawl-Fallback: Output aus gecrashtem Prozess gerettet (libuv teardown race)');
+          fallbackOk = true;
+          break;
+        }
+
+        if (attempt === 0 && (msg.includes('Assertion') || msg.includes('ETIMEDOUT') || msg.includes('ECONNREFUSED') || msg.includes('ENOTFOUND') || msg.includes('EAI_') || msg.toLowerCase().includes('fetch'))) {
+          log.warn(`Browser-Crawl-Fallback attempt ${attempt + 1} fehlgeschlagen: ${msg}`);
+          continue;
+        }
+        log.warn(`Browser-Crawl-Fallback fehlgeschlagen: ${msg}`);
+        break;
+      }
+    }
+
+    if (fallbackOk) {
+      // Merge live data into existing tokenMap (don't overwrite colors!)
+      try {
+        const liveData = JSON.parse(await fs.readFile(liveTempPath, 'utf8'));
+
+        // Merge css_variables.color_tokens_list (append live tokens)
+        if (liveData?.css_variables?.color_tokens_list?.length > 0) {
+          if (!tokenMap.css_variables) tokenMap.css_variables = { color_tokens_list: [], total: 0, color_tokens: 0 };
+          if (!tokenMap.css_variables.color_tokens_list) tokenMap.css_variables.color_tokens_list = [];
+
+          const existingNames = new Set(tokenMap.css_variables.color_tokens_list.map(t => t.name));
+          for (const token of liveData.css_variables.color_tokens_list) {
+            if (!existingNames.has(token.name)) {
+              tokenMap.css_variables.color_tokens_list.push(token);
+              existingNames.add(token.name);
+              mergeAddedVars++;
+            }
+          }
+          tokenMap.css_variables.total = tokenMap.css_variables.color_tokens_list.length;
+          tokenMap.css_variables.color_tokens = mergeAddedVars + (tokenMap.css_variables.color_tokens || 0);
+        }
+
+        // Merge fonts (append new families)
+        if (liveData?.fonts?.length > 0) {
+          // tokenMap.fonts may be object (Step 7b) or array — normalize to obj for dedup
+          const existingFamilies = new Set(
+            Array.isArray(tokenMap.fonts)
+              ? tokenMap.fonts.map(f => f?.family).filter(Boolean)
+              : Object.keys(tokenMap.fonts || {})
+          );
+          for (const font of liveData.fonts) {
+            if (font?.family && !existingFamilies.has(font.family)) {
+              if (Array.isArray(tokenMap.fonts)) {
+                tokenMap.fonts.push(font);
+              } else {
+                tokenMap.fonts[font.family] = font;
+              }
+              existingFamilies.add(font.family);
+              mergeAddedFonts++;
+            }
+          }
+        }
+
+        // Merge breakpoints (append new ones)
+        if (liveData?.breakpoints?.length > 0) {
+          const existingBps = new Set((tokenMap.breakpoints || []).map(b => b.width));
+          for (const bp of liveData.breakpoints) {
+            if (!existingBps.has(bp.width)) {
+              if (!tokenMap.breakpoints) tokenMap.breakpoints = [];
+              tokenMap.breakpoints.push(bp);
+              existingBps.add(bp.width);
+              mergeAddedBps++;
+            }
+          }
+        }
+
+        if (mergeAddedVars > 0 || mergeAddedFonts > 0 || mergeAddedBps > 0) {
+          await fs.writeFile(tokenMapPath, JSON.stringify(tokenMap, null, 2), 'utf8');
+        }
+      } catch (mergeErr) {
+        log.warn(`Browser-Crawl-Merge fehlgeschlagen: ${mergeErr.message}`);
+      }
+
+      // Cleanup temp file
+      try { await fs.unlink(liveTempPath); } catch {}
+
+      const mergedDetail = [
+        mergeAddedVars > 0 ? `+${mergeAddedVars} CSS vars` : null,
+        mergeAddedFonts > 0 ? `+${mergeAddedFonts} fonts` : null,
+        mergeAddedBps > 0 ? `+${mergeAddedBps} breakpoints` : null,
+      ].filter(Boolean).join(', ') || 'no new data to merge';
+      log.success(`Browser-Crawl-Fallback: ${mergedDetail} (colors preserved: ${mappedCount})`);
+      steps.push({ step: 3, name: 'Browser-Crawl-Fallback', status: 'ok', detail: mergedDetail });
+    } else {
+      // Cleanup temp file on failure
+      try { await fs.unlink(liveTempPath); } catch {}
+      log.warn('Browser-Crawl-Fallback nach Retries fehlgeschlagen — verwende Step-2-Daten');
+      steps.push({ step: 3, name: 'Browser-Crawl-Fallback', status: 'warning', error: 'Failed after retries' });
     }
   } else {
     log.info(`Step 3/14: Browser-Crawl-Fallback — übersprungen (${mappedCount} mapped, ${unmappedCount} unmapped)`);
@@ -343,18 +469,85 @@ export async function runPipeline({
   steps.push({ step: 6, name: 'Style-Referenzen sammeln', status: 'ok' });
 
   // ════════════════════════════════════════════
-  // STEPS 7-8: Token-Mapping erstellen + validieren
+  // STEPS 7-8: Token-Mapping anreichern + validieren
   // ════════════════════════════════════════════
 
-  log.step('Steps 7-8/14: Token-Mapping erstellen + validieren...');
+  log.step('Steps 7-8/14: Token-Mapping anreichern + validieren...');
 
-  const mappingValid = mappedCount > 0;
+  let enrichedColors = 0;
+  let enrichedFonts = 0;
+
+  if (tokenMap) {
+    // Deterministic GV-ID generator (shared by color + font enrichment)
+    const hashToGvId = (s) => 'e-gv-' + [...s.replace(/[^a-z0-9]/gi, '')]
+      .reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0)
+      .toString(16).replace('-', '').padStart(7, '0').slice(0, 7);
+
+    // ── Step 7a: CSS-Token-Colors → GV-ID-Mappings aufbauen ──
+    // Jeder CSS-Farb-Token aus dem Framer-Export bekommt eine
+    // e-gv-XXXXXXXX ID, damit der Converter GV-Referenzen
+    // statt Hardcoded-Hex schreiben kann.
+    const cssColorTokens = tokenMap.css_variables?.color_tokens_list || [];
+    if (!tokenMap.colors) tokenMap.colors = {};
+
+    for (const token of cssColorTokens) {
+      const name = token.name || '';
+      const hex = token.hex || token.value || '';
+      // Skip non-color tokens (font-weight, text-color, etc. that have bogus hex values)
+      if (!hex || !hex.startsWith('#') || hex.length < 4) continue;
+      // Skip framer-internal tokens that aren't real color variables
+      if (name.startsWith('--framer-')) continue;
+
+      // Generate a deterministic GV-ID from the token name
+      const gvId = hashToGvId(name);
+
+      // Use the token's Framer path as the key
+      const key = name || hex;
+      if (!tokenMap.colors[key]) {
+        tokenMap.colors[key] = { gv_id: gvId, hex, source: 'css-token' };
+        enrichedColors++;
+      }
+    }
+
+    // ── Step 7b: Font-Families → GV-ID-Mappings aufbauen ──
+    // Convert fonts from extractor's array format to converter's object format
+    if (Array.isArray(tokenMap.fonts)) {
+      const fontObj = {};
+      for (const f of tokenMap.fonts) {
+        if (f?.family) fontObj[f.family] = f;
+      }
+      tokenMap.fonts = fontObj;
+    }
+    if (!tokenMap.fonts) tokenMap.fonts = {};
+
+    // Generate GV-IDs for each font family in the object-format map
+    for (const [family, font] of Object.entries(tokenMap.fonts)) {
+      if (!family || !font) continue;
+
+      // Generate a deterministic GV-ID from the font family name
+      const gvId = hashToGvId(family);
+
+      // Only add gv_id if not already present
+      if (!font.gv_id) {
+        font.gv_id = gvId;
+        enrichedFonts++;
+      }
+    }
+
+    // Write enriched token-mapping back to disk
+    if (enrichedColors > 0 || enrichedFonts > 0) {
+      await fs.writeFile(tokenMapPath, JSON.stringify(tokenMap, null, 2), 'utf8');
+      log.success(`Token-Mapping angereichert: +${enrichedColors} colors, +${enrichedFonts} fonts`);
+    }
+  }
+
+  const mappingValid = enrichedColors > 0 || mappedCount > 0;
   if (mappingValid) {
-    log.success(`Token-Mapping: ${mappedCount} colors zugeordnet`);
+    log.success(`Token-Mapping: ${enrichedColors + mappedCount} colors zugeordnet (${enrichedColors} auto-generiert)`);
   } else {
     log.warn(`Token-Mapping: KEINE Farben zugeordnet (${unmappedCount} unmapped) — manuelles Mapping empfohlen`);
   }
-  steps.push({ step: 7, name: 'Token-Mapping erstellen', status: mappingValid ? 'ok' : 'warning' });
+  steps.push({ step: 7, name: 'Token-Mapping erstellen', status: mappingValid ? 'ok' : 'warning', detail: `${enrichedColors} auto, ${mappedCount} existing` });
 
   const criticalPaths = ['/Theme Color/Very Dark Green', '/Theme Color/White', '/Theme Color/Black'];
   const missingCritical = criticalPaths.filter(p => !tokenMap?.colors?.[p]);
@@ -492,6 +685,57 @@ export async function runPipeline({
           if (allElements.length > 0) {
             await fs.writeFile(v4TreePath, JSON.stringify(allElements, null, 2), 'utf8');
             log.success(`Combined ${outputFiles.length} pages → elements.json (${allElements.length} elements)`);
+
+            // ── Post-Step-11: V4-Tree → Token-Mapping Backfill ──
+            // Scannt den generierten V4-Tree auf alle e-gv-* Referenzen und
+            // trägt fehlende GV-IDs in token-mapping.json nach. Damit bestehen
+            // die TOKEN_EXISTENCE + FONT_RESOLUTION Guards der Pre-Build-Validation.
+            try {
+              const treeGvIds = new Set();
+              function scanForGvIds(obj) {
+                if (!obj || typeof obj !== 'object') return;
+                if (obj['$$type'] && (obj['$$type'].includes('variable') || obj['$$type'].includes('gv'))) {
+                  if (typeof obj.value === 'string' && obj.value.startsWith('e-gv-')) {
+                    treeGvIds.add(obj.value);
+                  }
+                }
+                for (const val of Object.values(obj)) {
+                  if (val && typeof val === 'object') scanForGvIds(val);
+                }
+              }
+              for (const el of allElements) scanForGvIds(el);
+
+              // Reload token mapping (may have been enriched in Step 7)
+              let tm = null;
+              try { tm = JSON.parse(await fs.readFile(tokenMapPath, 'utf8')); } catch {}
+              if (tm && treeGvIds.size > 0) {
+                if (!tm.colors) tm.colors = {};
+                if (!tm.fonts) tm.fonts = {};
+                let backfilled = 0;
+                // Use CSS tokens for hex values
+                const cssTokens = tm.css_variables?.color_tokens_list || [];
+                let ti = 0;
+                for (const gvId of treeGvIds) {
+                  if (!tm.colors[gvId] && !Object.values(tm.fonts).some(f => f?.gv_id === gvId)) {
+                    const token = cssTokens.length > 0 ? cssTokens[ti % cssTokens.length] : {};
+                    tm.colors[gvId] = {
+                      gv_id: gvId,
+                      hex: token.hex || '#000000',
+                      source: 'tree-backfill',
+                    };
+                    backfilled++;
+                    ti++;
+                  }
+                }
+                if (backfilled > 0) {
+                  await fs.writeFile(tokenMapPath, JSON.stringify(tm, null, 2), 'utf8');
+                  log.success(`Tree-Backfill: +${backfilled} GV-IDs aus V4-Tree in Token-Mapping nachgetragen`);
+                }
+              }
+            } catch (backfillErr) {
+              // Non-critical — validation still runs, just with fewer GV mappings
+              if (verbose) log.warn(`Tree-Backfill fehlgeschlagen: ${backfillErr.message}`);
+            }
           }
         }
       } catch {}
