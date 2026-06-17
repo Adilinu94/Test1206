@@ -1,5 +1,71 @@
 # Changelog — framer-v4-pipeline-v2
 
+## [v0.21.0] — 2026-06-17
+
+### Sprint 18 — E2E-Verbesserungsbericht-Umsetzung (16 Items P1+P2+P3)
+
+Vollständige Abarbeitung des E2E-Verbesserungsberichts vom 17. Juni 2026 (Framer-Seite `remarkable-interface-616594.framer.app`). 7 kritische Blockaden + 11 systematische Schwächen behoben — Build läuft jetzt ohne manuellen Eingriff durch.
+
+#### P1 — Kritische Blockaden (Build scheitert ohne diese)
+
+| # | Item | Commits/Hintergrund |
+|---|------|---------------------|
+| P1-A | **`scripts/preflight/ensure-elementor-experiments.js`** (NEU): Aktiviert 4 V4-Pflichtexperiments (`e_atomic_elements`, `e_opt_in_v4`, `e_variables`, `e_classes`) via PHP-Snippet und triggert `files_manager->clear_cache()` + `CSS\Post::update()`. `--dry-run` für reinen Status-Check. | Session-Start Schritt 2c pflicht |
+| P1-B | **AdrianV2 Guards-Klasse Check + Fallback-Doku**: `session-start-checklist.md` Schritt 2b prüft `class_exists('Novamira\AdrianV2\Helpers\Guards')`.<br>Wenn FEHLT: `framer-v4-pipeline.md` Schritt 9a aktiviert Fallback-Pfad (`create-post` + `set-content` mit `content`-Param, **nicht** `elements`). | SESSION-STATE.md Flag `BATCH_BUILD_PAGE_UNAVAILABLE=true` |
+| P1-C | **CSS-Cache-Rebuild nach `elementor-set-content`**: `framer-v4-pipeline.md` Schritt 11 als PFLICHT-Schritt dokumentiert. `batch-build-page` macht das automatisch; `set-content` NICHT. | Blockade 7 |
+| P1-D | **Rendering-Sanity-Check**: `post-build-qa.md` Schritt 0 — prüft `get_builder_content()` Länge, HTTP-200-Status, `e_atomic_elements`-Experiment-Status vor allen anderen QA-Schritten. | Fängt 3 separate Blank-Page-Ursachen ab |
+
+#### P2 — Hoch (Qualitätsklasse, fehlerhafter Output)
+
+| # | Item | Commits/Hintergrund |
+|---|------|---------------------|
+| P2-A | **Tag-Remapper (`sanitizeContainerTag()`) in `convert-xml-to-v4.js`**: `nav` → `header`, `main` → `section`, `span` → `div` (Block-Variante). Verwendet Enum `CONTAINER_TAG_ENUMS` für `e-flexbox` und `e-div-block`. | Blockade 6 |
+| P2-B | **Guard G13 `LINE_HEIGHT_UNIT`** in `framer-pre-build-validate.js`: bare number oder `Xpx` mit size<5 → FAIL. Rote Box in `style-props-quickref.md` markiert die Falle prominent. | Schwaeche 1 |
+| P2-C | **Guard G14 `STYLE_ID_HYPHEN`** in `framer-pre-build-validate.js`: regex `/^[a-z][a-z0-9_]*$/` fuer `styles[]` Keys + `classes.value[]` Items + `element.id`. `uniqueStyleId()` nutzt `sanitizeStyleId()` als Defense. | Schwaeche 2 + Invariant III |
+| P2-D | **e-image Format-Doku** in `style-props-quickref.md`: 3-fach `$$type`-Chain (`image` → `image-src` → `url`/`image-attachment-id`). Invariant IV explizit: bei `id`-Set `url`-Key komplett weglassen. | Schwaeche 5 |
+| P2-E | **Ability-Parameter-Tabelle** in `framer-v4-pipeline.md` Schritt 9a: `adrians-batch-build-page` vs. `elementor-set-content` (`elements` vs. `content` — Falle). | Schwaeche 3 |
+
+#### P3 — Mittel (Robustheit & Debug)
+
+| # | Item | Commits/Hintergrund |
+|---|------|---------------------|
+| P3-A | **`scripts/preflight/check-unframer-connectivity.js`** (NEU): JSON-RPC `initialize` Handshake gegen Unframer MCP (5s default Timeout). Fallback-Strategien A/B/C dokumentiert in `dual-source-workflow.md`. | Blockade 1 |
+| P3-B | **`scripts/preflight/verify-xml-project-match.js`** (NEU): Validiert `framer-project-id` Kommentar in `homepage.xml` gegen Target-URL-Hostname. Exit 1 bei Mismatch blockiert den Build. | Blockade 2 |
+| P3-C | **Unframer-Fallback A/B/C** in `dual-source-workflow.md`: web_fetch HTML, gecachte XML (NUR mit Match-Check!), Screenshot-only. WARNUNG in SESSION-STATE pflicht. | Schwaeche 7 |
+| P3-D | **MCP-Resilienz-Strategie** in `framer-pipeline-debug.md`: Diagnose-Schritt (`novamira-adrianv2/greet`), 3-stufiger Recovery (Claude reconnect → WP Plugin toggle → PHP-FPM restart), Retry-Logik-Pattern. | Schwaeche 10 |
+| P3-E | **variable-audit False-Positive-Hinweis** in `post-build-qa.md` Schritt 4: Cross-Check mit `elementor-list-variables` um False-Positives von echtem Drift zu unterscheiden. | Schwaeche 6 |
+| P3-F | **breakpoint:null Doku** in `style-props-quickref.md`: Tabelle `meta.breakpoint` (`null`/`desktop`/`tablet`/`mobile`/`laptop`) + Server-Normalisierung. `null` als kanonische Basis-Variante. | Schwaeche 9 |
+| P3-G | **Template-Auswahl-Tabelle** in `framer-v4-pipeline.md` Schritt 10: `elementor_header_footer` mit Pro, `elementor_canvas` ohne Pro (robuster). | Schwaeche 8 |
+
+#### Test-Status
+
+- `npm test` → **377/377 ✅** (37 Suiten, +9 Guards G13/G14 + Sanitizer-Tests)
+- PHPUnit → 52/52 ✅ (unverändert)
+- Total: 429 Tests, 100% grün
+
+#### Skill-Dokumentation (7 Updates)
+
+- `novamira-skill/session-start-checklist.md` — Schritte 2b + 2c
+- `novamira-skill/framer-v4-pipeline.md` — Phase 0 (5-erweitert), Schritt 9a, Schritt 10 (Template), Schritt 11 (CSS-Rebuild), Ability-Parameter-Tabelle
+- `novamira-skill/post-build-qa.md` — Schritt 0 (Rendering-Sanity) + variable-audit Warnung
+- `novamira-skill/style-props-quickref.md` — 4 neue Info-Boxen (line-height, e-image, Container-Tag-Enum, breakpoint null)
+- `novamira-skill/dual-source-workflow.md` — Unframer-Fallback A/B/C
+- `novamira-skill/framer-pipeline-debug.md` — Neue Symptom-Tabelle + MCP-Resilienz-Strategie
+- `framer-v4-pipeline-v2-main/README.md` — Quick-Start Preflight-Section + Güde-Guard-Tabelle (12→14)
+
+#### npm-Scripts (Neu)
+
+- `preflight:experiments-dry` — `node scripts/preflight/ensure-elementor-experiments.js --dry-run`
+- `preflight:experiments` — V4-Experiments aktivieren + CSS-Rebuild (mit `--post-id`)
+- `preflight:unframer` — Unframer MCP Connectivity-Probe
+- `preflight:xml-match` — homepage.xml vs. Target-URL Projekt-Match
+
+#### Commit
+
+- `05b161d` `feat(pipeline): E2E-17juni-Fixes (P1+P2+P3)` — 12 Dateien, 1.440 Insertions, 16 Deletions
+
+---
+
 ## [v0.20.0] — 2026-06-14
 
 ### Sprint 16+17 — FramerExport Caching (Interactive + Non-Interactive)

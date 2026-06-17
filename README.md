@@ -13,9 +13,24 @@ Standalone-Pipeline zur Konvertierung von **Framer-Websites** in **Elementor V4 
 
 ```bash
 node wizard.js          # Interaktiver CLI-Wizard (empfohlen)
-npm test                # 128 Pipeline-Tests (37 Suiten)
+npm test                # 377 Pipeline-Tests (37 Suiten)
 npm run test:e2e        # 18 E2E-Tests
 ```
+
+### Preflight-Gates (Phase 0 — vor jedem Build empfohlen)
+
+Sprint-18: 4 Pre-Build-Checks die kritische Blockaden aus dem E2E-Verbesserungsbericht abfangen:
+
+```bash
+npm run preflight:experiments-dry   # V4-Experiments Status (e_atomic_elements, e_opt_in_v4, e_variables, e_classes)
+npm run preflight:experiments       # Experiments AKTIVIEREN + CSS-Cache-Rebuild (mit --post-id)
+npm run preflight:unframer          # Unframer MCP erreichbar? (JSON-RPC initialize Probe, Fallback-Strategien A/B/C)
+npm run preflight:xml-match         # tools/framer-export/homepage.xml matched Target-URL? (Mismatches abfangen)
+```
+
+Detaillierte Anleitung in `novamira-skill/session-start-checklist.md` Schritte 2b+2c und `novamira-skill/framer-pipeline.md` Phase 0.
+
+
 
 ## Pipeline-Phasen
 
@@ -55,6 +70,12 @@ npm run asset-queue       # asset-to-wp-media.js → WP Media Upload-Queue
 npm run dependency-graph  # build-dependency-graph.js → Build-Reihenfolge (Kahn)
 npm run export-mcp-plan   # export-mcp-xml.js → getNodeXml-Plan
 npm run visual-qa         # visual-qa.js → Browser-Screenshots (Playwright/Puppeteer/dry-run)
+
+# Preflight-Gates (Sprint 18 — E2E-Verbesserungsbericht 17. Juni 2026)
+npm run preflight:experiments-dry  # Status: V4-Experiments pruefen (dry-run)
+npm run preflight:experiments      # Experiments aktivieren + CSS-Cache-Rebuild
+npm run preflight:unframer         # Unframer MCP Erreichbarkeit-Probe (JSON-RPC)
+npm run preflight:xml-match        # homepage.xml ↔ Target-URL Projekt-Match
 ```
 
 ## E2E Pipeline (Automatisiert) 🚀
@@ -307,22 +328,24 @@ build-manifest.json           ← Wizard Summary mit allen Pfaden
 | BATCH_GET | `adrians-batch-get-content` ersetzt N×`elementor-get-content` Calls. Max 50 Posts, Modi: skeleton/settings/full. Fix 4 damit **obsolet** |
 | VAR_AUDIT | `adrians-variable-audit` scannt e-gv-* Drift Site-weit. `report: "drift"` für nur Broken References. Fix 5 damit **obsolet** |
 
-## 12 Guards (framer-pre-build-validate)
+## 14 Guards (framer-pre-build-validate)
 
-| Guard | Beschreibung |
-|-------|-------------|
-| TOKEN_EXISTENCE | Alle `e-gv-*` IDs in token-mapping.json vorhanden? |
-| COLOR_CONSISTENCY | Alle Global-Color-Variable-Referenzen valide? |
-| FONT_RESOLUTION | Alle Font-Variablen aufgelöst? |
-| BREAKPOINT_CONSISTENCY | Nur `null/tablet/mobile/desktop`? |
-| STYLE_CLASSES_BINDING | Style-ID in `settings.classes.value`? **(Invariant I)** |
-| NO_HARDCODED_HEX | Keine rohen `#rrggbb` in Props? |
-| NO_PLAIN_STRINGS | Keine unwrapped `e-gv-*`? |
-| FONT_NAMES_QUOTED | Mehrteilige Font-Namen gequoted? |
-| BASE_VARIANT_NULL | Erste Variante `breakpoint: null`? |
-| TABLET_VARIANTS | Mobile → Tablet auch vorhanden? |
-| BACKGROUND_COLOR_GC | `background.color` via Global Class? |
-| IMAGE_SRC_FORMAT | `image-src` hat `id` **oder** `url`, nie beides? **(Invariant IV)** |
+| # | Guard | Beschreibung |
+|---|-------|-------------|
+| 1 | TOKEN_EXISTENCE | Alle `e-gv-*` IDs in token-mapping.json vorhanden? |
+| 2 | COLOR_CONSISTENCY | Alle Global-Color-Variable-Referenzen valide? |
+| 3 | FONT_RESOLUTION | Alle Font-Variablen aufgelöst? |
+| 4 | BREAKPOINT_CONSISTENCY | Nur `null/tablet/mobile/desktop`? |
+| 5 | STYLE_CLASSES_BINDING | Style-ID in `settings.classes.value`? **(Invariant I)** |
+| 6 | NO_HARDCODED_HEX | Keine rohen `#rrggbb` in Props? |
+| 7 | NO_PLAIN_STRINGS | Keine unwrapped `e-gv-*`? |
+| 8 | FONT_NAMES_QUOTED | Mehrteilige Font-Namen gequoted? |
+| 9 | BASE_VARIANT_NULL | Erste Variante `breakpoint: null`? |
+| 10 | TABLET_VARIANTS | Mobile → Tablet auch vorhanden? |
+| 11 | BACKGROUND_COLOR_GC | `background.color` via Global Class? |
+| 12 | IMAGE_SRC_FORMAT | `image-src` hat `id` **oder** `url`, nie beides? **(Invariant IV)** |
+| **13** | **LINE_HEIGHT_UNIT** *(Sprint 18 — P2-B)* | **Bare number oder `Xpx` mit X<5 blockiert — verwendet `$$type:size` mit `unit:em` oder String** |
+| **14** | **STYLE_ID_HYPHEN** *(Sprint 18 — P2-C)* | **Style-IDs/Classes-Werte: nur `[a-z][a-z0-9_]*`, keine Hyphens/Uppercase/Leading-Digits** |
 
 Score ≥ 85% → Build OK · Score < 85% → **BLOCKED**
 
