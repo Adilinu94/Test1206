@@ -41,6 +41,7 @@ const { values: args } = parseArgs({
     tree:            { type: 'string' },
     'components-dir': { type: 'string' },   // Phase 12: dir with <componentId>.xml files
     'token-map':     { type: 'string' },    // Phase 12: token-mapping for style resolution
+    'style-map':     { type: 'string' },    // Phase 12+: style-map from extract-style-map.js
     output:          { type: 'string' },
     verbose:         { type: 'boolean', default: false },
   },
@@ -148,6 +149,11 @@ function convertXmlToV4(xmlContent) {
   // Pass token-map if available for GV-color/font resolution
   if (tokenMapPath && tokenMapExists) {
     spawnArgs.push('--tokens', tokenMapPath);
+  }
+
+  // Pass style-map if available for inlineTextStyle resolution
+  if (args['style-map'] && fs.existsSync(args['style-map'])) {
+    spawnArgs.push('--style-map', args['style-map']);
   }
 
   if (args.verbose) {

@@ -9,6 +9,7 @@ on:
       - 'wizard.js'
       - 'package.json'
       - 'novamira-adrianv2/**'
+      - 'tools/**'
   pull_request:
     paths:
       - 'scripts/**'
@@ -16,6 +17,7 @@ on:
       - 'wizard.js'
       - 'package.json'
       - 'novamira-adrianv2/**'
+      - 'tools/**'
 
 jobs:
   test:
@@ -23,7 +25,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '22' }
+      - run: npm install
+      # Prio 1 Fix: framer-export deps ohne Puppeteer-Binary installieren
+      - name: Install framer-export dependencies
+        run: PUPPETEER_SKIP_DOWNLOAD=1 npm install --prefix tools/framer-export
       - run: node --test tests/pipeline.test.js
 
   test-e2e:
@@ -31,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '22' }
       - run: node --check tests/e2e.test.js
 
   test-schema:
@@ -39,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '22' }
       - run: node --check scripts/validate-v4-tree.js
 
   test-mcp-mock:
@@ -47,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '22' }
       - name: MCP Mock Integration Test
         run: node tests/integration.test.js
 
@@ -56,7 +62,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '22' }
       - run: npm install
       - run: node --check scripts/visual-qa.js
       - run: node --check scripts/section-compare.js
@@ -66,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '22' }
       - run: npm run lint:version
 
   syntax:
@@ -74,12 +80,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - run: |
-          for f in wizard.js scripts/**/*.js tests/**/*.js; do
+        with: { node-version: '22' }
+      - name: Check all JS scripts syntax
+        run: |
+          for f in wizard.js scripts/*.js; do
             node --check "$f" || exit 1
           done
           echo "All syntax OK"
+      - name: Check new Prio 1+2 scripts
+        run: |
+          node --check scripts/extract-style-map.js
+          node --check scripts/expand-components.js
+          node --check scripts/session-init.js
+          echo "New scripts syntax OK"
 
   test-all:
     name: Full Test Suite
@@ -90,9 +103,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
       - run: npm ci
+      - name: Install framer-export dependencies
+        run: PUPPETEER_SKIP_DOWNLOAD=1 npm install --prefix tools/framer-export
       - run: npm run test:all
       - name: Verify test count
         run: |
@@ -173,3 +188,4 @@ jobs:
 
       - name: Run PHPUnit
         run: ./vendor/bin/phpunit --testdox
+

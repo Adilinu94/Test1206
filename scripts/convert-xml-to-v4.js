@@ -40,6 +40,7 @@ const { values: args } = parseArgs({
     tokens:         { type: 'string' },
     fonts:          { type: 'string' },
     'image-map':    { type: 'string' },
+    'style-map':    { type: 'string' },   // JSON aus getProjectXml() mit textStyles/colorStyles
     output:         { type: 'string' },
     validate:       { type: 'boolean', default: false },
     verbose:        { type: 'boolean', default: false },
@@ -585,7 +586,7 @@ function detectGridLayout(xmlNode, attrs) {
  * @param {object|null} [xmlNode] - XML-Node (für Grid-Detection)
  * @returns {object} V4-Style-Props
  */
-function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageMap, xmlNode = null) {
+function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageMap, xmlNode = null, styleMap = null) {
   const props  = {};
   const { stackDirection, stackGap, padding, maxWidth, width, height,
           backgroundColor, 'background-color': bgColor,
@@ -593,7 +594,15 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
           position, top, right, bottom, left,
           color, 'font-family': fontFamily, 'font-size': fontSize,
           'font-weight': fontWeight, 'line-height': lineHeight,
-          'letter-spacing': letterSpacing, opacity } = attrs;
+          'letter-spacing': letterSpacing, opacity,
+          inlineTextStyle } = attrs;
+
+  // inlineTextStyle-Auflösung: "/Headings/80" → { fontSize, fontWeight, fontFamily, lineHeight, letterSpacing }
+  // Nur relevant für Text-Widgets; styleMap kommt aus getProjectXml() TextStyles.
+  let resolvedStyle = null;
+  if (inlineTextStyle && styleMap?.textStyles?.[inlineTextStyle]) {
+    resolvedStyle = styleMap.textStyles[inlineTextStyle];
+  }
 
   // ── Layout (flexbox / grid) ──
   if (widgetType === 'e-div-block') {
@@ -616,7 +625,9 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
     if (bgVal) {
       const resolved = resolveColor(bgVal, tokenMapping);
       if (resolved) {
-        warn(`background.color '${bgVal}' muss als Global Class gesetzt werden (Bug 3). \u00dcbersprungen.`);
+        // Bug 3 Fix: background.color als lokalen Style setzen statt verwerfen.
+        // Elementor V4 Background-Prop-Struktur: { $$type: 'background', value: { color: <color-prop> } }
+        props['background'] = { '$$type': 'background', value: { color: resolved } };
       }
     }
   }
@@ -638,26 +649,34 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
 
     const bgVal = backgroundColor || bgColor;
     if (bgVal) {
-      // Bug 3: background.color NUR in Global Classes, nie in lokalen Styles
+      // Bug 3 Fix: background.color als lokalen Style setzen statt verwerfen.
       const resolved = resolveColor(bgVal, tokenMapping);
       if (resolved) {
-        warn(`background.color '${bgVal}' muss als Global Class gesetzt werden (Bug 3). Übersprungen.`);
+        props['background'] = { '$$type': 'background', value: { color: resolved } };
       }
     }
   }
 
   // ── Typography (heading / text) ──
   if (widgetType === 'e-heading' || widgetType === 'e-paragraph') {
-    if (fontSize)      props['font-size']    = wrapSize(fontSize);
-    if (fontWeight)    props['font-weight']  = wrapType('string', fontWeight);
-    if (lineHeight)    props['line-height']  = resolveLineHeight(lineHeight);
-    if (letterSpacing) props['letter-spacing'] = wrapSize(letterSpacing);
-    if (fontFamily) {
-      const resolved = resolveFont(fontFamily.split(',')[0].trim().replace(/['"]/g,''), tokenMapping, fontResolution);
+    // Direktwerte aus XML haben Vorrang; resolvedStyle (aus inlineTextStyle) fuellt fehlende Werte auf.
+    const effFontSize      = fontSize       || resolvedStyle?.fontSize;
+    const effFontWeight    = fontWeight     || resolvedStyle?.fontWeight;
+    const effLineHeight    = lineHeight     || resolvedStyle?.lineHeight;
+    const effLetterSpacing = letterSpacing  || resolvedStyle?.letterSpacing;
+    const effFontFamily    = fontFamily     || resolvedStyle?.fontFamily;
+    const effColor         = color          || resolvedStyle?.color;
+
+    if (effFontSize)      props['font-size']      = wrapSize(effFontSize);
+    if (effFontWeight)    props['font-weight']    = wrapType('string', effFontWeight);
+    if (effLineHeight)    props['line-height']    = resolveLineHeight(effLineHeight);
+    if (effLetterSpacing) props['letter-spacing'] = wrapSize(effLetterSpacing);
+    if (effFontFamily) {
+      const resolved = resolveFont(effFontFamily.split(',')[0].trim().replace(/['"]/g,''), tokenMapping, fontResolution);
       if (resolved) props['font-family'] = resolved;
     }
-    if (color) {
-      const resolved = resolveColor(color, tokenMapping);
+    if (effColor) {
+      const resolved = resolveColor(effColor, tokenMapping);
       if (resolved) props['color'] = resolved;
     }
   }
@@ -699,6 +718,8 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
   // RC-11 Fix: Minimum default styles for widgets with empty props.
   // Widgets with {} props render with browser defaults (Times New Roman, no sizing).
   // Set sane fallbacks that match typical Framer designs.
+  // NOTE: Only fires when NEITHER XML attrs NOR inlineTextStyle provided values —
+  // so resolvedStyle has already had a chance to populate props above.
   if (Object.keys(props).length === 0) {
     if (widgetType === 'e-heading') {
       props['font-family'] = wrapType('string', 'Inter');
@@ -717,10 +738,6 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
 
   return props;
 }
-
-// ─────────────────────────────────────────────
-// NODE → V4 CONVERTER  (recursive)
-// ─────────────────────────────────────────────
 
 const usedStyleIds  = new Map(); // base-id → count
 const usedWidgetIds = new Map(); // base-id → count  (Bug 5 Fix)
@@ -851,9 +868,10 @@ function extractComponentText(attrs) {
  * @param {object|null} fontResolution - Font-Resolution
  * @param {object|null} imageMap - Image-Map (URL → wp_media_id)
  * @param {number} [depth=0] - Rekursionstiefe
+ * @param {object|null} [styleMap=null] - Style-Map aus getProjectXml() TextStyles/ColorStyles
  * @returns {object} V4-Element mit type, elType, widgetType, id, settings, styles, elements
  */
-function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0) {
+function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0, styleMap = null) {
   const { attrs } = xmlNode;
   // Bug 1+8 Fix: resolve text from component attrs > explicit text attr > child text
   const compText = extractComponentText(attrs);
@@ -878,7 +896,7 @@ function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0)
   // NOTE: buildStyleProps() is the richer version of v4-tree-builder's
   // mapFramerStyleToV4Props() — it adds Bug 3 (GC warnings), RC-08 (position),
   // RC-11 (text fallbacks), RC-09 (grid detection), and C2 grid support.
-  const props = buildStyleProps(enrichedAttrs, widgetType, tokenMapping, fontResolution, imageMap, xmlNode);
+  const props = buildStyleProps(enrichedAttrs, widgetType, tokenMapping, fontResolution, imageMap, xmlNode, styleMap);
 
   // ── Settings ──
   const settings = {
@@ -967,7 +985,7 @@ function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0)
     // Bug 3 Fix: recursively unwrap any chain of pass-through containers
     const resolved = resolvePassThrough(child, depth + 1);
     for (const r of resolved) {
-      const converted = convertNode(r.node, tokenMapping, fontResolution, imageMap, r.depth);
+      const converted = convertNode(r.node, tokenMapping, fontResolution, imageMap, r.depth, styleMap);
       if (converted) v4Children.push(converted);
     }
   }
@@ -1272,6 +1290,21 @@ if (args['image-map']) {
   }
 }
 
+// Style map (optional) — aus getProjectXml() extrahierte TextStyles/ColorStyles.
+// Format: { textStyles: { "/Headings/80": { fontSize, fontWeight, fontFamily, lineHeight, letterSpacing, color } }, colorStyles: { "/Neutrals/950": "#010004" } }
+// Wird in buildStyleProps() verwendet um inlineTextStyle-Referenzen aufzulösen.
+let styleMap = null;
+if (args['style-map']) {
+  if (fs.existsSync(args['style-map'])) {
+    styleMap = JSON.parse(fs.readFileSync(args['style-map'], 'utf8'));
+    const tsCount = Object.keys(styleMap.textStyles || {}).length;
+    const csCount = Object.keys(styleMap.colorStyles || {}).length;
+    log(`Style map loaded: ${tsCount} text styles, ${csCount} color styles`);
+  } else {
+    warn(`style-map nicht gefunden: ${args['style-map']}`);
+  }
+}
+
 // ─────────────────────────────────────────────
 // CONVERT
 // ─────────────────────────────────────────────
@@ -1293,7 +1326,7 @@ log(`XML nodes parsed: ${xmlRoots.length} root node(s)`);
 // Convert each root node
 const v4Tree = xmlRoots
   .filter(n => n.tagName && n.tagName !== '_root')
-  .map(n => convertNode(n, tokenMapping, fontResolution, imageMap, 0));
+  .map(n => convertNode(n, tokenMapping, fontResolution, imageMap, 0, styleMap));
 
 // C6: Token-to-GV Substitution Pass (Root-Cause Fix)
 // Replaces hardcoded hex values with e-gv-XXXXXXXX references

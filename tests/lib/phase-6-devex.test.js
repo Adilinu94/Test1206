@@ -10,7 +10,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
 
 import { generateBuildReport } from '../../scripts/wizard/build-report.js';
 import { loadReplay, saveReplay, listReplays, runReplay } from '../../scripts/wizard/replay.js';
@@ -189,9 +189,9 @@ test('Phase 6.4 listReplays: ignores tmp files', () => {
   try {
     saveReplay(dir, { post_id: 1, v4Tree: {} });
     const list = listReplays(dir);
-    // Replay-tmp-* files should be excluded
+    // Replay-tmp-* files should be excluded (check filename only, not full path which may contain /tmp/)
     for (const entry of list) {
-      assert.ok(!entry.path.includes('tmp'));
+      assert.ok(!basename(entry.path).includes('tmp'));
     }
   } finally {
     rmSync(dir, { recursive: true, force: true });
