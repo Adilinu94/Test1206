@@ -50,12 +50,26 @@ const { values: args } = parseArgs({
     'tokens-report': { type: 'boolean', default: false },
     'pro-fallback':  { type: 'boolean', default: true },
     'is-pro-active': { type: 'string', default: '' },  // 'true' or 'false' (parsed below)
+    // Fix #11: CSS-Fallback wenn getProjectXml() keine Styles liefert
+    // --framer-url oder --framer-html → css-fallback-extractor.js läuft automatisch
+    // wenn style-map leer/fehlend ist.
+    'framer-url':  { type: 'string' },  // Publizierte Framer-URL für CSS-Crawl-Fallback
+    'framer-html': { type: 'string' },  // Lokales FramerExport HTML als Fallback-Quelle
+    'prefer-gc':     { type: 'boolean', default: false },
   },
   strict: false,
 });
 
 const isProActive = (args['is-pro-active'] || '').toLowerCase() === 'true';
 const proFallbackEnabled = args['pro-fallback'] !== false;
+// Fix #1: --prefer-gc delegiert background an generate-global-classes.js (kein lokaler Style)
+const preferGcForBackground = args['prefer-gc'] === true;
+// Fix #1 (repair): GC-Kandidaten sammeln wenn --prefer-gc aktiv ist.
+// background wird NICHT in props geschrieben (siehe buildStyleProps), wäre also
+// für generate-global-classes.js unsichtbar. Wir schreiben die Kandidaten daher
+// in eine separate Begleitdatei <output>.gc-candidates.json statt sie in den
+// Tree zu mischen (vermeidet Risiko, dass Metadaten ins Elementor-Payload sickern).
+const pendingGcCandidates = [];
 
 // Help
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log('Usage: node scripts/convert-xml-to-v4.js [--help for options]'); console.log('Run with --help for full usage.'); process.exit(0); }
@@ -586,7 +600,7 @@ function detectGridLayout(xmlNode, attrs) {
  * @param {object|null} [xmlNode] - XML-Node (für Grid-Detection)
  * @returns {object} V4-Style-Props
  */
-function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageMap, xmlNode = null, styleMap = null) {
+function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageMap, xmlNode = null, styleMap = null, elementId = null) {
   const props  = {};
   const { stackDirection, stackGap, padding, maxWidth, width, height,
           backgroundColor, 'background-color': bgColor,
@@ -625,9 +639,16 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
     if (bgVal) {
       const resolved = resolveColor(bgVal, tokenMapping);
       if (resolved) {
-        // Bug 3 Fix: background.color als lokalen Style setzen statt verwerfen.
-        // Elementor V4 Background-Prop-Struktur: { $$type: 'background', value: { color: <color-prop> } }
-        props['background'] = { '$$type': 'background', value: { color: resolved } };
+        if (!preferGcForBackground) {
+          // Bug 3 Fix: background.color als lokalen Style setzen statt verwerfen.
+          // Elementor V4 Background-Prop-Struktur: { $$type: 'background', value: { color: <color-prop> } }
+          props['background'] = { '$$type': 'background', value: { color: resolved } };
+        } else if (elementId) {
+          // Fix #1 (repair): background NICHT lokal, aber als GC-Kandidat sammeln —
+          // sonst kann generate-global-classes.js den Wert nicht sehen (er steht
+          // in keinem props-Feld mehr).
+          pendingGcCandidates.push({ id: elementId, color: resolved });
+        }
       }
     }
   }
@@ -652,7 +673,12 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
       // Bug 3 Fix: background.color als lokalen Style setzen statt verwerfen.
       const resolved = resolveColor(bgVal, tokenMapping);
       if (resolved) {
-        props['background'] = { '$$type': 'background', value: { color: resolved } };
+        if (!preferGcForBackground) {
+          props['background'] = { '$$type': 'background', value: { color: resolved } };
+        } else if (elementId) {
+          // Fix #1 (repair): GC-Kandidat sammeln (siehe Begründung oben).
+          pendingGcCandidates.push({ id: elementId, color: resolved });
+        }
       }
     }
   }
@@ -716,21 +742,69 @@ function buildStyleProps(attrs, widgetType, tokenMapping, fontResolution, imageM
   if (opacity !== undefined) props['opacity'] = wrapUnitless(opacity);
 
   // RC-11 Fix: Minimum default styles for widgets with empty props.
-  // Widgets with {} props render with browser defaults (Times New Roman, no sizing).
-  // Set sane fallbacks that match typical Framer designs.
-  // NOTE: Only fires when NEITHER XML attrs NOR inlineTextStyle provided values —
-  // so resolvedStyle has already had a chance to populate props above.
+  // Fix #5: Wenn styleMap verfügbar ist, wird ein semantisch passender TextStyle
+  // gewählt statt der statischen Inter/32px Fallbacks.
+  // Heuristik: Node-Name enthält "Heading"/"Title"/"H1-H6" → größter TextStyle
+  //             Node-Name enthält "Body"/"Text"/"Para"      → kleinster TextStyle
+  //             Sonst: mittlerer TextStyle.
+  // NOTE: Only fires when NEITHER XML attrs NOR inlineTextStyle provided values.
   if (Object.keys(props).length === 0) {
-    if (widgetType === 'e-heading') {
-      props['font-family'] = wrapType('string', 'Inter');
-      props['font-size'] = wrapSize('32px');
-      props['font-weight'] = wrapType('string', '600');
-      props['color'] = wrapColor('#111111');
-    } else if (widgetType === 'e-paragraph') {
-      props['font-family'] = wrapType('string', 'Inter');
-      props['font-size'] = wrapSize('16px');
-      props['line-height'] = wrapUnitless(1.6);
-      props['color'] = wrapColor('#444444');
+    if (widgetType === 'e-heading' || widgetType === 'e-paragraph') {
+      const textStyles = styleMap?.textStyles ? Object.entries(styleMap.textStyles) : [];
+      let chosenStyle = null;
+
+      if (textStyles.length > 0) {
+        const withPx = textStyles
+          .map(([name, s]) => ({ name, style: s, px: s.fontSize ? parseFloat(s.fontSize) : 0 }))
+          .filter(e => e.px > 0)
+          .sort((a, b) => a.px - b.px); // aufsteigend (kleinster → größter)
+
+        const nodeName = (xmlNode?.attrs?.name || xmlNode?.attrs?.id || '').toLowerCase();
+        const isHeading = /heading|title|h[1-6]|display|hero|header/i.test(nodeName);
+        const isBody    = /body|text|para|caption|label|note|small/i.test(nodeName);
+
+        if (withPx.length > 0) {
+          if (widgetType === 'e-heading' || isHeading) {
+            chosenStyle = withPx[withPx.length - 1].style; // größter
+            log(`RC-11 smart fallback (heading): ${withPx[withPx.length - 1].name} ${withPx[withPx.length - 1].px}px`);
+          } else if (isBody || widgetType === 'e-paragraph') {
+            chosenStyle = withPx[0].style; // kleinster
+            log(`RC-11 smart fallback (body): ${withPx[0].name} ${withPx[0].px}px`);
+          } else {
+            const mid = Math.floor(withPx.length / 2);
+            chosenStyle = withPx[mid].style;
+            log(`RC-11 smart fallback (mid): ${withPx[mid].name} ${withPx[mid].px}px`);
+          }
+        }
+      }
+
+      if (chosenStyle) {
+        if (chosenStyle.fontFamily) {
+          const ff = chosenStyle.fontFamily.split(',')[0].trim().replace(/['"]/g, '');
+          const resolved = resolveFont(ff, tokenMapping, fontResolution);
+          props['font-family'] = resolved || wrapType('string', ff);
+        }
+        if (chosenStyle.fontSize)   props['font-size']   = wrapSize(chosenStyle.fontSize);
+        if (chosenStyle.fontWeight) props['font-weight'] = wrapType('string', String(chosenStyle.fontWeight));
+        if (chosenStyle.lineHeight) props['line-height'] = resolveLineHeight(chosenStyle.lineHeight);
+        if (chosenStyle.color) {
+          const c = resolveColor(chosenStyle.color, tokenMapping);
+          if (c) props['color'] = c;
+        }
+      } else {
+        // Statische Fallbacks — keine styleMap verfügbar oder leer
+        if (widgetType === 'e-heading') {
+          props['font-family'] = wrapType('string', 'Inter');
+          props['font-size']   = wrapSize('32px');
+          props['font-weight'] = wrapType('string', '600');
+          props['color']       = wrapColor('#111111');
+        } else {
+          props['font-family'] = wrapType('string', 'Inter');
+          props['font-size']   = wrapSize('16px');
+          props['line-height'] = wrapUnitless(1.6);
+          props['color']       = wrapColor('#444444');
+        }
+      }
     } else if (widgetType === 'e-button') {
       props['color'] = wrapColor('#ffffff');
     }
@@ -896,7 +970,7 @@ function convertNode(xmlNode, tokenMapping, fontResolution, imageMap, depth = 0,
   // NOTE: buildStyleProps() is the richer version of v4-tree-builder's
   // mapFramerStyleToV4Props() — it adds Bug 3 (GC warnings), RC-08 (position),
   // RC-11 (text fallbacks), RC-09 (grid detection), and C2 grid support.
-  const props = buildStyleProps(enrichedAttrs, widgetType, tokenMapping, fontResolution, imageMap, xmlNode, styleMap);
+  const props = buildStyleProps(enrichedAttrs, widgetType, tokenMapping, fontResolution, imageMap, xmlNode, styleMap, widgetId);
 
   // ── Settings ──
   const settings = {
@@ -1305,6 +1379,40 @@ if (args['style-map']) {
   }
 }
 
+// Fix #11: CSS-Fallback wenn style-map leer ist und --framer-url / --framer-html gesetzt
+// Wenn Unframer-MCP keine Styles liefert, wird die publizierte Framer-Seite gecrawlt.
+const styleMapIsEmpty = !styleMap ||
+  (Object.keys(styleMap.textStyles || {}).length === 0 &&
+   Object.keys(styleMap.colorStyles || {}).length === 0);
+
+if (styleMapIsEmpty && (args['framer-url'] || args['framer-html'])) {
+  const fallbackSrc = args['framer-html'] ? `--html ${args['framer-html']}` : `--url ${args['framer-url']}`;
+  const tmpStyleMap = path.join(os.tmpdir(), `style-map-fallback-${Date.now()}.json`);
+  warn(`style-map leer/fehlend → CSS-Fallback via ${args['framer-html'] ? 'HTML' : 'URL'}`);
+
+  const fallbackResult = spawnSync(
+    process.execPath,
+    [
+      path.join(__dirname, 'css-fallback-extractor.js'),
+      ...(args['framer-html'] ? ['--html', args['framer-html']] : ['--url', args['framer-url']]),
+      '--style-map-output', tmpStyleMap,
+      '--output-dir', os.tmpdir(),
+      ...(args.verbose ? ['--verbose'] : []),
+    ],
+    { stdio: ['ignore', 'inherit', 'inherit'] }
+  );
+
+  if (fallbackResult.status === 0 && fs.existsSync(tmpStyleMap)) {
+    styleMap = JSON.parse(fs.readFileSync(tmpStyleMap, 'utf8'));
+    const tsCount = Object.keys(styleMap.textStyles || {}).length;
+    const csCount = Object.keys(styleMap.colorStyles || {}).length;
+    process.stderr.write(`✓ CSS-Fallback: ${tsCount} TextStyles, ${csCount} Colors geladen.\n`);
+    try { fs.unlinkSync(tmpStyleMap); } catch { /* ignore cleanup error */ }
+  } else {
+    warn('CSS-Fallback fehlgeschlagen — RC-11 statische Fallbacks werden genutzt.');
+  }
+}
+
 // ─────────────────────────────────────────────
 // CONVERT
 // ─────────────────────────────────────────────
@@ -1358,6 +1466,16 @@ if (outputPath) {
   fs.mkdirSync(path.dirname(path.resolve(outputPath)), { recursive: true });
   fs.writeFileSync(outputPath, output, 'utf8');
   if (args.output) process.stderr.write(`Saved to ${outputPath}\n`);
+}
+
+// Fix #1 (repair): GC-Kandidaten als Begleitdatei schreiben (--prefer-gc Modus).
+// generate-global-classes.js liest diese via --gc-candidates um background-Werte
+// zu erkennen, die bewusst NICHT als lokaler Style im Tree stehen.
+if (preferGcForBackground && pendingGcCandidates.length > 0 && outputPath) {
+  const candidatesPath = outputPath.replace(/\.json$/, '') + '.gc-candidates.json';
+  fs.writeFileSync(candidatesPath, JSON.stringify({ background: pendingGcCandidates }, null, 2), 'utf8');
+  process.stderr.write(`✓ ${pendingGcCandidates.length} GC-Kandidat(en) (background) → ${candidatesPath}\n`);
+  process.stderr.write(`  Nutze: generate-global-classes.js --tree ${args.output || outputPath} --gc-candidates ${candidatesPath}\n`);
 }
 
 // --validate: run validate-v4-tree.js on the output

@@ -85,7 +85,7 @@
 ### PHP-2 — `adrians-batch-inject-snippets` (Batch-Modus für Animations-Workflow)
 - [x] `adrians-batch-inject-snippets.php` implementiert (max 20 Snippets, delegiert an code-injector)
 - [x] Fix committed
-- [ ] `inject-animation-code.js` anpassen: N einzelne Calls → 1 Batch-Call (JS-seitige Optimierung, separater Task)
+- [x] `inject-animation-code.js`: Batch ist Default (`adrians-batch-inject-snippets`), `--single-mode` nur noch Debug (Fix #2)
 
 ### PHP-3 — `adrians-delete-snippet`: `mode: "activate"` fehlt
 - [x] `activate`-Branch in `adrians-delete-snippet.php` hinzugefügt (inkl. WPCode-Transient-Clear)
@@ -145,7 +145,7 @@
 
 ## Offene Nice-to-have (nicht im ursprünglichen Audit)
 
-- [ ] `inject-animation-code.js`: JS-seitig auf `adrians-batch-inject-snippets` umstellen (N→1 Calls)
+- [x] `inject-animation-code.js`: JS-seitig auf `adrians-batch-inject-snippets` umgestellt — Batch ist Standard (Fix #2)
 - [ ] `PIPELINE_AUDIT_REPORT.md`: P0-Einträge als erledigt markieren
 - [ ] `lint:version`-ähnliches Script: Test-Count in README automatisch prüfen
 
@@ -153,3 +153,53 @@
 
 > **Hinweis:** Alle Fixes wurden in einem einzigen Commit gepusht (2026-06-12).  
 > Live-Tests gegen solar.local wurden nicht durchgeführt.
+
+---
+
+## ✅ Sprint 19 Fixes (2026-06-19)
+
+### Fix #1 — GC-Konflikt background.color koordiniert
+- [x] `convert-xml-to-v4.js`: `--prefer-gc` Flag (background NICHT lokal → GC übernimmt)
+- [x] `generate-global-classes.js`: `--local-bg-set` Flag (Background-GC überspringen wenn lokal gesetzt)
+- [x] Beide Modes explizit koordiniert, kein Doppel-Styling möglich
+
+### Fix #2 — inject-animation-code.js Batch
+- [x] Batch war bereits Default — als Done markiert + todo.md bereinigt
+
+### Fix #3 — SESSION-STATE.md Auto-Update
+- [x] `session-init.js`: `--update-session-state` Flag schreibt SESSION-STATE.md neu
+- [x] Version aus `package.json`, Repo-URL korrigiert, Datum automatisch
+- [x] npm-Script: `session-init:update-state`
+
+### Fix #4 — extract-style-map.js JSON-Format-Detektion
+- [x] `detectFormat()` am Anfang: erkennt JSON vs XML
+- [x] Bei JSON: direkter Parse von `{ textStyles, colorStyles }` ohne leere Map
+
+### Fix #5 — RC-11 smarter Fallback via styleMap
+- [x] Node-Name-Heuristik: heading → größter TextStyle, body → kleinster
+- [x] Statische Fallbacks (Inter/32px) nur noch wenn styleMap leer
+
+### Fix #6 — expand-components.js Mode-B Test-Fixture
+- [x] `tests/fixtures/component-mode-b.xml`: Page mit 2x Feature-Card + CTA
+- [x] `tests/fixtures/components/comp-feature-card.xml`
+- [x] `tests/fixtures/components/comp-cta-block.xml`
+
+### Fix #11 — CSS-Fallback automatisch
+- [x] `scripts/css-fallback-extractor.js`: crawlt Framer-URL oder liest HTML
+- [x] `convert-xml-to-v4.js`: Auto-Trigger via `--framer-url` / `--framer-html` wenn styleMap leer
+- [x] npm-Scripts: `css-fallback`, `css-fallback:url`, `css-fallback:html`
+
+### Fix #12 — Responsive Breakpoints Pipeline-Integration
+- [x] `scripts/integrate-responsive.js`: Orchestriert extract-responsive-breakpoints + auto-scale-responsive
+- [x] `--skip-if-present` Guard: überschreibt keine vorhandenen Breakpoints
+- [x] npm-Scripts: `responsive`, `responsive:with-css`
+
+### Fix #13 — Visual QA Post-Build-Hook automatisch
+- [x] `scripts/post-build-hook.js`: Screenshot-Diff + QA-Audits in einem Schritt
+- [x] Diff-Threshold (Default 10%), exit 0/1 für Agent-Signal
+- [x] `build-quality.json` mit `agent_verdict` Klartext
+- [x] npm-Scripts: `post-build`, `post-build:qa-only`, `post-build:dry`
+
+### Offen (nächste Session)
+- [ ] Fix #8: Helpers-Guard in `batch-create-variables`
+- [ ] Novamira Fixes 4–8: batch-get-content, variable-audit, memory-auto-fill, patch-element-styles multi-post, skill-list

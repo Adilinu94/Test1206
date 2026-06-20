@@ -64,6 +64,79 @@ if (args.xml) {
   }
 }
 
+// ─── Fix #4: Format-Detektion (JSON vs XML) ─────────────────────────────────
+// getProjectXml() liefert je nach Unframer-Version entweder XML oder JSON.
+// Bei JSON-Input produziert der XML-Regex-Parser leere Maps ohne Fehler —
+// das wird hier abgefangen und JSON wird direkt in das Ausgabeformat umgewandelt.
+
+function detectFormat(content) {
+  const trimmed = content.trimStart();
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) return 'json';
+  if (trimmed.startsWith('<')) return 'xml';
+  return 'unknown';
+}
+
+const inputFormat = detectFormat(xmlContent);
+log(`Input format detected: ${inputFormat}`);
+
+if (inputFormat === 'json') {
+  warn('Input ist JSON (nicht XML) — Framer-JSON-Format erkannt. Extrahiere Styles direkt aus JSON.');
+  try {
+    const parsed = JSON.parse(xmlContent);
+    // Unframer liefert entweder { textStyles: {…}, colorStyles: {…} } direkt
+    // oder ein verschachteltes Objekt mit "styles"-Key.
+    const raw = parsed.styles || parsed;
+    const textStyles = {};
+    const colorStyles = {};
+
+    // textStyles: { "/Headings/80": { fontSize, fontWeight, fontFamily, … } }
+    for (const [name, val] of Object.entries(raw.textStyles || {})) {
+      if (!name || typeof val !== 'object') continue;
+      textStyles[name] = {
+        fontSize:      val.fontSize      || val['font-size']      || null,
+        fontWeight:    val.fontWeight    || val['font-weight']    || null,
+        fontFamily:    val.fontFamily    || val['font-family']    || null,
+        lineHeight:    val.lineHeight    || val['line-height']    || null,
+        letterSpacing: val.letterSpacing || val['letter-spacing'] || null,
+        color:         val.color         || null,
+      };
+    }
+
+    // colorStyles: { "/Neutrals/Neutral 950": "#010004" }
+    for (const [name, val] of Object.entries(raw.colorStyles || {})) {
+      if (!name) continue;
+      colorStyles[name] = typeof val === 'string' ? val : (val.value || val.hex || val.color || null);
+    }
+
+    // Framer JSON kann auch eine flache "colors"-Map enthalten
+    for (const [name, val] of Object.entries(raw.colors || {})) {
+      if (!name || colorStyles[name]) continue;
+      colorStyles[name] = typeof val === 'string' ? val : (val.value || val.hex || val.color || null);
+    }
+
+    const tsCount = Object.keys(textStyles).length;
+    const csCount = Object.keys(colorStyles).length;
+    if (tsCount === 0 && csCount === 0) {
+      warn('JSON-Input: Keine TextStyles oder ColorStyles gefunden. Prüfe Unframer-Ausgabeformat.');
+    }
+
+    const output = JSON.stringify({ textStyles, colorStyles }, null, 2);
+    if (args.output) {
+      fs.mkdirSync(path.dirname(path.resolve(args.output)), { recursive: true });
+      fs.writeFileSync(args.output, output, 'utf8');
+      process.stderr.write(`✓ style-map.json (aus JSON): ${tsCount} text styles, ${csCount} color styles → ${args.output}\n`);
+    } else {
+      process.stdout.write(output + '\n');
+    }
+    process.exit(0);
+  } catch (e) {
+    warn(`JSON-Parsing fehlgeschlagen: ${e.message} — versuche XML-Fallback.`);
+    // Fällt durch zum XML-Parser
+  }
+} else if (inputFormat === 'unknown') {
+  warn('Unbekanntes Eingabeformat (weder XML noch JSON). Versuche XML-Parser als Fallback.');
+}
+
 // ─── Attribute extractor (minimal, no full parse needed) ────────────────────
 
 /**

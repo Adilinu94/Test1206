@@ -36,15 +36,103 @@
  */
 
 import { parseArgs } from 'node:util';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const { values: args } = parseArgs({
   options: {
     json:       { type: 'boolean', default: false }, // maschinenlesbarer Output
     verbose:    { type: 'boolean', default: false },
     'read-vars': { type: 'boolean', default: false }, // GV-Liste aus Elementor lesen
+    // Fix #3: SESSION-STATE.md automatisch aktualisieren
+    'update-session-state': { type: 'boolean', default: false },
+    'repo-url':  { type: 'string', default: 'https://github.com/Adilinu94/Framer-to-Elementor-V4-Pipeline' },
   },
   strict: false,
 });
+
+// ─── Fix #3: SESSION-STATE.md Auto-Update ────────────────────────────────────
+// Wird VOR dem normalen Checklisten-Output geprüft, damit --update-session-state
+// als eigenständiger Modus funktioniert (kein Mischen mit dem Default-Flow).
+
+/**
+ * Schreibt SESSION-STATE.md neu mit aktuellen Werten aus package.json + Repo-URL.
+ * Wird aufgerufen mit: node scripts/session-init.js --update-session-state
+ *
+ * Bewusst kein MCP-Call nötig — nur package.json + Git-Info.
+ * GV-IDs werden NICHT gespeichert (session-live, ändern sich pro Lauf).
+ */
+function updateSessionState() {
+  const pkgPath = resolve(__dirname, '..', 'package.json');
+  const statePath = resolve(__dirname, '..', 'SESSION-STATE.md');
+
+  let version = 'unknown';
+  try {
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+    version = pkg.version || version;
+  } catch { /* package.json nicht lesbar — Version bleibt "unknown" */ }
+
+  const repoUrl = args['repo-url'] || 'https://github.com/Adilinu94/Framer-to-Elementor-V4-Pipeline';
+  const today = new Date().toISOString().split('T')[0];
+
+  // Existierende Datei lesen um "Offene Tasks" zu erhalten
+  let openTasks = '';
+  if (existsSync(statePath)) {
+    const existing = readFileSync(statePath, 'utf8');
+    const taskMatch = existing.match(/## Offene Tasks[\s\S]*?(?=\n## |\n---|\s*$)/);
+    openTasks = taskMatch ? taskMatch[0] : '';
+  }
+
+  const content = `# SESSION-STATE.md — framer-v4-pipeline-v2
+
+> **Letzte Aktualisierung:** ${today}  
+> **Pipeline-Version:** v${version}  
+> **Repo:** ${repoUrl}  
+> **Primäre MCP-Verbindung:** \`novamira-solar-local\` → \`http://solar.local/wp-json/mcp/novamira\`
+
+---
+
+## Aktueller Status
+
+| Bereich | Status |
+|---------|--------|
+| CI-Workflow | ✅ Aktiv |
+| Pipeline-Version | v${version} |
+| Zuletzt aktualisiert | ${today} |
+
+---
+
+${openTasks || `## Offene Tasks
+
+Siehe \`tasks/todo.md\` für die vollständige Aufgabenliste.`}
+
+---
+
+## Wichtige IDs & Sessions
+
+> **Hinweis:** Session-abhängige IDs (e-gv-*, gc-*) werden NICHT hier gespeichert.  
+> Diese ändern sich pro MCP-Session. Immer frisch via \`adrians-setup-v4-foundation\` abrufen.
+
+---
+
+## Environment
+
+- **Lokale WP-Sites:** \`solar.local\` (LocalWP), \`treetsshop.local\`
+- **Node-Version:** 18 / 20 / 22 (CI-Matrix)
+- **Primärer Branch:** \`main\`
+`;
+
+  writeFileSync(statePath, content, 'utf8');
+  process.stderr.write(`✓ SESSION-STATE.md aktualisiert: v${version} | ${today} | ${repoUrl}\n`);
+}
+
+if (args['update-session-state']) {
+  updateSessionState();
+  process.exit(0);
+}
 
 const log = (...m) => { if (args.verbose && !args.json) process.stderr.write('[session-init] ' + m.join(' ') + '\n'); };
 
@@ -199,3 +287,4 @@ Führe diese ${calls.length} Calls in der angegebenen Reihenfolge aus:
 }
 
 process.exit(0);
+

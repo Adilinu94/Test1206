@@ -7,8 +7,16 @@
  * Kernregeln (aus AGENTS.md):
  *   - ≥2 Elemente mit gleicher Style-Signatur → GC-Vorschlag
  *   - background.color → IMMER GC, auch bei nur 1 Element (Bug 3)
+ *     AUSNAHME: wenn convert-xml-to-v4.js mit --prefer-gc=false lief (Standard),
+ *     dann wurde background bereits als lokaler Style gesetzt. In diesem Fall
+ *     überspringt generate-global-classes.js den background-GC um Duplikate zu
+ *     vermeiden. Flag: --local-bg-set (true = Bug-3-Fix aktiv, false = prefer-gc).
  *   - Structure GC + Color GC trennen
  *   - Naming: gc-<semantic>-<variant>
+ *
+ * Koordination mit convert-xml-to-v4.js:
+ *   - convert --prefer-gc    → background NIE lokal → generate-gc verarbeitet background als GC ✅
+ *   - convert (Standard)     → background lokal    → generate-gc --local-bg-set überspringt background ✅
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -29,6 +37,15 @@ const { values: args } = parseArgs({
     'check-abilities':{ type: 'boolean', default: false }, // RC-12: query MCP for ability availability
     'hide-missing':   { type: 'boolean', default: false }, // RC-12: drop mcp_calls with missing abilities
     'mcp-config':     { type: 'string' },                  // path to .mcp.json
+    // Fix #1: Koordination mit convert-xml-to-v4.js --prefer-gc
+    // --local-bg-set  →  convert lief OHNE --prefer-gc (Standard): background bereits lokal gesetzt.
+    //                     Background-GC-Schritt wird übersprungen um Doppel-Style zu vermeiden.
+    //                     Standard: false (entspricht --prefer-gc Modus: background → GC).
+    'local-bg-set':   { type: 'boolean', default: false },
+    // Fix #1 (repair): Begleitdatei mit background-Kandidaten aus --prefer-gc Modus.
+    // Wird von convert-xml-to-v4.js als <output>.gc-candidates.json geschrieben,
+    // da diese Werte NICHT mehr in props stehen und sonst unsichtbar wären.
+    'gc-candidates':  { type: 'string' },
     verbose:          { type: 'boolean', default: false },
     help:             { type: 'boolean', default: false },
   },
@@ -80,6 +97,10 @@ EXIT-CODES:
 const log = (...a) => args.verbose && process.stderr.write('[gen-gc] ' + a.join(' ') + '\n');
 const warn = (...a) => process.stderr.write('[WARN] ' + a.join(' ') + '\n');
 const fatal = (msg, code = 2) => { process.stderr.write('[FATAL] ' + msg + '\n'); process.exit(code); };
+
+// Fix #1: true wenn convert-xml-to-v4.js OHNE --prefer-gc lief (Standard).
+// In diesem Fall ist background bereits als lokaler Style im Tree → GC-Schritt überspringen.
+const localBgSet = args['local-bg-set'] === true;
 
 const MIN_DUPS = parseInt(args['min-dups'] ?? '2', 10);
 
@@ -312,6 +333,29 @@ for (const el of allElements) {
   }
 }
 
+// Fix #1 (repair): GC-Kandidaten aus --prefer-gc Begleitdatei einlesen.
+// Diese background-Werte stehen NICHT in props (convert-xml-to-v4.js hat sie
+// bewusst nicht lokal gesetzt) und sind daher für die obige Schleife unsichtbar.
+if (args['gc-candidates']) {
+  const candPath = resolve(args['gc-candidates']);
+  if (existsSync(candPath)) {
+    try {
+      const candidates = JSON.parse(readFileSync(candPath, 'utf8'));
+      const bgCandidates = candidates.background || [];
+      for (const c of bgCandidates) {
+        if (!c.id || !c.color) continue;
+        const filteredProps = { background: { '$$type': 'background', value: { color: c.color } } };
+        backgroundElements.push({ id: c.id, widget: 'unknown', props: filteredProps, filteredProps });
+      }
+      log(`${bgCandidates.length} GC-Kandidat(en) aus ${candPath} geladen`);
+    } catch (e) {
+      warn(`--gc-candidates konnte nicht gelesen werden: ${e.message}`);
+    }
+  } else {
+    warn(`--gc-candidates Datei nicht gefunden: ${candPath}`);
+  }
+}
+
 // ── Global-Class-Vorschläge erstellen ──────────────────────────────────────
 
 const suggestedClasses = [];
@@ -387,6 +431,13 @@ for (const [sig, { props, elements }] of structureSignatures) {
 }
 
 // Background-GCs (IMMER, auch bei 1 Element — Bug 3 Schutz)
+// Fix #1: Wenn localBgSet=true wurde background bereits von convert-xml-to-v4.js
+// als lokaler Style gesetzt (Standard-Modus ohne --prefer-gc).
+// In diesem Fall überspringen wir den GC-Schritt um Doppel-Styling zu vermeiden.
+if (localBgSet) {
+  warn('--local-bg-set aktiv: background bereits als lokaler Style im Tree. Background-GCs werden übersprungen.');
+  warn('Zum Aktivieren: convert-xml-to-v4.js --prefer-gc + generate-global-classes.js (ohne --local-bg-set).');
+} else {
 // Duplikate zusammenfassen
 const bgSignatureMap = new Map();
 for (const el of backgroundElements) {
@@ -417,6 +468,7 @@ for (const [sig, { props, elements }] of bgSignatureMap) {    const name = sanit
   });
   log(`GC Background: ${name} (${elements.length} Elemente, Bug-3-Schutz)`);
 }
+} // end else (localBgSet guard — Fix #1)
 
 // ── Doppelte ungrouped-Eintraege bereinigen ────────────────────────────────
 
@@ -547,7 +599,11 @@ const plan = {
 
 if (suggestedClasses.length === 0) {
   process.stderr.write('[gen-gc] Keine Duplikate gefunden — alle Styles sind unique.\n');
-  process.stderr.write('[gen-gc] Hinweis: background.color-Elemente wurden trotzdem als GC markiert.\n');
+  if (!localBgSet) {
+    process.stderr.write('[gen-gc] Hinweis: background.color-Elemente wurden trotzdem als GC markiert.\n');
+  } else {
+    process.stderr.write('[gen-gc] Hinweis: --local-bg-set aktiv — background.color wurde NICHT als GC markiert (bereits lokaler Style).\n');
+  }
   process.exit(1);
 }
 

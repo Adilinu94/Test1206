@@ -72,7 +72,17 @@
     "measure-quality": "node scripts/measure-quality-metrics.js",
     "test:integration-live": "node --test tests/integration.test.js -- --live",
     "profile-pipeline": "node scripts/profile-pipeline.js",
-    "deploy-plugin": "bash novamira-adrianv2/scripts/deploy-plugin.sh"
+    "deploy-plugin": "bash novamira-adrianv2/scripts/deploy-plugin.sh",
+    "session-init": "node scripts/session-init.js",
+    "session-init:update-state": "node scripts/session-init.js --update-session-state",
+    "css-fallback": "node scripts/css-fallback-extractor.js",
+    "css-fallback:url": "node scripts/css-fallback-extractor.js --url",
+    "css-fallback:html": "node scripts/css-fallback-extractor.js --html",
+    "responsive": "node scripts/integrate-responsive.js",
+    "responsive:with-css": "node scripts/integrate-responsive.js --css",
+    "post-build": "node scripts/post-build-hook.js",
+    "post-build:qa-only": "node scripts/post-build-hook.js --qa-only",
+    "post-build:dry": "node scripts/post-build-hook.js --dry-run"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
