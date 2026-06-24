@@ -1,0 +1,18 @@
+{
+  "_comment": "Kopiere diese Datei nach mcp-server-config.json und fülle Credentials aus. mcp-server-config.json NIEMALS committen (steht in .gitignore).",
+  "mcpServers": {
+    "novamira-solar-local": {
+      "url": "http://solar.local/wp-json/mcp/novamira",
+      "headers": {
+        "Authorization": "Basic BASE64_ENCODED_USER_PASS"
+      }
+    },
+    "novamira-remote": {
+      "url": "https://your-site.com/wp-json/mcp/novamira",
+      "headers": {
+        "Authorization": "Basic BASE64_ENCODED_USER_PASS"
+      }
+    }
+  },
+  "_hint_base64": "Base64-Encoding: btoa('username:app-password') im Browser oder: echo -n 'user:pass' | base64 im Terminal"
+}

@@ -1,0 +1,2402 @@
+Node xml:
+<Desktop
+    nodeId="WQLkyLRf1"
+    position="absolute"
+    width="1440px"
+    height="fit-content"
+    top="0px"
+    left="0px"
+    <!-- background color string or project color style path (if starts with /) -->
+    backgroundColor="white"
+    overflow="clip"
+    layout="stack"
+    stackDirection="vertical"
+    stackDistribution="start"
+    stackAlignment="center"
+>
+  <SmoothScroll
+      nodeId="tCppkdsqF"
+      locked="true"
+      width="fit-content"
+      height="fit-content"
+      intensity="15"
+   />
+  <HeroSection
+      nodeId="zLVHvcg7l"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/Theme Color/Very Dark Green"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="151px 30px 112px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="y5TwZSx9H"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="sukbr6QOL"
+          width="1fr"
+          height="fit-content"
+          overflow="visible"
+          layout="stack"
+          gap="10px"
+          stackDirection="horizontal"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <TextWrapper
+            nodeId="yFPDRpE9X"
+            width="1fr"
+            height="fit-content"
+            maxWidth="629px"
+            borderRadius="0px"
+            overflow="visible"
+            layout="stack"
+            gap="30px"
+            stackDirection="vertical"
+            stackDistribution="start"
+            stackAlignment="start"
+        >
+          <TitleWrapper
+              nodeId="IOnAZJS94"
+              width="1fr"
+              height="fit-content"
+              borderRadius="0px"
+              overflow="visible"
+              layout="stack"
+              gap="40px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="start"
+          >
+            <Text
+                nodeId="DRilRTnLU"
+                width="1fr"
+                height="fit-content"
+                borderRadius="0px"
+                overflow="visible"
+                layout="stack"
+                gap="16px"
+                stackDirection="vertical"
+                stackDistribution="start"
+                stackAlignment="start"
+            >
+              <TrustedByThousandsOfHomeowners
+                  nodeId="zsWvJY9LN"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- project text style path, always starts with / -->
+                  inlineTextStyle="/Body/Body-16px-Medium"
+              >
+                Trusted by Thousands of Homeowners
+              </TrustedByThousandsOfHomeowners>
+              <TitleDescription
+                  nodeId="Oa4q8ObKO"
+                  width="1fr"
+                  height="fit-content"
+                  borderRadius="0px"
+                  overflow="visible"
+                  layout="stack"
+                  gap="24px"
+                  stackDirection="vertical"
+                  stackDistribution="start"
+                  stackAlignment="start"
+              >
+                <FastReliablePlumbingSolutionsYouCanTrust
+                    nodeId="H0EQBr8hB"
+                    width="1fr"
+                    height="fit-content"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Heading/Heading 1"
+                >
+                  Fast reliable plumbing solutions you can Trust
+                </FastReliablePlumbingSolutionsYouCanTrust>
+                <PlumbingAcRepairElectricalWorkAndCompleteHomeMaintenanceByCe
+                    nodeId="XsjDwYqvX"
+                    width="1fr"
+                    height="fit-content"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Body/Body-20px-Medium"
+                >
+                  Plumbing, AC repair, electrical work, and complete home maintenance by certified professionals.
+                </PlumbingAcRepairElectricalWorkAndCompleteHomeMaintenanceByCe>
+              </TitleDescription>
+            </Text>
+            <PrimaryButton
+                nodeId="vu2LKNt43"
+                width="fit-content"
+                height="fit-content"
+                <!-- the component id this instance uses -->
+                componentId="Y8FLRZ93g"
+                variant="MkNLMUh9v"
+                ycw27fUKm="Get Free Estimate"
+                hM59WZCdN="/contact"
+             />
+          </TitleWrapper>
+          <Cards
+              nodeId="BAmiIH6uq"
+              width="fit-content"
+              height="fit-content"
+              borderRadius="0px"
+              overflow="visible"
+              layout="stack"
+              gap="30px"
+              stackDirection="horizontal"
+              stackDistribution="start"
+              stackAlignment="center"
+          >
+            <Feature
+                nodeId="Bx7ZoeXtR"
+                width="fit-content"
+                height="fit-content"
+                <!-- the component id this instance uses -->
+                componentId="ej9HrmT7x"
+                variant="SGB0G91oP"
+                axmCaN6Sl="Certified and trained technicians"
+             />
+            <Feature
+                nodeId="GPkHCyJu2"
+                width="fit-content"
+                height="fit-content"
+                <!-- the component id this instance uses -->
+                componentId="ej9HrmT7x"
+                variant="SGB0G91oP"
+                axmCaN6Sl="Quality tools and professional"
+             />
+          </Cards>
+        </TextWrapper>
+        <Image
+            nodeId="Nnmq7j5PD"
+            position="absolute"
+            width="620px"
+            height="620px"
+            bottom="-116px"
+            left="635px"
+            <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+            backgroundImage="https://framerusercontent.com/images/HyjQ7oy5eU7zePWICby3Ukt2dk.png"
+            zIndex="1"
+            overflow="clip"
+         />
+        <HappyCustomer
+            nodeId="amtP0SatY"
+            position="absolute"
+            width="304px"
+            height="fit-content"
+            right="-20px"
+            bottom="-72px"
+            <!-- background color string or project color style path (if starts with /) -->
+            backgroundColor="/White/White"
+            borderRadius="16px"
+            zIndex="1"
+            overflow="visible"
+            layout="stack"
+            gap="10px"
+            padding="30px"
+            stackDirection="vertical"
+            stackDistribution="start"
+            stackAlignment="start"
+        >
+          <TextWrapper
+              nodeId="c_aFXSsBz"
+              width="1fr"
+              height="fit-content"
+              borderRadius="0px"
+              overflow="visible"
+              layout="stack"
+              gap="40px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="start"
+          >
+            <HappyCustomers
+                nodeId="X0JwyJSVE"
+                width="1fr"
+                height="fit-content"
+                borderRadius="0px"
+                overflow="visible"
+                layout="stack"
+                gap="8px"
+                stackDirection="vertical"
+                stackDistribution="start"
+                stackAlignment="start"
+            >
+              <1499
+                  nodeId="How6ICX8R"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- project text style path, always starts with / -->
+                  inlineTextStyle="/Heading/Heading 1 b"
+              >
+                1,499+
+              </1499>
+              <HappyCustomers
+                  nodeId="b9Rm8GQAQ"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- project text style path, always starts with / -->
+                  inlineTextStyle="/Body/Body-16px-Medium"
+              >
+                Happy Customers
+              </HappyCustomers>
+            </HappyCustomers>
+            <Avatar
+                nodeId="UB97x4JNT"
+                width="fit-content"
+                height="fit-content"
+                borderRadius="0px"
+                overflow="visible"
+                layout="stack"
+                gap="12px"
+                stackDirection="horizontal"
+                stackDistribution="start"
+                stackAlignment="center"
+            >
+              <ImageWrapper
+                  nodeId="z8YasWNY5"
+                  width="fit-content"
+                  height="fit-content"
+                  borderRadius="0px"
+                  overflow="visible"
+                  layout="stack"
+                  gap="-16px"
+                  stackDirection="horizontal"
+                  stackDistribution="start"
+                  stackAlignment="center"
+              >
+                <Avatar1
+                    nodeId="qcHa457al"
+                    width="40px"
+                    height="40px"
+                    borderRadius="100%"
+                    <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+                    backgroundImage="https://framerusercontent.com/images/6pGKR4B6j0cujMroezTdi9iATLs.png"
+                    borderWidth="1px"
+                    borderStyle="solid"
+                    borderColor="/White/White"
+                 />
+                <Avatar2
+                    nodeId="tgHRrV6yd"
+                    width="40px"
+                    height="40px"
+                    borderRadius="100%"
+                    <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+                    backgroundImage="https://framerusercontent.com/images/zQvBUSCvXARc2gOpLM18vDLFvnQ.png"
+                    borderWidth="1px"
+                    borderStyle="solid"
+                    borderColor="/White/White"
+                 />
+                <Avatar3
+                    nodeId="D5hZBujuc"
+                    width="40px"
+                    height="40px"
+                    borderRadius="100%"
+                    <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+                    backgroundImage="https://framerusercontent.com/images/HFlP9folXrxwgoUd03tkhl8hJs.png"
+                    borderWidth="1px"
+                    borderStyle="solid"
+                    borderColor="/White/White"
+                 />
+              </ImageWrapper>
+              <HouseOwner
+                  nodeId="RYpaLGqpu"
+                  width="fit-content"
+                  height="fit-content"
+                  borderRadius="0px"
+                  overflow="visible"
+                  layout="stack"
+                  stackDirection="vertical"
+                  stackDistribution="start"
+                  stackAlignment="start"
+              >
+                <HouseOwner
+                    nodeId="fNecHfECw"
+                    width="115px"
+                    height="fit-content"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Body/Body-14px-Semibold"
+                >
+                  House Owner
+                </HouseOwner>
+              </HouseOwner>
+            </Avatar>
+          </TextWrapper>
+        </HappyCustomer>
+      </Content>
+    </Container>
+  </HeroSection>
+  <BrandSection
+      nodeId="wWBafay2A"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/White/White"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="60px 30px 60px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="Jt_eT0zsx"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="Vv69YQ7qT"
+          width="1fr"
+          height="fit-content"
+          overflow="clip"
+          layout="stack"
+          gap="30px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <TrustedHomeServiceProfessionals
+            nodeId="Cct1u8VbP"
+            width="fit-content"
+            height="fit-content"
+            <!-- project text style path, always starts with / -->
+            inlineTextStyle="/Body/Body-20px-Medium"
+        >
+          Trusted Home Service Professionals
+        </TrustedHomeServiceProfessionals>
+        <LogoWrapper
+            nodeId="aswLfB4Gp"
+            width="1fr"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="72px"
+            stackDirection="horizontal"
+            stackDistribution="start"
+            stackAlignment="center"
+        >
+          <Image
+              nodeId="ZR5lRqw1g"
+              width="fit-image"
+              height="30px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/mzO33jOGZ2kFTOb8RDrM7zYHIg.svg"
+              overflow="clip"
+           />
+          <Image
+              nodeId="f3eH6Er00"
+              width="fit-image"
+              height="30px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/fLfFG04FyCuuwjOnSXhU9AfMuA.svg"
+              overflow="clip"
+           />
+          <Image
+              nodeId="zr_PhFSN5"
+              width="fit-image"
+              height="30px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/w6ur7mCbecnxjPpJRUSb4lTPpY.svg"
+              overflow="clip"
+           />
+          <Image
+              nodeId="SonRZPtZP"
+              width="fit-image"
+              height="30px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/GFx5Z5si5o4nnsPwySbFwdB8.svg"
+              overflow="clip"
+           />
+          <Image
+              nodeId="WxkPtkxjf"
+              width="fit-image"
+              height="30px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/tuGt1ShDCCMJK51rciaYh8aezY.svg"
+              overflow="clip"
+           />
+          <Image
+              nodeId="nYnLAxCw6"
+              width="fit-image"
+              height="30px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/A01KQilKR45cJ9BjDVqLYFnHfA.svg"
+              overflow="clip"
+           />
+        </LogoWrapper>
+      </Content>
+    </Container>
+  </BrandSection>
+  <AboutSection
+      nodeId="TimsOtgDp"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/White/White"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="60px 30px 60px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="fNxO2pIko"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="XygPq1slg"
+          width="1fr"
+          height="fit-content"
+          overflow="clip"
+          layout="stack"
+          gap="70px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <TaxtWrapper
+            nodeId="wh6P3_u0n"
+            width="1fr"
+            height="fit-content"
+            maxWidth="925px"
+            borderRadius="0px"
+            overflow="visible"
+            layout="stack"
+            gap="16px"
+            stackDirection="vertical"
+            stackDistribution="start"
+            stackAlignment="center"
+        >
+          <SubHeading
+              nodeId="ixMKN1RYI"
+              width="fit-content"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="mTLqUheu2"
+              variant="iCQoOVVFA"
+              BMhUprG8u="About us"
+           />
+          <Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe
+              nodeId="YFxv4Kwj3"
+              width="1fr"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Heading/Heading 3"
+          >
+            Since 2015, we’ve been delivering trusted home repair and maintenance services with a perfect balance of quality, reliability, and efficiency. For over a decade, our skilled team has provided plumbing, electrical, and AC solutions—ensuring every home stays safe, functional, and comfortable every day.
+          </Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe>
+        </TaxtWrapper>
+        <ImageWrapper
+            nodeId="HvtEz1urc"
+            width="88%"
+            height="fit-content"
+            borderRadius="0px"
+            overflow="visible"
+            layout="stack"
+            gap="24px"
+            stackDirection="horizontal"
+            stackDistribution="start"
+            stackAlignment="end"
+        >
+          <Image1
+              nodeId="lUu5OzR_j"
+              width="263px"
+              height="250px"
+              borderRadius="16px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/JYa8x0EeBsXnaJqZvSHthSpk0Q.png"
+           />
+          <Image2
+              nodeId="fJ6saQH1O"
+              width="263px"
+              height="316px"
+              borderRadius="16px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/coYTQXdMmIuZw6mUAE78efxisZE.png"
+           />
+          <Image3
+              nodeId="zj23Qp8uw"
+              width="263px"
+              height="250px"
+              borderRadius="16px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/tUWaihWhSO5vY387bSa08TA.png"
+           />
+          <Image4
+              nodeId="O6qIfLm0I"
+              width="263px"
+              height="316px"
+              borderRadius="16px"
+              <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+              backgroundImage="https://framerusercontent.com/images/ASYAyybGVXm93p6wn4ChnpCgmY.png"
+           />
+        </ImageWrapper>
+      </Content>
+    </Container>
+  </AboutSection>
+  <WhyChooseUsSection
+      nodeId="HVJx28tCS"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/White/White"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="60px 30px 60px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="BEQa7KnnJ"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="Df7Mh37iL"
+          width="1fr"
+          height="fit-content"
+          overflow="clip"
+          layout="stack"
+          gap="70px"
+          stackDirection="horizontal"
+          stackDistribution="start"
+          stackAlignment="start"
+      >
+        <TextWrapper
+            nodeId="Qn9rFbkSL"
+            position="sticky"
+            width="1fr"
+            height="fit-content"
+            top="20px"
+            maxWidth="628px"
+            zIndex="1"
+            overflow="clip"
+            layout="stack"
+            gap="40px"
+            stackDirection="vertical"
+            stackDistribution="center"
+            stackAlignment="start"
+        >
+          <TitleWrapper
+              nodeId="NRCKtr59U"
+              width="1fr"
+              height="fit-content"
+              borderRadius="0px"
+              overflow="visible"
+              layout="stack"
+              gap="16px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="start"
+          >
+            <SubHeading
+                nodeId="n0fm0FIl_"
+                width="fit-content"
+                height="fit-content"
+                <!-- the component id this instance uses -->
+                componentId="mTLqUheu2"
+                variant="iCQoOVVFA"
+                BMhUprG8u="Why Choose Us"
+             />
+            <Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe
+                nodeId="yRi8rNRC0"
+                width="1fr"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Heading/Heading 2"
+            >
+              We are committed to delivering reliable, high-quality services.
+            </Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe>
+          </TitleWrapper>
+          <PrimaryButton
+              nodeId="OZjsP56dk"
+              width="fit-content"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="Y8FLRZ93g"
+              variant="MkNLMUh9v"
+              ycw27fUKm="Get Free Estimate"
+              hM59WZCdN="/contact"
+           />
+        </TextWrapper>
+        <CardWrapper
+            nodeId="NAnVZm4xR"
+            width="1fr"
+            height="fit-content"
+            maxWidth="628px"
+            overflow="clip"
+            layout="stack"
+            gap="30px"
+            stackDirection="vertical"
+            stackDistribution="center"
+            stackAlignment="center"
+        >
+          <WhyChooseUsCard
+              nodeId="KT5JQUXm9"
+              position="sticky"
+              width="1fr"
+              height="fit-content"
+              top="20px"
+              <!-- the component id this instance uses -->
+              componentId="VRpMivKqS"
+              variant="OVnfbQeuN"
+              HIOZhb8Nl="Experienced Professionals"
+              k1sl8dLnu="Our skilled technicians bring years of hands-on experience to handle every job with precision and care."
+           />
+          <WhyChooseUsCard
+              nodeId="ikNoILixG"
+              position="sticky"
+              width="1fr"
+              height="fit-content"
+              top="20px"
+              <!-- the component id this instance uses -->
+              componentId="VRpMivKqS"
+              variant="OVnfbQeuN"
+              HIOZhb8Nl="Fast & Reliable Service"
+              k1sl8dLnu="We respond quickly and complete work efficiently without compromising on quality and reliability."
+           />
+          <WhyChooseUsCard
+              nodeId="EmL7vXbZo"
+              position="sticky"
+              width="1fr"
+              height="fit-content"
+              top="20px"
+              <!-- the component id this instance uses -->
+              componentId="VRpMivKqS"
+              variant="OVnfbQeuN"
+              HIOZhb8Nl="Affordable Pricing"
+              k1sl8dLnu="Transparent pricing with no hidden costs, ensuring great value for every service."
+           />
+          <WhyChooseUsCard
+              nodeId="T0lZcuZsS"
+              position="sticky"
+              width="1fr"
+              height="fit-content"
+              top="20px"
+              <!-- the component id this instance uses -->
+              componentId="VRpMivKqS"
+              variant="OVnfbQeuN"
+              HIOZhb8Nl="Customer Satisfaction"
+              k1sl8dLnu="Your satisfaction is our priority—we go the extra mile to exceed expectations."
+           />
+        </CardWrapper>
+      </Content>
+    </Container>
+  </WhyChooseUsSection>
+  <WhoWeAreSection
+      nodeId="DX4Y9eoMu"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/White/White"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="60px 30px 60px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="N4PMELskW"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="yNfDl582d"
+          width="1fr"
+          height="fit-content"
+          overflow="clip"
+          layout="stack"
+          gap="70px"
+          stackDirection="horizontal"
+          stackDistribution="start"
+          stackAlignment="start"
+      >
+        <Video
+            nodeId="FxX_qS8fR"
+            width="1fr"
+            height="355px"
+            <!-- the component id this instance uses -->
+            componentId="aBYRhbvV5"
+            variant="aESnEHKt8"
+         />
+        <TextWrapper
+            nodeId="XzDmkN2pL"
+            width="1fr"
+            height="fit-content"
+            maxWidth="628px"
+            overflow="clip"
+            layout="stack"
+            gap="40px"
+            stackDirection="vertical"
+            stackDistribution="center"
+            stackAlignment="start"
+        >
+          <TitleWrapper
+              nodeId="ShFwgiHpi"
+              width="1fr"
+              height="fit-content"
+              borderRadius="0px"
+              overflow="visible"
+              layout="stack"
+              gap="24px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="start"
+          >
+            <SubHeadingTitle
+                nodeId="s8427BT1E"
+                width="1fr"
+                height="fit-content"
+                overflow="clip"
+                layout="stack"
+                gap="16px"
+                stackDirection="vertical"
+                stackDistribution="center"
+                stackAlignment="start"
+            >
+              <SubHeading
+                  nodeId="HCyzj7ru8"
+                  width="fit-content"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="mTLqUheu2"
+                  variant="iCQoOVVFA"
+                  BMhUprG8u="Who we are"
+               />
+              <Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe
+                  nodeId="WLMCIFuqQ"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- project text style path, always starts with / -->
+                  inlineTextStyle="/Heading/Heading 2"
+              >
+                Committed to quality home Repair
+              </Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe>
+            </SubHeadingTitle>
+            <Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe
+                nodeId="jzLXBkQNQ"
+                width="1fr"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Body/Body-20px-Regular"
+            >
+              MasterCare is a professional home service company dedicated to delivering reliable repair and maintenance solutions for modern households. We specialize in plumbing, AC servicing.
+            </Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe>
+          </TitleWrapper>
+          <PrimaryButton
+              nodeId="g20pHY5Wm"
+              width="fit-content"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="Y8FLRZ93g"
+              variant="MkNLMUh9v"
+              ycw27fUKm="Get Free Estimate"
+              hM59WZCdN="/contact"
+           />
+        </TextWrapper>
+      </Content>
+    </Container>
+  </WhoWeAreSection>
+  <ServiceSection
+      nodeId="jW7RT0Ld7"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/White/White"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="60px 30px 60px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Frame
+        nodeId="OBwLPLH1c"
+        position="absolute"
+        width="100%"
+        height="342px"
+        bottom="0px"
+        centerX="50%"
+        <!-- background color string or project color style path (if starts with /) -->
+        backgroundColor="/Theme Color/Very Dark Green"
+        zIndex="1"
+        overflow="clip"
+     />
+    <Container
+        nodeId="ixoNXpDz8"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        zIndex="1"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="QHsrYZqVN"
+          width="1fr"
+          height="fit-content"
+          overflow="visible"
+          layout="stack"
+          gap="50px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <TitleWrapper
+            nodeId="NljX4knOg"
+            width="1fr"
+            height="fit-content"
+            maxWidth="676px"
+            borderRadius="0px"
+            overflow="visible"
+            layout="stack"
+            gap="24px"
+            stackDirection="vertical"
+            stackDistribution="start"
+            stackAlignment="start"
+        >
+          <SubHeadingTitle
+              nodeId="yCWRzfvWt"
+              width="1fr"
+              height="fit-content"
+              overflow="clip"
+              layout="stack"
+              gap="16px"
+              stackDirection="vertical"
+              stackDistribution="center"
+              stackAlignment="center"
+          >
+            <SubHeading
+                nodeId="GY0JtTTag"
+                width="fit-content"
+                height="fit-content"
+                <!-- the component id this instance uses -->
+                componentId="mTLqUheu2"
+                variant="iCQoOVVFA"
+                BMhUprG8u="Services"
+             />
+            <Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe
+                nodeId="eeQrnDn7q"
+                width="1fr"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Heading/Heading 2"
+            >
+              Complete home services under one roof
+            </Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe>
+          </SubHeadingTitle>
+          <Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe
+              nodeId="p6XPfrbsN"
+              width="1fr"
+              height="fit-content"
+              <!-- project text style path, always starts with / -->
+              inlineTextStyle="/Body/Body-20px-Regular"
+          >
+            MasterCare offers a wide range of home maintenance and repair solutions. Our technicians are trained to handle both.
+          </Since2015WeVeBeenDeliveringTrustedHomeRepairAndMaintenanceSe>
+        </TitleWrapper>
+        <Slideshow
+            nodeId="T6n5D7t5O"
+            width="1fr"
+            height="562px"
+            direction="left"
+            autoPlayControl="false"
+            intervalControl="3"
+            dragControl="false"
+            startFrom="0"
+            alignment="center"
+            itemAmount="3"
+            gap="24"
+            borderRadius="0"
+         />
+      </Content>
+    </Container>
+  </ServiceSection>
+  <BenifitSection
+      nodeId="JJLhARTA3"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/Theme Color/Very Dark Green"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="60px 30px 120px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="K5uhtoDZO"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        zIndex="1"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="aPYx_Pzl0"
+          width="1fr"
+          height="fit-content"
+          overflow="visible"
+          layout="stack"
+          gap="100px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <CardWrapper
+            nodeId="PoBQ283bZ"
+            width="1fr"
+            height="fit-content"
+            borderWidth="0px 0px 1px 0px"
+            borderStyle="solid"
+            borderColor="/Theme Color/Dark Green"
+            overflow="clip"
+            layout="stack"
+            gap="82px"
+            padding="0px 0px 30px 0px"
+            stackDirection="horizontal"
+            stackDistribution="center"
+            stackAlignment="center"
+        >
+          <BenefitCard
+              nodeId="G9ILThAJo"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="R5eZk5xeG"
+              TGaWEjsQE="Fast Response"
+              c994nVs6m="Our technicians respond quickly to service requests, helping resolve plumbing issues before they become bigger problems."
+           />
+          <BenefitCard
+              nodeId="UhbY9LtlC"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="R5eZk5xeG"
+              TGaWEjsQE="Experienced Professionals"
+              c994nVs6m="Every technician is trained and experienced in handling residential plumbing repairs and installations."
+           />
+          <BenefitCard
+              nodeId="SytEzIHRg"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="R5eZk5xeG"
+              TGaWEjsQE="Transparent Pricing"
+              c994nVs6m="Clear service estimates are provided before work begins, ensuring customers understand the cost upfront."
+           />
+        </CardWrapper>
+        <TrustContent
+            nodeId="z_9E0yf7B"
+            width="1fr"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="10px"
+            stackDirection="horizontal"
+            stackDistribution="space-between"
+            stackAlignment="start"
+        >
+          <ImageWrapper
+              nodeId="fo49K1hOk"
+              width="562px"
+              height="558px"
+              overflow="visible"
+          >
+            <Image2
+                nodeId="CgrHbgNZp"
+                position="absolute"
+                width="371px"
+                height="388.08935546875px"
+                top="0px"
+                left="0px"
+                borderRadius="20px"
+                <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+                backgroundImage="https://framerusercontent.com/images/kFkPa3oOInNaR1zLQhivCb3dpGY.png"
+             />
+            <Image1
+                nodeId="miQvJ95Wu"
+                position="absolute"
+                width="371px"
+                height="388.08935546875px"
+                top="170.91015625px"
+                left="191px"
+                borderRadius="20px"
+                <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+                backgroundImage="https://framerusercontent.com/images/apAgUZaL12XzPHPl3AFiBWzyEf4.png"
+             />
+          </ImageWrapper>
+          <TextWrapper
+              nodeId="uQ_Akfxed"
+              width="1fr"
+              height="fit-content"
+              maxWidth="629px"
+              borderRadius="0px"
+              overflow="visible"
+              layout="stack"
+              gap="30px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="start"
+          >
+            <TitleWrapper
+                nodeId="tdVAxUGWO"
+                width="1fr"
+                height="fit-content"
+                borderRadius="0px"
+                overflow="visible"
+                layout="stack"
+                gap="40px"
+                stackDirection="vertical"
+                stackDistribution="start"
+                stackAlignment="start"
+            >
+              <Text
+                  nodeId="e755QC8sJ"
+                  width="1fr"
+                  height="fit-content"
+                  borderRadius="0px"
+                  overflow="visible"
+                  layout="stack"
+                  gap="16px"
+                  stackDirection="vertical"
+                  stackDistribution="start"
+                  stackAlignment="start"
+              >
+                <SubHeading
+                    nodeId="r7U07bvpX"
+                    width="fit-content"
+                    height="fit-content"
+                    <!-- the component id this instance uses -->
+                    componentId="mTLqUheu2"
+                    variant="yZpUbauWr"
+                    BMhUprG8u="Why Choose Us"
+                 />
+                <TitleDescription
+                    nodeId="wa8q2iCfG"
+                    width="1fr"
+                    height="fit-content"
+                    borderRadius="0px"
+                    overflow="visible"
+                    layout="stack"
+                    gap="24px"
+                    stackDirection="vertical"
+                    stackDistribution="start"
+                    stackAlignment="start"
+                >
+                  <FastReliablePlumbingSolutionsYouCanTrust
+                      nodeId="B9UAiZmEX"
+                      width="1fr"
+                      height="fit-content"
+                      <!-- project text style path, always starts with / -->
+                      inlineTextStyle="/Heading/Heading 2"
+                  >
+                    MasterCare focuses on delivering reliable.
+                  </FastReliablePlumbingSolutionsYouCanTrust>
+                  <PlumbingAcRepairElectricalWorkAndCompleteHomeMaintenanceByCe
+                      nodeId="t4YsSLh2w"
+                      width="1fr"
+                      height="fit-content"
+                      <!-- project text style path, always starts with / -->
+                      inlineTextStyle="/Body/Body-20px-Medium"
+                  >
+                    MasterCare is a professional home service company dedicated to delivering reliable repair and maintenance solutions for modern households. We specialize in plumbing.
+                  </PlumbingAcRepairElectricalWorkAndCompleteHomeMaintenanceByCe>
+                </TitleDescription>
+              </Text>
+              <PrimaryButton
+                  nodeId="U9KuN3bZS"
+                  width="fit-content"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="Y8FLRZ93g"
+                  variant="MkNLMUh9v"
+                  ycw27fUKm="Get Free Estimate"
+                  hM59WZCdN="/contact"
+               />
+            </TitleWrapper>
+            <Cards
+                nodeId="sYUpRPTsS"
+                width="fit-content"
+                height="fit-content"
+                borderRadius="0px"
+                overflow="visible"
+                layout="stack"
+                gap="30px"
+                stackDirection="horizontal"
+                stackDistribution="start"
+                stackAlignment="center"
+            >
+              <Feature
+                  nodeId="pJZk0aF1W"
+                  width="fit-content"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="ej9HrmT7x"
+                  variant="SGB0G91oP"
+                  axmCaN6Sl="Certified and trained technicians"
+               />
+              <Feature
+                  nodeId="zsGk9L_7U"
+                  width="fit-content"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="ej9HrmT7x"
+                  variant="SGB0G91oP"
+                  axmCaN6Sl="Quality tools and professional"
+               />
+            </Cards>
+            <CertifiedTechnician
+                nodeId="Wzv9FAb3N"
+                width="1fr"
+                height="fit-content"
+                <!-- background color string or project color style path (if starts with /) -->
+                backgroundColor="/Theme Color/Dark Green"
+                borderRadius="16px"
+                overflow="visible"
+                layout="stack"
+                gap="154px"
+                padding="20px"
+                stackDirection="horizontal"
+                stackDistribution="space-between"
+                stackAlignment="center"
+            >
+              <TextWrapper
+                  nodeId="CsKWszc9p"
+                  width="1fr"
+                  height="fit-content"
+                  maxWidth="399px"
+                  borderRadius="0px"
+                  overflow="visible"
+                  layout="stack"
+                  gap="12px"
+                  stackDirection="vertical"
+                  stackDistribution="center"
+                  stackAlignment="center"
+              >
+                <CertifiedTechnicians
+                    nodeId="KRwp79XJk"
+                    width="1fr"
+                    height="fit-content"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Body/Body-20px-Medium"
+                >
+                  Certified Technicians
+                </CertifiedTechnicians>
+                <Description
+                    nodeId="fcDOBgYwS"
+                    width="1fr"
+                    height="fit-content"
+                    borderRadius="0px"
+                    overflow="visible"
+                    layout="stack"
+                    gap="8px"
+                    stackDirection="vertical"
+                    stackDistribution="start"
+                    stackAlignment="start"
+                >
+                  <AllTechniciansAreTrainedAndExperiencedInPlumbingAcRepairElec
+                      nodeId="QB0bpQzWG"
+                      width="1fr"
+                      height="fit-content"
+                      <!-- project text style path, always starts with / -->
+                      inlineTextStyle="/Body/Body-18px-Medium"
+                      overflow="clip"
+                      textTruncation="1"
+                  >
+                    All technicians are trained and experienced in plumbing, AC repair, electrical work.
+                  </AllTechniciansAreTrainedAndExperiencedInPlumbingAcRepairElec>
+                </Description>
+              </TextWrapper>
+              <Line
+                  nodeId="F8xfax04r"
+                  width="3px"
+                  height="73px"
+                  svg="<svg width="3" height="73" viewBox="-1 -1 3 73" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M0.5 0V70.5" stroke="white" stroke-opacity="0.1"/>
+</svg>
+"
+               />
+              <Image
+                  nodeId="XSl8pAXPy"
+                  width="103px"
+                  height="52px"
+                  <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+                  backgroundImage="https://framerusercontent.com/images/uIF66BAth7lPwaXWtR68YYVCGw.png"
+                  overflow="clip"
+                  gap="10px"
+               />
+            </CertifiedTechnician>
+          </TextWrapper>
+        </TrustContent>
+      </Content>
+    </Container>
+  </BenifitSection>
+  <TestimonialSection
+      nodeId="DyoOEUBtx"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/White/White"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="120px 30px 60px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="jXN9Yoz2K"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        zIndex="1"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="kHDCMEp43"
+          width="1fr"
+          height="fit-content"
+          overflow="visible"
+          layout="stack"
+          gap="50px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <TitleWrapper
+            nodeId="DBNpMZgmO"
+            width="1fr"
+            height="fit-content"
+            maxWidth="412px"
+            borderRadius="0px"
+            overflow="visible"
+            layout="stack"
+            gap="16px"
+            stackDirection="vertical"
+            stackDistribution="start"
+            stackAlignment="center"
+        >
+          <SubHeading
+              nodeId="sAnndYF2i"
+              width="fit-content"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="mTLqUheu2"
+              variant="iCQoOVVFA"
+              BMhUprG8u="Testimonial "
+           />
+          <TitleDescription
+              nodeId="FyVy8hXuO"
+              width="1fr"
+              height="fit-content"
+              borderRadius="0px"
+              overflow="visible"
+              layout="stack"
+              gap="24px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="center"
+          >
+            <FastReliablePlumbingSolutionsYouCanTrust
+                nodeId="JKNpvDCgw"
+                width="1fr"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Heading/Heading 2"
+            >
+              What out customer say
+            </FastReliablePlumbingSolutionsYouCanTrust>
+          </TitleDescription>
+        </TitleWrapper>
+        <Testimonial
+            nodeId="Q6xwoV63K"
+            width="1fr"
+            height="fit-content"
+            <!-- background color string or project color style path (if starts with /) -->
+            backgroundColor="/Theme Color/Light Lime Green"
+            borderRadius="20px"
+            overflow="visible"
+            layout="stack"
+            gap="34px"
+            padding="30px 20px 30px 20px"
+            stackDirection="horizontal"
+            stackDistribution="start"
+            stackAlignment="center"
+        >
+          <Video
+              nodeId="lHejiJYUd"
+              width="628px"
+              height="440px"
+              <!-- the component id this instance uses -->
+              componentId="aBYRhbvV5"
+              variant="aESnEHKt8"
+           />
+          <TextWrapper
+              nodeId="qnGJh9z1A"
+              width="1fr"
+              height="fit-content"
+              borderRadius="0px"
+              overflow="visible"
+              layout="stack"
+              gap="57px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="start"
+          >
+            <TextWrapper
+                nodeId="VMaGOVkAj"
+                width="1fr"
+                height="fit-content"
+                borderRadius="0px"
+                overflow="visible"
+                layout="stack"
+                gap="40px"
+                stackDirection="vertical"
+                stackDistribution="start"
+                stackAlignment="start"
+            >
+              <Logo
+                  nodeId="CivwN1w3H"
+                  width="167px"
+                  height="fit-image"
+                  <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+                  backgroundImage="https://framerusercontent.com/images/w6ur7mCbecnxjPpJRUSb4lTPpY.svg"
+                  overflow="clip"
+                  gap="10px"
+               />
+              <FeedbackWrapper
+                  nodeId="fk0LwdiQo"
+                  width="1fr"
+                  height="fit-content"
+                  borderRadius="0px"
+                  overflow="visible"
+                  layout="stack"
+                  gap="24px"
+                  stackDirection="vertical"
+                  stackDistribution="start"
+                  stackAlignment="start"
+              >
+                <MasterCareSolvedMyPlumbingProblemQuicklyAndProfessionallyThe
+                    nodeId="idvAWNf5y"
+                    width="1fr"
+                    height="fit-content"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Heading/Heading 3"
+                >
+                  “MasterCare solved my plumbing problem quickly and professionally. The technician arrived on time and completed the repair efficiently.”
+                </MasterCareSolvedMyPlumbingProblemQuicklyAndProfessionallyThe>
+                <NameDesignation
+                    nodeId="AiZcRL6TW"
+                    width="fit-content"
+                    height="fit-content"
+                    borderRadius="0px"
+                    overflow="visible"
+                    layout="stack"
+                    gap="10px"
+                    stackDirection="horizontal"
+                    stackDistribution="start"
+                    stackAlignment="center"
+                >
+                  <JamesWalker
+                      nodeId="toNeY5V4Z"
+                      width="fit-content"
+                      height="fit-content"
+                      <!-- project text style path, always starts with / -->
+                      inlineTextStyle="/Body/Body-16px-Medium"
+                  >
+                    James Walker
+                  </JamesWalker>
+                  <MapleHouse
+                      nodeId="bGdKznDF7"
+                      width="fit-content"
+                      height="fit-content"
+                      <!-- project text style path, always starts with / -->
+                      inlineTextStyle="/Body/Body-16px-Medium"
+                  >
+                    Maple House
+                  </MapleHouse>
+                </NameDesignation>
+              </FeedbackWrapper>
+            </TextWrapper>
+            <Count
+                nodeId="OKENxBfKg"
+                width="1fr"
+                height="fit-content"
+                borderRadius="0px"
+                overflow="visible"
+                layout="stack"
+                gap="8px"
+                stackDirection="vertical"
+                stackDistribution="start"
+                stackAlignment="start"
+            >
+              <100
+                  nodeId="c8S8GT2Og"
+                  width="fit-content"
+                  height="fit-content"
+                  <!-- project text style path, always starts with / -->
+                  inlineTextStyle="/Heading/Heading 2"
+              >
+                100+
+              </100>
+              <ProblemResolved
+                  nodeId="YqvywFZTg"
+                  width="fit-content"
+                  height="fit-content"
+                  <!-- project text style path, always starts with / -->
+                  inlineTextStyle="/Body/Body-20px-Medium"
+              >
+                Problem Resolved
+              </ProblemResolved>
+            </Count>
+          </TextWrapper>
+        </Testimonial>
+        <CardWrapper
+            nodeId="sBoc9GPys"
+            width="1fr"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="24px"
+            stackDirection="horizontal"
+            stackDistribution="center"
+            stackAlignment="center"
+        >
+          <TestimonialCard
+              nodeId="THUFUmhxn"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="z9MDod84V"
+              x6JDLHDil="“MasterCare provided outstanding service when my AC stopped working. The technician was knowledgeable and fixed the issue in no time.”"
+              MQT5tICdo="Alex Ferguson"
+              kfpx1_aQC="Homeowner"
+           />
+          <TestimonialCard
+              nodeId="g2V2SbZxB"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="z9MDod84V"
+              x6JDLHDil="“I had an urgent electrical issue, and MasterCare handled it perfectly. Fast response, clear pricing, and very professional service throughout.”"
+              MQT5tICdo="Glenn Philips"
+              kfpx1_aQC="Office Manager"
+           />
+        </CardWrapper>
+      </Content>
+    </Container>
+  </TestimonialSection>
+  <TeamSection
+      nodeId="NQl4TWkfE"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/White/White"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="60px 30px 60px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="xg9yJjoVT"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        zIndex="1"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="sWM9vQcg9"
+          width="1fr"
+          height="fit-content"
+          overflow="visible"
+          layout="stack"
+          gap="50px"
+          stackDirection="vertical"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <TitleWrapper
+            nodeId="kC28KVVFy"
+            width="1fr"
+            height="fit-content"
+            maxWidth="629px"
+            borderRadius="0px"
+            overflow="visible"
+            layout="stack"
+            gap="16px"
+            stackDirection="vertical"
+            stackDistribution="start"
+            stackAlignment="center"
+        >
+          <SubHeading
+              nodeId="J4lx9z7R3"
+              width="fit-content"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="mTLqUheu2"
+              variant="iCQoOVVFA"
+              BMhUprG8u="Our team"
+           />
+          <TitleDescription
+              nodeId="qIBHmYf7j"
+              width="1fr"
+              height="fit-content"
+              borderRadius="0px"
+              overflow="visible"
+              layout="stack"
+              gap="24px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="center"
+          >
+            <FastReliablePlumbingSolutionsYouCanTrust
+                nodeId="DSLTS0In4"
+                width="1fr"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Heading/Heading 2"
+            >
+              Meet the experts behind our services
+            </FastReliablePlumbingSolutionsYouCanTrust>
+          </TitleDescription>
+        </TitleWrapper>
+        <CardWrapper
+            nodeId="NQuGU6D01"
+            width="1fr"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="24px"
+            stackDirection="horizontal"
+            stackDistribution="center"
+            stackAlignment="center"
+        >
+          <TeamCard
+              nodeId="aKG0ie2st"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="ffdCaZUs3"
+              dZSqVvHxu="Michael Carter"
+              qaxpo1Jsv="Senior Plumbing Specialist"
+              IWW77smyh="x.com"
+           />
+          <TeamCard
+              nodeId="Ptyy2Xdjs"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="ffdCaZUs3"
+              dZSqVvHxu="Daniel Foster"
+              qaxpo1Jsv="Electrical Technician"
+              IWW77smyh="x.com"
+           />
+          <TeamCard
+              nodeId="QBtiKHNWu"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="ffdCaZUs3"
+              dZSqVvHxu="James Walker"
+              qaxpo1Jsv="HVAC & AC Expert"
+              IWW77smyh="x.com"
+           />
+          <TeamCard
+              nodeId="Q2Oz4O13t"
+              width="1fr"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="ffdCaZUs3"
+              dZSqVvHxu="Ethan Brooks"
+              qaxpo1Jsv="Service Coordinator"
+              IWW77smyh="x.com"
+           />
+        </CardWrapper>
+      </Content>
+    </Container>
+  </TeamSection>
+  <PartnerSection
+      nodeId="uPgWLaOcN"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/White/White"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="60px 30px 60px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="sbsKDecdX"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        zIndex="1"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="ltARAv29e"
+          width="1fr"
+          height="fit-content"
+          overflow="visible"
+          layout="stack"
+          gap="50px"
+          stackDirection="horizontal"
+          stackDistribution="start"
+          stackAlignment="center"
+      >
+        <Image
+            nodeId="Lm4svlKWD"
+            width="589px"
+            height="1fr"
+            borderRadius="16px"
+            <!-- background image URL, if you pass a new image url, the image will be uploaded to Framer -->
+            backgroundImage="https://framerusercontent.com/images/AwuBDRDkUhUncUg2uQ9lNb7s9F0.png"
+            overflow="clip"
+         />
+        <TitleWrapper
+            nodeId="bqfhuKles"
+            width="1fr"
+            height="fit-content"
+            maxWidth="629px"
+            borderRadius="0px"
+            overflow="visible"
+            layout="stack"
+            gap="32px"
+            stackDirection="vertical"
+            stackDistribution="start"
+            stackAlignment="start"
+        >
+          <TitleContent
+              nodeId="hXBnEPN9m"
+              width="1fr"
+              height="fit-content"
+              overflow="clip"
+              layout="stack"
+              gap="24px"
+              stackDirection="vertical"
+              stackDistribution="center"
+              stackAlignment="center"
+          >
+            <TitleDescription
+                nodeId="NIhneHFi0"
+                width="1fr"
+                height="fit-content"
+                borderRadius="0px"
+                overflow="visible"
+                layout="stack"
+                gap="20px"
+                stackDirection="vertical"
+                stackDistribution="start"
+                stackAlignment="start"
+            >
+              <TitleSubHeading
+                  nodeId="oK4wuZ8r4"
+                  width="1fr"
+                  height="fit-content"
+                  overflow="clip"
+                  layout="stack"
+                  gap="16px"
+                  stackDirection="vertical"
+                  stackDistribution="center"
+                  stackAlignment="start"
+              >
+                <SubHeading
+                    nodeId="LYQcbmQGb"
+                    width="fit-content"
+                    height="fit-content"
+                    <!-- the component id this instance uses -->
+                    componentId="mTLqUheu2"
+                    variant="iCQoOVVFA"
+                    BMhUprG8u="Become a Partner"
+                 />
+                <FastReliablePlumbingSolutionsYouCanTrust
+                    nodeId="sqY5Icl32"
+                    width="1fr"
+                    height="fit-content"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Heading/Heading 2"
+                >
+                  MasterCare focuses on delivering reliable.
+                </FastReliablePlumbingSolutionsYouCanTrust>
+              </TitleSubHeading>
+              <FastReliablePlumbingSolutionsYouCanTrust
+                  nodeId="WLozSBZv6"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- project text style path, always starts with / -->
+                  inlineTextStyle="/Body/Body-20px-Regular"
+              >
+                Join MasterCare and grow your professional service business with a trusted home services network. We partner with skilled technicians and service providers who want consistent work opportunities and reliable support.
+              </FastReliablePlumbingSolutionsYouCanTrust>
+            </TitleDescription>
+            <ButtonWrapper
+                nodeId="vIEPbheQg"
+                width="1fr"
+                height="fit-content"
+                overflow="clip"
+                layout="stack"
+                gap="24px"
+                stackDirection="vertical"
+                stackDistribution="center"
+                stackAlignment="start"
+            >
+              <Cards
+                  nodeId="Nx9W_kRjR"
+                  width="fit-content"
+                  height="fit-content"
+                  borderRadius="0px"
+                  overflow="visible"
+                  layout="stack"
+                  gap="30px"
+                  stackDirection="horizontal"
+                  stackDistribution="start"
+                  stackAlignment="center"
+              >
+                <Feature
+                    nodeId="HXo0jRiq0"
+                    width="fit-content"
+                    height="fit-content"
+                    <!-- the component id this instance uses -->
+                    componentId="ej9HrmT7x"
+                    variant="kUZ0Kso9h"
+                    axmCaN6Sl="Flexible Work Schedule"
+                 />
+                <Feature
+                    nodeId="dmWdnlHTf"
+                    width="fit-content"
+                    height="fit-content"
+                    <!-- the component id this instance uses -->
+                    componentId="ej9HrmT7x"
+                    variant="kUZ0Kso9h"
+                    axmCaN6Sl="Grow Your Business"
+                 />
+              </Cards>
+              <PrimaryButton
+                  nodeId="SuUSnCs2R"
+                  width="fit-content"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="Y8FLRZ93g"
+                  variant="MkNLMUh9v"
+                  ycw27fUKm="Get Free Estimate"
+                  hM59WZCdN="/contact"
+               />
+            </ButtonWrapper>
+          </TitleContent>
+          <ContactInfo
+              nodeId="N5URcv5ub"
+              width="1fr"
+              height="fit-content"
+              borderRadius="0px"
+              overflow="visible"
+              layout="stack"
+              gap="24px"
+              stackDirection="vertical"
+              stackDistribution="start"
+              stackAlignment="start"
+          >
+            <ApplyToBecomeAPartner
+                nodeId="XbQ6F6UnR"
+                width="1fr"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Body/Body-20px-Medium"
+            >
+              Apply to Become a Partner
+            </ApplyToBecomeAPartner>
+            <PhoneEmail
+                nodeId="AgFkpgY2l"
+                width="1fr"
+                height="fit-content"
+                borderRadius="0px"
+                overflow="visible"
+                layout="stack"
+                gap="20px"
+                stackDirection="vertical"
+                stackDistribution="start"
+                stackAlignment="start"
+            >
+              <Phone
+                  nodeId="pnG_6A7tn"
+                  width="fit-content"
+                  height="fit-content"
+                  borderRadius="0px"
+                  overflow="visible"
+                  layout="stack"
+                  gap="10px"
+                  stackDirection="horizontal"
+                  stackDistribution="start"
+                  stackAlignment="center"
+              >
+                <Phone
+                    nodeId="MSwYHl6jW"
+                    width="32px"
+                    height="32px"
+                    svg="<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.1737 11.8045C12.1017 13.7373 13.3668 15.5488 14.9689 17.1509C16.571 18.753 18.3825 20.0181 20.3153 20.9461C20.4816 21.0259 20.5647 21.0658 20.6699 21.0965C21.0437 21.2054 21.5027 21.1272 21.8193 20.9005C21.9083 20.8367 21.9846 20.7605 22.137 20.6081C22.6031 20.1419 22.8362 19.9089 23.0706 19.7565C23.9544 19.1818 25.0939 19.1818 25.9777 19.7565C26.2121 19.9089 26.4451 20.1419 26.9113 20.6081L27.1711 20.8679C27.8797 21.5765 28.234 21.9308 28.4265 22.3113C28.8092 23.068 28.8092 23.9617 28.4265 24.7185C28.234 25.099 27.8797 25.4533 27.1711 26.1619L26.9609 26.372C26.2548 27.0782 25.9017 27.4313 25.4216 27.701C24.889 28.0002 24.0616 28.2153 23.4507 28.2135C22.9001 28.2119 22.5238 28.1051 21.7712 27.8915C17.7267 26.7435 13.9102 24.5775 10.7262 21.3936C7.54224 18.2096 5.37627 14.3931 4.22831 10.3486C4.0147 9.59598 3.9079 9.21969 3.90626 8.66909C3.90444 8.05813 4.11959 7.23081 4.41882 6.69813C4.68848 6.21809 5.04157 5.86501 5.74773 5.15884L5.95791 4.94866C6.6665 4.24007 7.02079 3.88578 7.4013 3.69332C8.15805 3.31056 9.05174 3.31056 9.80849 3.69332C10.189 3.88578 10.5433 4.24007 11.2519 4.94866L11.5117 5.20849C11.9778 5.67463 12.2109 5.9077 12.3633 6.14207C12.938 7.02593 12.938 8.16537 12.3633 9.04922C12.2109 9.28359 11.9778 9.51666 11.5117 9.9828C11.3593 10.1352 11.2831 10.2114 11.2193 10.3005C10.9926 10.6171 10.9143 11.0761 11.0233 11.4499C11.054 11.5551 11.0939 11.6382 11.1737 11.8045Z" fill="#1A3127"/>
+</svg>
+"
+                 />
+                <442079460857
+                    nodeId="xNem6U0Sw"
+                    width="fit-content"
+                    height="fit-content"
+                    link="tel:+44 20 7946 0857"
+                    linkOpenInNewTab="true"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Heading/Heading 3"
+                >
+                  +44 20 7946 0857
+                </442079460857>
+              </Phone>
+              <Email
+                  nodeId="EmXOOktae"
+                  width="1fr"
+                  height="fit-content"
+                  borderRadius="0px"
+                  overflow="visible"
+                  layout="stack"
+                  gap="10px"
+                  stackDirection="horizontal"
+                  stackDistribution="start"
+                  stackAlignment="center"
+              >
+                <Send03
+                    nodeId="Pl3RsW2El"
+                    width="32px"
+                    height="32px"
+                    svg="<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.4325 6.30542C3.19053 5.57641 3.06955 5.21191 3.15761 4.98738C3.23409 4.79239 3.39775 4.64468 3.59954 4.58853C3.83189 4.52388 4.18212 4.68148 4.88258 4.99669L27.1723 15.027C27.8581 15.3356 28.201 15.4899 28.3069 15.7042C28.399 15.8905 28.399 16.109 28.3069 16.2952C28.201 16.5095 27.8581 16.6638 27.1723 16.9724L4.89035 26.9993C4.18777 27.3155 3.83648 27.4736 3.6039 27.4086C3.40192 27.3523 3.23824 27.2042 3.16203 27.0088C3.07427 26.7839 3.19656 26.4186 3.44113 25.688L6.55436 16.3884C6.59624 16.2633 14.0373 16.1367 14.0456 16.0727C14.0531 16.0159 14.0456 15.9656 6.62577 15.9656C6.61757 15.9016 6.59679 15.839 6.55523 15.7138L3.4325 6.30542Z" fill="#1A3127"/>
+</svg>
+"
+                 />
+                <PartnersMastercareCom
+                    nodeId="rzsEDAll1"
+                    width="fit-content"
+                    height="fit-content"
+                    link="mailto:partners@mastercare.com"
+                    linkOpenInNewTab="true"
+                    <!-- project text style path, always starts with / -->
+                    inlineTextStyle="/Heading/Heading 3"
+                >
+                  partners@mastercare.com
+                </PartnersMastercareCom>
+              </Email>
+            </PhoneEmail>
+          </ContactInfo>
+        </TitleWrapper>
+      </Content>
+    </Container>
+  </PartnerSection>
+  <FaqSection
+      nodeId="ekBLlXDB7"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/White/White"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="60px 30px 120px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="Tr9J7DQ0a"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        zIndex="1"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="RXEXnUhrh"
+          width="1fr"
+          height="fit-content"
+          overflow="visible"
+          layout="stack"
+          gap="50px"
+          stackDirection="vertical"
+          stackDistribution="center"
+          stackAlignment="center"
+      >
+        <TextWrapper
+            nodeId="nItXArudK"
+            width="1fr"
+            height="fit-content"
+            maxWidth="629px"
+            borderRadius="0px"
+            overflow="visible"
+            layout="stack"
+            gap="24px"
+            stackDirection="vertical"
+            stackDistribution="start"
+            stackAlignment="center"
+        >
+          <TitleWrapper
+              nodeId="n_4xOLSsu"
+              width="1fr"
+              height="fit-content"
+              overflow="clip"
+              layout="stack"
+              gap="16px"
+              stackDirection="vertical"
+              stackDistribution="center"
+              stackAlignment="center"
+          >
+            <FrequentlyAskedQuestions
+                nodeId="GvAkkLonn"
+                width="1fr"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Heading/Heading 2"
+            >
+              Frequently asked questions
+            </FrequentlyAskedQuestions>
+            <NeedMoreInformationContactUsBelow
+                nodeId="rB_kh6FKG"
+                width="1fr"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Body/Body-20px-Regular"
+            >
+              Need More Information? Contact Us Below
+            </NeedMoreInformationContactUsBelow>
+          </TitleWrapper>
+          <PrimaryButton
+              nodeId="kJT_rbtPd"
+              width="fit-content"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="Y8FLRZ93g"
+              variant="MkNLMUh9v"
+              ycw27fUKm="Contact us"
+              hM59WZCdN="/contact"
+           />
+        </TextWrapper>
+        <Faq
+            nodeId="ld0RVd_Dg"
+            width="1fr"
+            height="fit-content"
+            maxWidth="846px"
+            <!-- the component id this instance uses -->
+            componentId="BnLA5lZhZ"
+            variant="z2DI2puTu"
+         />
+      </Content>
+    </Container>
+  </FaqSection>
+  <BlogSection
+      nodeId="RJNLJeM4i"
+      width="1fr"
+      height="fit-content"
+      <!-- background color string or project color style path (if starts with /) -->
+      backgroundColor="/Theme Color/Very Dark Green"
+      overflow="clip"
+      layout="stack"
+      gap="10px"
+      padding="120px 30px 120px 30px"
+      stackDirection="vertical"
+      stackDistribution="center"
+      stackAlignment="center"
+  >
+    <Container
+        nodeId="lImSayzGU"
+        width="1fr"
+        height="fit-content"
+        maxWidth="1280px"
+        zIndex="1"
+        overflow="visible"
+        layout="stack"
+        gap="10px"
+        stackDirection="vertical"
+        stackDistribution="center"
+        stackAlignment="center"
+    >
+      <Content
+          nodeId="O8pmhuR0H"
+          width="1fr"
+          height="fit-content"
+          overflow="visible"
+          layout="stack"
+          gap="50px"
+          stackDirection="vertical"
+          stackDistribution="center"
+          stackAlignment="center"
+      >
+        <TextWrapper
+            nodeId="vYHV8O9sr"
+            width="1fr"
+            height="fit-content"
+            borderRadius="0px"
+            overflow="visible"
+            layout="stack"
+            gap="24px"
+            stackDirection="horizontal"
+            stackDistribution="start"
+            stackAlignment="end"
+        >
+          <TitleWrapper
+              nodeId="torCeE7wJ"
+              width="1fr"
+              height="fit-content"
+              overflow="clip"
+              layout="stack"
+              gap="16px"
+              stackDirection="vertical"
+              stackDistribution="center"
+              stackAlignment="start"
+          >
+            <SubHeading
+                nodeId="DcjABhU55"
+                width="fit-content"
+                height="fit-content"
+                <!-- the component id this instance uses -->
+                componentId="mTLqUheu2"
+                variant="yZpUbauWr"
+                BMhUprG8u="Blogs"
+             />
+            <FrequentlyAskedQuestions
+                nodeId="x3MNkyZnp"
+                width="1fr"
+                height="fit-content"
+                <!-- project text style path, always starts with / -->
+                inlineTextStyle="/Heading/Heading 2"
+            >
+              Read articles
+            </FrequentlyAskedQuestions>
+          </TitleWrapper>
+          <PrimaryButton
+              nodeId="hjrlkUfDn"
+              width="fit-content"
+              height="fit-content"
+              <!-- the component id this instance uses -->
+              componentId="Y8FLRZ93g"
+              variant="Az86pEv5n"
+              ycw27fUKm="All Blogs"
+              hM59WZCdN="/blogs"
+           />
+        </TextWrapper>
+        <CardWrapper
+            nodeId="dR7Gosxk9"
+            width="1fr"
+            height="fit-content"
+            overflow="clip"
+            layout="stack"
+            gap="24px"
+            stackDirection="horizontal"
+            stackDistribution="center"
+            stackAlignment="center"
+        >
+          <BlogDetails
+              nodeId="bB24QULpd"
+              width="1fr"
+              height="fit-content"
+              layout="stack"
+              gap="20px"
+              stackDirection="horizontal"
+              stackDistribution="center"
+              stackAlignment="start"
+          >
+            <BlogDetail
+                nodeId="Q1onpSMSm"
+                width="1fr"
+                height="fit-content"
+                link="/blogs/:slug"
+                layout="stack"
+                gap="10px"
+                stackDirection="horizontal"
+                stackDistribution="start"
+                stackAlignment="center"
+            >
+              <BlogCard
+                  nodeId="u2ezKaqSD"
+                  width="1fr"
+                  height="fit-content"
+                  <!-- the component id this instance uses -->
+                  componentId="y4G0d30ot"
+                  variant="zC0wcZo4w"
+                  agEaqFua3="Mar 25, 2026"
+                  sjKpyanrS="2:30 PM"
+                  GZk7DkTxS="How regular AC maintenance can save energy."
+               />
+            </BlogDetail>
+          </BlogDetails>
+        </CardWrapper>
+      </Content>
+    </Container>
+  </BlogSection>
+</Desktop>
+<!-- This is a non-primary variant. To see children inside, call getNodeXml again on this nodeId. -->
+<Tablet
+    nodeId="Px0QA3Mz8"
+    position="absolute"
+    width="810px"
+    height="fit-content"
+    top="0px"
+    left="1540px"
+    <!-- background color string or project color style path (if starts with /) -->
+    backgroundColor="white"
+    overflow="clip"
+    layout="stack"
+    stackDirection="vertical"
+    stackDistribution="start"
+    stackAlignment="center"
+ />
+<!-- This is a non-primary variant. To see children inside, call getNodeXml again on this nodeId. -->
+<Phone
+    nodeId="QoxZ85cXX"
+    position="absolute"
+    width="390px"
+    height="fit-content"
+    top="0px"
+    left="2450px"
+    <!-- background color string or project color style path (if starts with /) -->
+    backgroundColor="white"
+    overflow="clip"
+    layout="stack"
+    stackDirection="vertical"
+    stackDistribution="start"
+    stackAlignment="center"
+ />
+<ServiceDetails
+    nodeId="mAX1l0UHD"
+    position="absolute"
+    width="fit-content"
+    height="fit-content"
+    top="3808px"
+    left="-2924px"
+    layout="stack"
+    gap="20px"
+    stackDirection="vertical"
+    stackDistribution="center"
+    stackAlignment="start"
+>
+  <!-- Call getNodeXml on this node to get more details, character limit was reached -->
+</ServiceDetails>
+<ServiceDetails
+    nodeId="kbFj_UU0N"
+    position="absolute"
+    width="350px"
+    height="fit-content"
+    top="5030px"
+    left="-2382px"
+    layout="stack"
+    gap="20px"
+    stackDirection="vertical"
+    stackDistribution="center"
+    stackAlignment="start"
+>
+  <!-- Call getNodeXml on this node to get more details, character limit was reached -->
+</ServiceDetails>
+<ServiceDetails
+    nodeId="l5JB1DqZT"
+    position="absolute"
+    width="fit-content"
+    height="fit-content"
+    top="3808px"
+    left="-2413px"
+    layout="stack"
+    gap="20px"
+    stackDirection="vertical"
+    stackDistribution="center"
+    stackAlignment="start"
+>
+  <!-- Call getNodeXml on this node to get more details, character limit was reached -->
+</ServiceDetails>
+<ServiceDetails
+    nodeId="MZ1qQee3U"
+    position="absolute"
+    width="350px"
+    height="fit-content"
+    top="5030px"
+    left="-2005px"
+    layout="stack"
+    gap="20px"
+    stackDirection="vertical"
+    stackDistribution="center"
+    stackAlignment="start"
+>
+  <!-- Call getNodeXml on this node to get more details, character limit was reached -->
+</ServiceDetails>
+<ServiceDetails
+    nodeId="MB02JTOcb"
+    position="absolute"
+    width="fit-content"
+    height="fit-content"
+    top="3808px"
+    left="-1902px"
+    layout="stack"
+    gap="20px"
+    stackDirection="vertical"
+    stackDistribution="center"
+    stackAlignment="start"
+>
+  <!-- Call getNodeXml on this node to get more details, character limit was reached -->
+</ServiceDetails>
+<ServiceDetails
+    nodeId="vhfG16iho"
+    position="absolute"
+    width="350px"
+    height="fit-content"
+    top="5030px"
+    left="-1630px"
+    layout="stack"
+    gap="20px"
+    stackDirection="vertical"
+    stackDistribution="center"
+    stackAlignment="start"
+>
+  <!-- Call getNodeXml on this node to get more details, character limit was reached -->
+</ServiceDetails>
+<ServiceDetails
+    nodeId="dvyTSTKSx"
+    position="absolute"
+    width="fit-content"
+    height="fit-content"
+    top="3808px"
+    left="-1391px"
+    layout="stack"
+    gap="20px"
+    stackDirection="vertical"
+    stackDistribution="center"
+    stackAlignment="start"
+>
+  <!-- Call getNodeXml on this node to get more details, character limit was reached -->
+</ServiceDetails>
+<ServiceDetails
+    nodeId="y4xAlKc3h"
+    position="absolute"
+    width="350px"
+    height="fit-content"
+    top="5030px"
+    left="-1255px"
+    layout="stack"
+    gap="20px"
+    stackDirection="vertical"
+    stackDistribution="center"
+    stackAlignment="start"
+>
+  <!-- Call getNodeXml on this node to get more details, character limit was reached -->
+</ServiceDetails>
+<ServiceDetails
+    nodeId="utJ9bdghs"
+    position="absolute"
+    width="fit-content"
+    height="fit-content"
+    top="3808px"
+    left="-880px"
+    layout="stack"
+    gap="20px"
+    stackDirection="vertical"
+    stackDistribution="center"
+    stackAlignment="start"
+>
+  <!-- Call getNodeXml on this node to get more details, character limit was reached -->
+</ServiceDetails>
+<ServiceDetails
+    nodeId="COH2Sa4AI"
+    position="absolute"
+    width="350px"
+    height="fit-content"
+    top="5030px"
+    left="-880px"
+    layout="stack"
+    gap="20px"
+    stackDirection="vertical"
+    stackDistribution="center"
+    stackAlignment="start"
+>
+  <!-- Call getNodeXml on this node to get more details, character limit was reached -->
+</ServiceDetails>

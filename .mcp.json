@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "novamira-rundmund-local": {
+      "command": "npx",
+      "args": ["-y", "@automattic/mcp-wordpress-remote@latest"],
+      "env": {
+        "WP_API_URL": "http://rundmund.local/wp-json/mcp/novamira",
+        "WP_API_USERNAME": "Adrian",
+        "WP_API_PASSWORD": "NDQJvceHMdvSmFPehLN4drEo"
+      }
+    },
+    "framer": {
+      "type": "http",
+      "url": "https://mcp.unframer.co/mcp?id=e9715ce69cba1208a49d3b86a74b7e876c44f1f002e9ac175befe075c37e4f2b&secret=zk0cxPk87OMhk0xQI6jcoyHOaHzwuxvV"
+    }
+  }
+}

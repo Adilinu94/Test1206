@@ -1,0 +1,29 @@
+<Node
+  id="feature-card-root"
+  name="Feature Card"
+  widgetType="e-flexbox"
+  stackDirection="vertical"
+  gap="16"
+  padding="24"
+  borderRadius="12"
+>
+  <Node
+    id="card-icon"
+    name="Icon"
+    widgetType="e-image"
+    width="48"
+    height="48"
+  />
+  <Node
+    id="card-title"
+    name="Card Title"
+    widgetType="e-heading"
+    inlineTextStyle="/Headings/24"
+  >Feature Title</Node>
+  <Node
+    id="card-body"
+    name="Card Body"
+    widgetType="e-paragraph"
+    inlineTextStyle="/Body/16"
+  >Feature description text goes here.</Node>
+</Node>

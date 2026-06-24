@@ -1,0 +1,88 @@
+{
+  "source": "test4.nick-webdesign.de",
+  "post_id": 1953,
+  "post_title": "E2E Test — Framer Hero (Wellness)",
+  "extracted_via": "novamira/elementor-get-content element_id=s-hero",
+  "extracted_at": "2026-06-15",
+  "element_type": "e-flexbox (Hero: 1 e-flexbox + 1 e-div-block + heading + paragraph + 1 e-flexbox + button)",
+  "element": {
+    "id": "s-hero",
+    "elType": "e-flexbox",
+    "settings": {
+      "classes": { "$$type": "classes", "value": ["e-s-hero-local"] }
+    },
+    "elements": [
+      {
+        "id": "s-hero-content",
+        "elType": "e-div-block",
+        "settings": {
+          "classes": { "$$type": "classes", "value": ["e-s-hero-content-local"] }
+        },
+        "elements": [
+          {
+            "id": "s-hero-title",
+            "elType": "widget",
+            "widgetType": "e-heading",
+            "settings": {
+              "classes": { "$$type": "classes", "value": ["e-s-hero-title-local"] },
+              "title": { "$$type": "html-v3", "value": { "content": { "value": "Feel better, live lighter, one step at a time", "$$type": "string" }, "children": [] } },
+              "tag": { "$$type": "string", "value": "h1" }
+            },
+            "elements": [],
+            "styles": {}
+          },
+          {
+            "id": "s-hero-subtitle",
+            "elType": "widget",
+            "widgetType": "e-paragraph",
+            "settings": {
+              "classes": { "$$type": "classes", "value": ["e-s-hero-subtitle-local"] },
+              "paragraph": { "$$type": "html-v3", "value": { "content": { "value": "A balanced approach to wellness that supports your body, improves energy, and fits naturally into your daily life.", "$$type": "string" }, "children": [] } }
+            },
+            "elements": [],
+            "styles": {}
+          },
+          {
+            "id": "s-hero-actions",
+            "elType": "e-flexbox",
+            "settings": {
+              "classes": { "$$type": "classes", "value": ["e-s-hero-actions-local"] }
+            },
+            "elements": [
+              {
+                "id": "s-hero-cta",
+                "elType": "widget",
+                "widgetType": "e-button",
+                "settings": {
+                  "classes": { "$$type": "classes", "value": ["e-s-hero-cta-local"] },
+                  "text": { "$$type": "html-v3", "value": { "content": { "value": "Explore All Services", "$$type": "string" }, "children": [] } },
+                  "link": { "$$type": "string", "value": "/services" }
+                },
+                "elements": [],
+                "styles": {}
+              }
+            ],
+            "styles": {}
+          }
+        ],
+        "styles": {}
+      }
+    ],
+    "isInner": false,
+    "styles": {},
+    "interactions": [],
+    "editor_settings": [],
+    "version": "0.0"
+  },
+  "schema_observations": {
+    "bug_2_confirmed": "All atomic widgets use elType='widget' with widgetType (e-heading, e-paragraph, e-button)",
+    "bug_3_4_5_confirmed": "title, paragraph, text all use $$type 'html-v3'; classes always { $$type: 'classes', value: [...] }",
+    "e_button_text_confirmed": "e-button text is { $$type: 'html-v3', value: { content: {...}, children: [] } } (same shape as e-heading title)",
+    "e_button_link_simplified": "On 1953 link is a plain string '/services' (unwrapped) — likely because the hero is minimal; 1950 shows the full wrapped shape: { $$type: 'link', value: { href: { $$type: 'string', value: '...' }, isTargetBlank: { $$type: 'boolean', value: false }, tag: { $$type: 'string', value: 'a' } } }",
+    "e_button_tag": "tag: { $$type: 'string', value: 'button' }",
+    "e_heading_tag": "tag: { $$type: 'string', value: 'h1' } (e-heading accepts h1-h6)",
+    "container_link_default": "Containers (e-flexbox/e-div-block) may have settings.link: { $$type: 'link', value: [] } when no link is set — the empty array is the default",
+    "kebab_case_class_ids": "Class IDs on 1953 use 'e-s-hero-local' (kebab-case with 'e-' prefix and '-local' suffix). This is the local-class pattern documented in 'elementor-add-element' description: 'for v4 atomic elements with synthesized local styles, the rendered CSS class is s-<element_id>'. The 'e-s-hero-local' id is the value of the local style, not the element_id itself — see 1950 for the canonical 'e-{elementId}-{8hexHash}' pattern.",
+    "no_g_classes": "Hero page 1953 uses ONLY local classes (no 'g-...' global class refs) — confirms that local-only builds are valid and rendered correctly"
+  }
+}

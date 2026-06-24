@@ -1,0 +1,93 @@
+{
+  "source": "test4.nick-webdesign.de",
+  "post_id": 1938,
+  "post_title": "Test Hero Page",
+  "extracted_via": "novamira/elementor-get-content element_id=hero-container",
+  "extracted_at": "2026-06-15",
+  "element_type": "e-flexbox (minimal hero: 1 e-flexbox + 1 e-heading)",
+  "element": {
+    "id": "hero-container",
+    "elType": "e-flexbox",
+    "settings": {
+      "classes": { "$$type": "classes", "value": ["s-hero-container"] },
+      "tag": { "$$type": "string", "value": "div" },
+      "link": {
+        "$$type": "link",
+        "value": {
+          "isTargetBlank": { "$$type": "boolean", "value": false },
+          "tag": { "$$type": "string", "value": "a" }
+        }
+      }
+    },
+    "elements": [
+      {
+        "id": "hero-heading",
+        "elType": "widget",
+        "widgetType": "e-heading",
+        "settings": {
+          "title": {
+            "$$type": "html-v3",
+            "value": { "content": { "value": "Test", "$$type": "string" }, "children": [] }
+          },
+          "classes": { "$$type": "classes", "value": ["s-hero-heading"] },
+          "tag": { "$$type": "string", "value": "h2" },
+          "link": {
+            "$$type": "link",
+            "value": {
+              "isTargetBlank": { "$$type": "boolean", "value": false },
+              "tag": { "$$type": "string", "value": "a" }
+            }
+          }
+        },
+        "elements": [],
+        "styles": {
+          "s-hero-heading": {
+            "id": "s-hero-heading",
+            "type": "class",
+            "label": "local",
+            "variants": [
+              {
+                "meta": { "breakpoint": "desktop", "state": null },
+                "props": {
+                  "font-size": { "$$type": "size", "value": { "size": 72, "unit": "px" } },
+                  "color": { "$$type": "color", "value": "#ffffff" },
+                  "text-align": { "$$type": "string", "value": "center" }
+                },
+                "custom_css": null
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "styles": {
+      "s-hero-container": {
+        "id": "s-hero-container",
+        "type": "class",
+        "label": "local",
+        "variants": [
+          {
+            "meta": { "breakpoint": "desktop", "state": null },
+            "props": {
+              "min-height": { "$$type": "size", "value": { "size": 100, "unit": "vh" } },
+              "background": {
+                "$$type": "background",
+                "value": { "color": { "$$type": "color", "value": "#2563eb" } }
+              },
+              "justify-content": { "$$type": "string", "value": "center" },
+              "align-items": { "$$type": "string", "value": "center" }
+            },
+            "custom_css": null
+          }
+        ]
+      }
+    }
+  },
+  "schema_observations": {
+    "minimal_hero": "Single e-flexbox container with one e-heading child is the smallest valid V4 page",
+    "link_optional_fields": "link can be { $$type: 'link', value: { isTargetBlank, tag } } without href (no link) — href is optional when value is not a real link",
+    "kebab_class_ids_valid": "Class id 's-hero-container' (kebab-case without 'e-' prefix or hash) is valid — Elementor accepts any string as a class id as long as it does not start with a digit; the 1950 'e-{elementId}-{hash}' pattern is a convention not a hard rule",
+    "text_align_values": "text-align enum: 'start' | 'center' | 'end' | 'justify' — Elementor uses logical values, not 'left'/'right'",
+    "color_short_hex": "3/6/8-digit hex colors are all accepted"
+  }
+}

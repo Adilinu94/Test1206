@@ -1,0 +1,66 @@
+{
+  "generated": "2026-06-24T17:54:43.187Z",
+  "source": "C:\\Users\\adini\\AppData\\Local\\Temp\\pipeline-test\\s35-count.json",
+  "phases": [
+    {
+      "name": "Token-Extraktion",
+      "duration_ms": 128,
+      "status": "FAIL",
+      "error": "Exit 2"
+    },
+    {
+      "name": "Konvertierung",
+      "duration_ms": 115,
+      "status": "FAIL",
+      "error": "Exit 2"
+    },
+    {
+      "name": "Auto-Scaling",
+      "duration_ms": 100,
+      "status": "OK"
+    },
+    {
+      "name": "GC-Generierung",
+      "duration_ms": 88,
+      "status": "FAIL",
+      "error": "Exit 1"
+    },
+    {
+      "name": "Media-Patching",
+      "duration_ms": 103,
+      "status": "FAIL",
+      "error": "Exit 1"
+    },
+    {
+      "name": "Validierung",
+      "duration_ms": 110,
+      "status": "FAIL",
+      "error": "Exit 1"
+    },
+    {
+      "name": "Quality-Metrics",
+      "duration_ms": 91,
+      "status": "OK"
+    }
+  ],
+  "total_ms": 737,
+  "ok_count": 2,
+  "fail_count": 5,
+  "bottleneck": [
+    {
+      "name": "Token-Extraktion",
+      "duration_ms": 128,
+      "pct_of_total": 17
+    },
+    {
+      "name": "Konvertierung",
+      "duration_ms": 115,
+      "pct_of_total": 16
+    },
+    {
+      "name": "Validierung",
+      "duration_ms": 110,
+      "pct_of_total": 15
+    }
+  ]
+}

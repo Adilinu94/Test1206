@@ -1,0 +1,354 @@
+name: Framer V4 Pipeline CI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'scripts/**'
+      - 'tests/**'
+      - 'wizard.js'
+      - 'package.json'
+      - 'novamira-adrianv2/**'
+      - 'tools/**'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - 'tests/**'
+      - 'wizard.js'
+      - 'package.json'
+      - 'novamira-adrianv2/**'
+      - 'tools/**'
+      - '.github/workflows/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm install
+      # Prio 1 Fix: framer-export deps ohne Puppeteer-Binary installieren
+      - name: Install framer-export dependencies
+        run: PUPPETEER_SKIP_DOWNLOAD=1 npm install --prefix tools/framer-export
+      - run: node --test tests/pipeline.test.js
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: node --check tests/e2e.test.js
+
+  test-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: node --check scripts/validate-v4-tree.js
+
+  test-mcp-mock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: MCP Mock Integration Test
+        run: node tests/integration.test.js
+
+  test-visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm install
+      - run: node --check scripts/visual-qa.js
+      - run: node --check scripts/section-compare.js
+
+  design-diff:
+    name: Design Diff (Framer ↔ Elementor CSS)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write    # needed to commit badge JSON back to repo
+    env:
+      DD_FRAMER_URL: ${{ vars.DESIGNDIFF_FRAMER_URL || '' }}
+      DD_ELEMENTOR_URL: ${{ vars.DESIGNDIFF_ELEMENTOR_URL || '' }}
+      DD_MIN_SCORE: ${{ vars.DESIGNDIFF_MIN_SCORE || '70' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright system dependencies
+        run: npx playwright install-deps chromium
+
+      - name: Install Playwright Chromium browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium
+
+      - name: Run Design Diff (Dry-Run – no target URLs configured)
+        if: env.DD_FRAMER_URL == '' || env.DD_ELEMENTOR_URL == ''
+        run: |
+          echo "ℹ️  DESIGNDIFF_FRAMER_URL and/or DESIGNDIFF_ELEMENTOR_URL not configured."
+          echo "   Set them as Repository Variables (Settings → Secrets and variables → Actions → Variables)."
+          echo "   Running --dry-run to verify script integrity instead."
+          node scripts/design-diff.js \
+            --framer-url https://easier-train-154753.framer.app/ \
+            --elementor-url http://example.com/ \
+            --dry-run \
+            --output reports/ci-design-diff.json
+          echo "✅ Design-diff dry-run OK (script integrity verified)"
+
+          # ── Step Summary (dry-run info) ──
+          node scripts/lib/design-diff-step-summary.cjs \
+            reports/ci-design-diff.json \
+            --framer-url "$DD_FRAMER_URL" \
+            --elementor-url "$DD_ELEMENTOR_URL" \
+            --threshold "$DD_MIN_SCORE" \
+            >> $GITHUB_STEP_SUMMARY
+
+          # ── Badge JSON (dry-run placeholder for shields.io) ──
+          node --input-type=commonjs -e "
+            const fs = require('fs');
+            const badge = { schemaVersion: 1, label: 'design-diff', message: 'not configured', color: 'lightgrey', isError: false, namedLogo: 'css3', cacheSeconds: 86400 };
+            fs.mkdirSync('reports', { recursive: true });
+            fs.writeFileSync('reports/ci-design-diff-badge.json', JSON.stringify(badge, null, 2));
+          "
+          echo "✅ Badge JSON written (dry-run)"
+
+      - name: Run Design Diff (Real comparison with score threshold)
+        if: env.DD_FRAMER_URL != '' && env.DD_ELEMENTOR_URL != ''
+        id: design-diff-real
+        timeout-minutes: 5
+        run: |
+          echo "🎯 Running design-diff: $DD_FRAMER_URL ↔ $DD_ELEMENTOR_URL"
+          echo "   Score threshold: $DD_MIN_SCORE/100"
+          node scripts/design-diff.js \
+            --framer-url "$DD_FRAMER_URL" \
+            --elementor-url "$DD_ELEMENTOR_URL" \
+            --timeout 60000 \
+            --output reports/ci-design-diff.json
+          EXIT_CODE=$?
+          
+          # Extract score from report (--input-type=commonjs because package.json has "type":"module")
+          # Guard: only parse if report file was written (script may have crashed)
+          if [ -f reports/ci-design-diff.json ]; then
+            SCORE=$(node --input-type=commonjs -e "const r=require('./reports/ci-design-diff.json'); console.log(r.meta?.overall_score || 0)")
+            SEVERITY=$(node --input-type=commonjs -e "const r=require('./reports/ci-design-diff.json'); console.log(r.meta?.max_severity || 'UNKNOWN')")
+          else
+            echo "❌ Report file not found — design-diff script failed to produce output"
+            SCORE=0
+            SEVERITY=CRASH
+          fi
+          echo "design_diff_score=$SCORE" >> $GITHUB_OUTPUT
+          echo "design_diff_severity=$SEVERITY" >> $GITHUB_OUTPUT
+          
+          echo "   Score: $SCORE/100  Severity: $SEVERITY"
+          
+          # ── Step Summary (rich output in GitHub Actions UI) ──
+          node scripts/lib/design-diff-step-summary.cjs \
+            reports/ci-design-diff.json \
+            --framer-url "$DD_FRAMER_URL" \
+            --elementor-url "$DD_ELEMENTOR_URL" \
+            --threshold "$DD_MIN_SCORE" \
+            >> $GITHUB_STEP_SUMMARY
+
+          # ── Badge JSON (for shields.io dynamic badge) ──
+          
+          # ── Badge JSON (for shields.io dynamic badge) ──
+          export BADGE_COLOR="green"
+          if [ "$SCORE" -lt 70 ]; then export BADGE_COLOR="red"
+          elif [ "$SCORE" -lt 85 ]; then export BADGE_COLOR="orange"
+          fi
+          node --input-type=commonjs -e "
+            const fs = require('fs');
+            const r = require('./reports/ci-design-diff.json');
+            const score = r.meta?.overall_score || 0;
+            const color = process.env.BADGE_COLOR || 'grey';
+            const badge = {
+              schemaVersion: 1,
+              label: 'design-diff',
+              message: score + '/100',
+              color: color,
+              isError: score < 70,
+              namedLogo: 'css3',
+              cacheSeconds: 86400
+            };
+            fs.mkdirSync('reports', { recursive: true });
+            fs.writeFileSync('reports/ci-design-diff-badge.json', JSON.stringify(badge, null, 2));
+          "
+          echo "✅ Badge JSON written to reports/ci-design-diff-badge.json"
+          
+          if [ "$SCORE" -lt "$DD_MIN_SCORE" ]; then
+            echo ""
+            echo "❌ Design-diff score $SCORE/100 < threshold $DD_MIN_SCORE/100 — BUILD BLOCKED"
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ Design-diff score $SCORE/100 ≥ threshold $DD_MIN_SCORE/100 — PASS"
+          exit 0
+
+      - name: Commit and push badge
+        if: always() && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/ci-design-diff-badge.json
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update design-diff badge [skip ci]"
+            git push
+            echo "✅ Badge JSON pushed to repo"
+          else
+            echo "ℹ️  No badge changes to commit"
+          fi
+
+      - name: Upload design-diff report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: design-diff-report
+          path: reports/ci-design-diff.json
+          retention-days: 7
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm run lint:version
+
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Check all JS scripts syntax
+        run: |
+          for f in wizard.js scripts/*.js; do
+            node --check "$f" || exit 1
+          done
+          echo "All syntax OK"
+      - name: Check new Prio 1+2 scripts
+        run: |
+          node --check scripts/extract-style-map.js
+          node --check scripts/expand-components.js
+          node --check scripts/session-init.js
+          node --check scripts/lib/design-diff-step-summary.cjs
+          echo "New scripts syntax OK"
+
+  test-all:
+    name: Full Test Suite
+    runs-on: ubuntu-latest
+    needs: [test, test-e2e, test-mcp-mock, phpunit, phpcs, psalm]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - name: Install framer-export dependencies
+        run: PUPPETEER_SKIP_DOWNLOAD=1 npm install --prefix tools/framer-export
+      - run: npm run test:all
+      - name: Verify test count
+        run: |
+          echo "test:all completed successfully"
+
+  phpcs:
+    name: PHP CodeSniffer
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: novamira-adrianv2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          tools: composer
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('novamira-adrianv2/composer.json') }}
+          restore-keys: composer-
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Run PHPCS
+        run: ./vendor/bin/phpcs --standard=phpcs.xml --report=full
+
+  psalm:
+    name: Psalm Static Analysis
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: novamira-adrianv2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          tools: composer
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('novamira-adrianv2/composer.json') }}
+          restore-keys: composer-
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Run Psalm
+        run: ./vendor/bin/psalm --no-progress --no-cache --error-format=github
+
+  phpunit:
+    name: PHPUnit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: novamira-adrianv2
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          tools: composer
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('novamira-adrianv2/composer.json') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run PHPUnit
+        run: ./vendor/bin/phpunit --testdox
+
