@@ -13,7 +13,7 @@ Standalone-Pipeline zur Konvertierung von **Framer-Websites** in **Elementor V4 
 
 ```bash
 node wizard.js          # Interaktiver CLI-Wizard (empfohlen)
-npm test                # 377 Pipeline-Tests (37 Suiten)
+npm test                # 434 Pipeline-Tests (37 Suiten)
 npm run test:e2e        # 18 E2E-Tests
 ```
 
@@ -50,9 +50,9 @@ Detaillierte Anleitung in `novamira-skill/session-start-checklist.md` Schritte 2
 
 ```bash
 # Tests
-npm test                  # 128 Pipeline-Tests in 37 Suiten (framer-utils, converter, guards…)
+npm test                  # 434 Tests in allen Suiten (framer-utils, converter, guards…)
 npm run test:e2e          # 18 E2E-Tests (kompletter Pipeline-Durchlauf)
-npm run test:all          # 153 Tests (128 pipeline + 18 e2e + 7 integration)
+npm run test:all          # 434 Tests
 npm run measure-quality  # Qualitaets-Metriken messen
 npm run test:integration-live # Integration --live
 
@@ -423,7 +423,7 @@ framer-v4-pipeline-v2/
 │   ├── build-dependency-graph.js        # Kahn-Algorithmus Build-Reihenfolge
 │   └── export-mcp-xml.js                # getNodeXml Plan-Generator
 └── tests/
-    ├── pipeline.test.js                 # 128 Pipeline-Tests in 37 Suiten
+    ├── pipeline.test.js                 # 434 Tests in allen Suiten
     └── e2e.test.js                      # 18 E2E-Tests
 ```
 

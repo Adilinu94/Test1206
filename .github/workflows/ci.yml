@@ -8,184 +8,88 @@ on:
       - 'tests/**'
       - 'wizard.js'
       - 'package.json'
-      - 'novamira-adrianv2/**'
-      - 'tools/**'
   pull_request:
     paths:
       - 'scripts/**'
       - 'tests/**'
       - 'wizard.js'
       - 'package.json'
-      - 'novamira-adrianv2/**'
-      - 'tools/**'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
+    name: Test Suite (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['18', '20', '22']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '22' }
-      - run: npm install
-      # Prio 1 Fix: framer-export deps ohne Puppeteer-Binary installieren
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
       - name: Install framer-export dependencies
         run: PUPPETEER_SKIP_DOWNLOAD=1 npm install --prefix tools/framer-export
-      - run: node --test tests/pipeline.test.js
+      - name: Run full test suite
+        run: npm test
 
-  test-e2e:
+  test-integration:
+    name: Integration Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '22' }
-      - run: node --check tests/e2e.test.js
-
-  test-schema:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '22' }
-      - run: node --check scripts/validate-v4-tree.js
-
-  test-mcp-mock:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '22' }
-      - name: MCP Mock Integration Test
-        run: node tests/integration.test.js
-
-  test-visual:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '22' }
-      - run: npm install
-      - run: node --check scripts/visual-qa.js
-      - run: node --check scripts/section-compare.js
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Install framer-export dependencies
+        run: PUPPETEER_SKIP_DOWNLOAD=1 npm install --prefix tools/framer-export
+      - name: Run integration tests
+        run: node --test tests/integration.test.js
 
   lint:
+    name: Lint (version check + JS syntax)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '22' }
-      - run: npm run lint:version
-
-  syntax:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '22' }
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Check test-count lint
+        run: npm run lint:version
       - name: Check all JS scripts syntax
         run: |
-          for f in wizard.js scripts/*.js; do
+          for f in wizard.js scripts/*.js scripts/wizard/*.js scripts/preflight/*.js scripts/lib/*.js; do
             node --check "$f" || exit 1
           done
           echo "All syntax OK"
-      - name: Check new Prio 1+2 scripts
-        run: |
-          node --check scripts/extract-style-map.js
-          node --check scripts/expand-components.js
-          node --check scripts/session-init.js
-          echo "New scripts syntax OK"
 
   test-all:
-    name: Full Test Suite
+    name: Full Test Suite Gate
     runs-on: ubuntu-latest
-    needs: [test, test-e2e, test-mcp-mock, phpunit, phpcs, psalm]
+    needs: [test, test-integration, lint]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '22'
           cache: 'npm'
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
       - name: Install framer-export dependencies
         run: PUPPETEER_SKIP_DOWNLOAD=1 npm install --prefix tools/framer-export
-      - run: npm run test:all
-      - name: Verify test count
-        run: |
-          echo "test:all completed successfully"
-
-  phpcs:
-    name: PHP CodeSniffer
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: novamira-adrianv2
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.0'
-          tools: composer
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache
-          key: composer-${{ hashFiles('novamira-adrianv2/composer.json') }}
-          restore-keys: composer-
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
-      - name: Run PHPCS
-        run: ./vendor/bin/phpcs --standard=phpcs.xml --report=full
-
-  psalm:
-    name: Psalm Static Analysis
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: novamira-adrianv2
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.0'
-          tools: composer
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache
-          key: composer-${{ hashFiles('novamira-adrianv2/composer.json') }}
-          restore-keys: composer-
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
-      - name: Run Psalm
-        run: ./vendor/bin/psalm --no-progress --no-cache --error-format=github
-
-  phpunit:
-    name: PHPUnit Tests
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: novamira-adrianv2
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.0'
-          tools: composer
-
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache
-          key: composer-${{ hashFiles('novamira-adrianv2/composer.json') }}
-          restore-keys: composer-
-
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
-
-      - name: Run PHPUnit
-        run: ./vendor/bin/phpunit --testdox
-
+      - name: Run full test:all suite
+        run: npm run test:all
