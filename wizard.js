@@ -649,14 +649,15 @@ if (sub === 'pipeline') {
   const skipQa = process.argv.includes('--skip-qa');
   const dryRun = process.argv.includes('--dry-run');
   const verbose = process.argv.includes('--verbose');
+  const resume = process.argv.includes('--resume');
 
-  if (!framerUrl && !exportDir) {
+  if (!framerUrl && !exportDir && !resume) {
     log.error('pipeline requires --url <framer-url> or --export-dir <dir>');
     phPipeline();
     process.exit(2);
   }
 
-  await runPipeline({ framerUrl, postId, exportDir, siteId, noCache, skipQa, dryRun, verbose });
+  await runPipeline({ framerUrl, postId, exportDir, siteId, noCache, skipQa, dryRun, verbose, resume });
   process.exit(0);
 }
 

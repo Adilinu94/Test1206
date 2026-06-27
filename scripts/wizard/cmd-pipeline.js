@@ -83,6 +83,7 @@ export async function runPipeline({
   dryRun = false,
   verbose = false,
   siteId = 'default',
+  resume = false,
 }) {
   const rootDir = findWorkspaceRoot();
   const startTime = Date.now();
@@ -94,6 +95,19 @@ export async function runPipeline({
   // Phase 4: Detection-Cache (wird in Step 0 befuellt)
   let elementorEnv = null;
   let themeEnv = null;
+
+  // ── Pipeline-State (Resume-Support) ──────────────────────────────────────
+  const { loadState, createState, savePhase, markFailed, isPhaseCompleted, getPhaseOutput } =
+    await import('../lib/pipeline-state.js');
+  const statePath = path.join(rootDir, '.pipeline', 'state.json');
+  let pState = resume ? await loadState(statePath) : null;
+  if (!pState) {
+    pState = createState({ target: siteId, framerUrl: framerUrl || '', postId: postId ? parseInt(postId) : null });
+  }
+  if (resume && pState) {
+    log.info(`Resuming pipeline from state: ${statePath}`);
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   console.log(`\n${'═'.repeat(60)}`);
   console.log('  🚀 FULL 14-STEP PIPELINE (OPTIMIZED)');
@@ -157,7 +171,19 @@ export async function runPipeline({
   // STEP 1: FramerExport
   // ════════════════════════════════════════════
 
-  if (exportDir && existsSync(exportDir)) {
+  // Resume: restore exportDir from previous state
+  if (resume && isPhaseCompleted(pState, 'framer-export')) {
+    const cached = getPhaseOutput(pState, 'framer-export');
+    if (cached?.exportDir && existsSync(cached.exportDir)) {
+      exportDir = cached.exportDir;
+      log.success(`Step 1/14: FramerExport — resumed from state: ${exportDir}`);
+      steps.push({ step: 1, name: 'FramerExport', status: 'resumed' });
+    }
+  }
+
+  if (!exportDir) {
+  if (existingExportDir && existsSync(existingExportDir)) {
+    exportDir = path.resolve(existingExportDir);
     log.success(`Step 1/14: FramerExport — vorhanden: ${exportDir}`);
     steps.push({ step: 1, name: 'FramerExport', status: 'cached' });
   } else if (framerUrl) {
@@ -208,8 +234,10 @@ export async function runPipeline({
         await writeFramerExportCache(framerUrl, exportDir);
         log.success(`FramerExport: ${exportDir}`);
         steps.push({ step: 1, name: 'FramerExport', status: 'ok' });
+        pState = await savePhase(pState, 'framer-export', { exportDir }, statePath);
       } catch (err) {
         log.error(`FramerExport fehlgeschlagen: ${err.message}`);
+        pState = await markFailed(pState, 'framer-export', err, statePath);
         return { status: 'FAILED', step: 1, error: err.message };
       }
     }
@@ -217,6 +245,7 @@ export async function runPipeline({
     log.error('--url oder --export-dir erforderlich');
     return { status: 'FAILED', step: 1, error: 'Missing --url or --export-dir' };
   }
+  } // end if(!exportDir) resume guard
 
   const exportHtml = path.join(exportDir, 'index.html');
   if (!existsSync(exportHtml)) {
@@ -670,6 +699,17 @@ export async function runPipeline({
   // STEP 11: convert-xml-to-v4.js (WITH token-map)
   // ════════════════════════════════════════════
 
+  // Resume: skip if already done and output still exists
+  if (resume && isPhaseCompleted(pState, 'convert-xml')) {
+    const cached = getPhaseOutput(pState, 'convert-xml');
+    if (cached?.v4TreePath && existsSync(cached.v4TreePath)) {
+      v4TreePath = cached.v4TreePath;
+      log.success(`Step 11/14: convert-xml — resumed from state: ${v4TreePath}`);
+      steps.push({ step: 11, name: 'convert-xml-to-v4.js', status: 'resumed' });
+    }
+  }
+
+  if (!v4TreePath) {
   log.step('Step 11/14: XML → V4 Tree konvertieren...');
 
   let xmlFiles = [];
@@ -804,6 +844,12 @@ export async function runPipeline({
     steps.push({ step: 11, name: 'convert-xml-to-v4.js', status: 'skipped', detail: 'No XML files found' });
   }
 
+  // Save Step 11 to state when v4TreePath was produced
+  if (v4TreePath && existsSync(v4TreePath)) {
+    pState = await savePhase(pState, 'convert-xml', { v4TreePath }, statePath);
+  }
+  } // end if(!v4TreePath) resume guard
+
   // ════════════════════════════════════════════
   // STEPS 12+14: Validate + QA Gate (PARALLEL)
   // ════════════════════════════════════════════
@@ -900,6 +946,7 @@ export async function runPipeline({
   } else if (postId && v4TreePath && existsSync(v4TreePath)) {
     log.info('Step 13/14: elementor-set-content — an Agent delegiert');
     steps.push({ step: 13, name: 'elementor-set-content', status: 'delegated', detail: `post_id=${postId}` });
+    pState = await savePhase(pState, 'elementor-set-content', { postId }, statePath);
   } else {
     steps.push({ step: 13, name: 'elementor-set-content', status: 'skipped' });
   }
@@ -967,6 +1014,12 @@ export async function runPipeline({
   console.log(`  ✅ ${okSteps} ok  ⚠️ ${warnSteps} warnings  ⏭️ ${skipSteps} skipped  ❌ ${failSteps} failed`);
   console.log(`  📄 Summary: ${path.relative(rootDir, summaryPath)}`);
   console.log(`${'═'.repeat(60)}\n`);
+
+  // Clear state on fully successful run (no failures)
+  if (failSteps === 0 && !dryRun) {
+    const { clearState } = await import('../lib/pipeline-state.js');
+    await clearState(statePath);
+  }
 
   return summary;
 }

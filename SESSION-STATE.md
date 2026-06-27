@@ -82,8 +82,8 @@ npm run convert -- --xml input.xml --theme-defaults theme-defaults.json --output
 Siehe `tasks/todo.md` für die vollständige Aufgabenliste.
 
 Kurzübersicht noch offene Punkte:
-- **Fix #8** (Helpers-Guard in `batch-create-variables`): offen
-- **Novamira Fixes 4–8** (batch-get-content, variable-audit, memory-auto-fill, patch-element-styles multi-post, skill-list): offen
+- ~~**Fix #8** (Helpers-Guard in `batch-create-variables`): offen~~ → **ERLEDIGT** (class-batch-create-variables.php v1.1.0)
+- ~~**Novamira Fixes 4–8** (batch-get-content, variable-audit, memory-auto-fill, patch-element-styles multi-post, skill-list): offen~~ → **ERLEDIGT** (alle in novamira-adrianv2 gepusht)
 - **theme-defaults.json**: muss noch von einem Agenten mit Live-MCP-Zugriff auf `solar.local` mit echten Theme-Werten befüllt werden (aktuell nur Code-Unterstützung vorhanden, keine echten Werte)
 
 ---

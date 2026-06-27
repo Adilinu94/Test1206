@@ -65,7 +65,7 @@
 - [x] `wizard.js`: GC-Generierung aus "Optional" in Pflichtschritt upgraden
 - [x] `validate-v4-tree.js`: `checkDomDepth()` als C7 hinzugefügt (warning ≥4, error ≥6)
 - [x] 2 neue Tests in `tests/pipeline.test.js` für DOM-Depth-Check (Suite 10)
-- [ ] `PIPELINE_AUDIT_REPORT.md`: P0-1 und P0-2 als `[x] erledigt` markieren — optional/manuell
+- [x] `PIPELINE_AUDIT_REPORT.md`: P0-1 und P0-2 als `[x] erledigt` markieren — archiviert in docs/archive/
 
 ### P1-5 — `adrians-list-snippets.php`: DB-Query-Filter statt PHP-Filter
 - [x] WP_Query um `meta_query` für `filter_type` erweitert
@@ -146,8 +146,8 @@
 ## Offene Nice-to-have (nicht im ursprünglichen Audit)
 
 - [x] `inject-animation-code.js`: JS-seitig auf `adrians-batch-inject-snippets` umgestellt — Batch ist Standard (Fix #2)
-- [ ] `PIPELINE_AUDIT_REPORT.md`: P0-Einträge als erledigt markieren
-- [ ] `lint:version`-ähnliches Script: Test-Count in README automatisch prüfen
+- [x] `PIPELINE_AUDIT_REPORT.md`: P0-Einträge als erledigt markieren — archiviert in docs/archive/
+- [x] `lint:version`-ähnliches Script: Test-Count in README automatisch prüfen — `scripts/lint-test-count.js` existiert
 
 ---
 
@@ -201,8 +201,8 @@
 - [x] npm-Scripts: `post-build`, `post-build:qa-only`, `post-build:dry`
 
 ### Offen (nächste Session)
-- [ ] Fix #8: Helpers-Guard in `batch-create-variables`
-- [ ] Novamira Fixes 4–8: batch-get-content, variable-audit, memory-auto-fill, patch-element-styles multi-post, skill-list
+- [x] Fix #8: Helpers-Guard in `batch-create-variables` — implementiert in class-batch-create-variables.php (v1.1.0)
+- [x] Novamira Fixes 4–8: batch-get-content, variable-audit, memory-auto-fill, patch-element-styles multi-post, skill-list — alle in novamira-adrianv2 implementiert und gepusht
 
 ---
 
