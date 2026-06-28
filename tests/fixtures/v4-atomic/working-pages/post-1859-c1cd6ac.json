@@ -1,0 +1,79 @@
+{
+  "source": "test4.nick-webdesign.de",
+  "post_id": 1859,
+  "post_title": "stacking cards",
+  "extracted_via": "novamira/elementor-get-content element_id=c1cd6ac",
+  "extracted_at": "2026-06-15",
+  "element_type": "e-flexbox (stacking cards: container with 3 sticky e-div-block children)",
+  "element": {
+    "id": "c1cd6ac",
+    "elType": "e-flexbox",
+    "settings": {
+      "classes": { "$$type": "classes", "value": ["e-c1cd6ac-a8994ff"] }
+    },
+    "elements": [
+      {
+        "id": "d409098",
+        "elType": "e-div-block",
+        "settings": { "classes": { "$$type": "classes", "value": ["e-d409098-f7cf604"] } },
+        "elements": [
+          {
+            "id": "8a3892d",
+            "elType": "widget",
+            "widgetType": "e-heading",
+            "settings": {
+              "title": { "$$type": "html-v3", "value": { "content": { "value": "Card 1", "$$type": "string" }, "children": [] } },
+              "link": { "$$type": "link", "value": [] }
+            },
+            "elements": [],
+            "styles": {},
+            "interactions": [],
+            "editor_settings": [],
+            "version": "0.0"
+          }
+        ],
+        "isInner": false,
+        "styles": {
+          "e-d409098-f7cf604": {
+            "id": "e-d409098-f7cf604",
+            "label": "local",
+            "type": "class",
+            "variants": [
+              {
+                "meta": { "breakpoint": "desktop", "state": null },
+                "props": {
+                  "width": { "$$type": "size", "value": { "size": 62, "unit": "%" } },
+                  "min-height": { "$$type": "size", "value": { "size": 100, "unit": "vh" } },
+                  "position": { "$$type": "string", "value": "sticky" },
+                  "inset-block-start": { "$$type": "size", "value": { "size": 1, "unit": "px" } },
+                  "z-index": { "$$type": "number", "value": 1 },
+                  "scroll-margin-top": { "$$type": "size", "value": { "size": 0, "unit": "px" } },
+                  "background": {
+                    "$$type": "background",
+                    "value": { "color": { "$$type": "color", "value": "#ffa1a1" } }
+                  },
+                  "display": { "$$type": "string", "value": "flex" },
+                  "flex-direction": { "$$type": "string", "value": "column" },
+                  "justify-content": { "$$type": "string", "value": "center" },
+                  "align-items": { "$$type": "string", "value": "center" }
+                },
+                "custom_css": null
+              }
+            ]
+          }
+        },
+        "interactions": [],
+        "editor_settings": [],
+        "version": "0.0"
+      }
+    ]
+  },
+  "schema_observations": {
+    "sticky_positioning": "Sticky cards are e-div-block with position: 'sticky' + inset-block-start (logical property) + z-index number",
+    "min_height_vh": "min-height accepts vh unit: { size: 100, unit: 'vh' }",
+    "background_color_short": "Simple solid backgrounds use the short shape: background: { $$type: 'background', value: { color: { $$type: 'color', value: '#ffa1a1' } } } — no background-overlay needed",
+    "background_color_8_digit_hex": "8-digit hex (#a1c2ff7d — with alpha) is accepted by Elementor; the server-side V4 color contrast handler in the plugin ignores the alpha channel for contrast calculations",
+    "scroll_margin": "scroll-margin-top: { $$type: 'size', value: { size: 0, unit: 'px' } } supports smooth-scroll-to-anchor offset",
+    "z_index_number": "z-index is a plain { $$type: 'number', value: N } — no size wrapper"
+  }
+}

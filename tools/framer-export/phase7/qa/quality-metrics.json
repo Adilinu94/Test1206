@@ -1,0 +1,48 @@
+{
+  "generated": "2026-06-15T16:40:07.981Z",
+  "source": "tools/framer-export/phase7/hero-section.json",
+  "metrics": {
+    "dom_depth": {
+      "value": 9,
+      "target": "≤3",
+      "status": "FAIL"
+    },
+    "gc_coverage": {
+      "value": 0,
+      "unit": "%",
+      "target": "≥90%",
+      "status": "FAIL"
+    },
+    "gv_color_substitution": {
+      "value": 0,
+      "unit": "%",
+      "target": "≥95%",
+      "status": "FAIL"
+    },
+    "gv_font_substitution": {
+      "value": 0,
+      "unit": "%",
+      "target": "≥95%",
+      "status": "FAIL"
+    },
+    "grid_usage": {
+      "value": 7,
+      "unit": "%",
+      "target": "≥35%",
+      "status": "FAIL"
+    },
+    "components": {
+      "value": 3,
+      "target": "≥10",
+      "status": "WARN"
+    },
+    "total_elements": {
+      "value": 28
+    }
+  },
+  "summary": {
+    "ok": 0,
+    "warn": 1,
+    "fail": 5
+  }
+}

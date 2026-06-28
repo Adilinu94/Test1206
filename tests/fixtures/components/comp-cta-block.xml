@@ -1,0 +1,26 @@
+<Node
+  id="cta-root"
+  name="CTA Block"
+  widgetType="e-flexbox"
+  stackDirection="horizontal"
+  gap="16"
+  padding="40"
+  justifyContent="center"
+  alignItems="center"
+>
+  <Node
+    id="cta-headline"
+    name="CTA Headline"
+    widgetType="e-heading"
+    inlineTextStyle="/Headings/48"
+  >Ready to start?</Node>
+  <Node
+    id="cta-button"
+    name="CTA Button"
+    widgetType="e-button"
+    backgroundColor="#0f5bff"
+    color="#ffffff"
+    padding="16"
+    borderRadius="8"
+  >Get Started</Node>
+</Node>

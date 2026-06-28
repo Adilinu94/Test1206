@@ -1,0 +1,82 @@
+# Node
+node_modules/
+npm-debug.log*
+.pnpm-store/
+
+# Pipeline-Artefakte (enthalten Client-Daten, nie committen)
+exports/
+v4-tree.json
+v4-tree-*.json
+build-manifest.json
+image-manifest.json
+image-map.json
+font-resolution.json
+responsive.json
+extracted-styles.json
+extracted-breakpoints.json
+token-mapping.json
+variables-plan.json
+gc-plan.json
+dependency-graph.json
+mcp-build-plan.json
+elementor-dump.json
+validate-report.json
+
+# Asset-Ordner
+assets/
+tokens/
+fonts/
+
+# FramerExport Build-Outputs (Working-Dir-Dumps, nicht in Repo)
+tools/framer-export/hero-only-v4*.json
+tools/framer-export/hero-v4-tree*.json
+tools/framer-export/hero-phase4.json
+tools/framer-export/homepage-v4-tree.json
+tools/framer-export/hero-section.xml
+tools/framer-export/homepage.xml
+tools/framer-export/framer-hilarious-workshops-284047-*/
+tools/framer-export/framer-remarkable-interface-*/
+tools/framer-export/phase4/
+
+# Umgebungsvariablen
+.env
+.env.local
+.mcp.json
+mcp-server-config.json
+
+# Pipeline-Cache & Reports
+.pipeline/
+reports/
+animation-plan.json
+rollback-plan.json
+.framer-export-cache.json
+.framer-export-cache/
+.live-cache/
+.deploy-marker
+qa-report.json
+pipeline-profile.json
+
+# Pipeline-Working-Dir-Artefakte
+tmp/
+tmp-wave-test-*/
+.git-commit-msg-*.txt
+pr-*.md
+.git-commit-msg.txt
+.git-commit-msg-*.txt
+
+# HINWEIS: Neubau/ ist KEIN Working-Dir-Muell! Es enthaelt das in Entwicklung
+# befindliche zweite Plugin "Novamira Adrians Extra v2.0.0" (Namespace
+# NickWebdesign\Adrians) mit 18+ Klassen fuer V4-Atomic-Editing, SEO, A11Y,
+# PHP-Sandbox, Global-Classes. Nicht loeschen, nicht committen bis zur
+# Entscheidung ueber Merge/Migration ins Haupt-Plugin.
+
+# Temporaere Dateien
+*.tmp
+*.bak
+*.log
+tst.txt
+test.txt
+
+# OS
+.DS_Store
+Thumbs.db

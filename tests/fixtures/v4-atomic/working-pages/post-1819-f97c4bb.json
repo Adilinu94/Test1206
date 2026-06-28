@@ -1,0 +1,100 @@
+{
+  "source": "test4.nick-webdesign.de",
+  "post_id": 1819,
+  "post_title": "Elementor #1819",
+  "extracted_via": "novamira/elementor-get-content element_id=f97c4bb",
+  "extracted_at": "2026-06-15",
+  "element_type": "e-div-block (with 3 children: 2x e-heading + 1x e-paragraph)",
+  "element": {
+    "id": "f97c4bb",
+    "elType": "e-div-block",
+    "settings": {
+      "classes": { "$$type": "classes", "value": ["e-f97c4bb-d1ed80e", "g-8215a39"] }
+    },
+    "elements": [
+      {
+        "id": "967c4da",
+        "elType": "widget",
+        "widgetType": "e-heading",
+        "settings": {
+          "classes": { "$$type": "classes", "value": ["g-74b73e5"] },
+          "title": { "$$type": "html-v3", "value": { "content": { "value": "Dein WordPress Webdesign Profi", "$$type": "string" }, "children": [] } }
+        },
+        "elements": [],
+        "styles": {},
+        "interactions": [],
+        "editor_settings": [],
+        "version": "0.0"
+      },
+      {
+        "id": "c9f1069",
+        "elType": "widget",
+        "widgetType": "e-heading",
+        "settings": {
+          "classes": { "$$type": "classes", "value": ["g-5ff504c"] },
+          "title": { "$$type": "html-v3", "value": { "content": { "value": "Ich kümmere mich um deine Webseite ", "$$type": "string" }, "children": [] } }
+        },
+        "elements": [],
+        "styles": {},
+        "interactions": [],
+        "editor_settings": [],
+        "version": "0.0"
+      },
+      {
+        "id": "cc5a1fb",
+        "elType": "widget",
+        "widgetType": "e-paragraph",
+        "settings": {
+          "classes": { "$$type": "classes", "value": ["g-479cde0"] },
+          "paragraph": { "$$type": "html-v3", "value": { "content": { "value": "Ich gestalte einzigartige Webseiten, die deine Sichtbarkeit im Internet steigern und den optimalen ersten Eindruck vermitteln.<br>", "$$type": "string" }, "children": [] } }
+        },
+        "elements": [],
+        "styles": {},
+        "interactions": [],
+        "editor_settings": [],
+        "version": "0.0"
+      }
+    ],
+    "isInner": false,
+    "styles": {
+      "e-f97c4bb-d1ed80e": {
+        "id": "e-f97c4bb-d1ed80e",
+        "label": "local",
+        "type": "class",
+        "variants": [
+          {
+            "meta": { "breakpoint": "desktop", "state": null },
+            "props": {
+              "max-width": { "$$type": "size", "value": { "size": 51, "unit": "%" } },
+              "display": { "$$type": "string", "value": "block" },
+              "justify-content": { "$$type": "string", "value": "flex-start" },
+              "align-self": { "$$type": "string", "value": "center" }
+            },
+            "custom_css": null
+          },
+          {
+            "meta": { "breakpoint": "mobile", "state": null },
+            "props": {
+              "min-width": { "$$type": "size", "value": { "size": 100, "unit": "%" } },
+              "max-width": { "$$type": "size", "value": { "size": 100, "unit": "%" } },
+              "align-self": { "$$type": "string", "value": "start" }
+            },
+            "custom_css": null
+          }
+        ]
+      }
+    },
+    "interactions": [],
+    "editor_settings": [],
+    "version": "0.0"
+  },
+  "schema_observations": {
+    "bug_2_confirmed": "elType for atomic widgets is 'widget', widgetType is 'e-heading' / 'e-paragraph'",
+    "bug_3_confirmed": "title prop uses $$type 'html-v3' wrapper with nested content: { $$type: 'string', value: '...' }, children: []",
+    "bug_4_confirmed": "paragraph prop uses same html-v3 shape as title",
+    "bug_5_confirmed": "classes is object { $$type: 'classes', value: [array] }, not bare array",
+    "bug_6_confirmed": "styles map is keyed by class-id with { id, label, type, variants: [{ meta, props, custom_css }] }",
+    "responsive_via_variants": "Per-breakpoint styling is expressed as separate variants, not suffixed keys (e.g. typography_font_size_tablet)",
+    "local_class_naming": "Local class ids follow pattern 'e-{elementId}-{8hexHash}' (e-f97c4bb-d1ed80e); global classes use 'g-{8hex}' (g-74b73e5)"
+  }
+}

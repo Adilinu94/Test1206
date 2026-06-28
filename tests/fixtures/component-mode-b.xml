@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Page name="TestPage" id="page1">
+  <Node
+    id="hero"
+    name="Hero Section"
+    widgetType="e-flexbox"
+    stackDirection="vertical"
+    padding="80"
+    gap="32"
+    backgroundColor="#0f172a"
+  >
+    <Node
+      id="card-instance-1"
+      name="Feature Card A"
+      componentId="comp-feature-card"
+      backgroundColor="#1e293b"
+      padding="24"
+    />
+    <Node
+      id="card-instance-2"
+      name="Feature Card B"
+      componentId="comp-feature-card"
+      backgroundColor="#334155"
+      padding="24"
+    />
+    <Node
+      id="cta-instance"
+      name="CTA Block"
+      componentId="comp-cta-block"
+      padding="40"
+    />
+  </Node>
+</Page>

@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "treeFile": "tools/framer-export/phase7/hero-section.json",
+    "treeNodes": 28,
+    "checksRun": 17,
+    "passed": 15,
+    "warnings": 2,
+    "errors": 0,
+    "score": 88
+  },
+  "guards": [
+    {
+      "id": "TOKEN_EXISTENCE",
+      "status": "PASS",
+      "message": "All 0 e-gv-* IDs found in token-mapping.json"
+    },
+    {
+      "id": "COLOR_CONSISTENCY",
+      "status": "PASS",
+      "message": "All color references resolve to valid hex values"
+    },
+    {
+      "id": "FONT_RESOLUTION",
+      "status": "PASS",
+      "message": "All font variables resolved"
+    },
+    {
+      "id": "BREAKPOINT_CONSISTENCY",
+      "status": "PASS",
+      "message": "All breakpoint values are valid"
+    },
+    {
+      "id": "STYLE_CLASSES_BINDING",
+      "status": "PASS",
+      "message": "All style IDs are bound in settings.classes.value[]"
+    },
+    {
+      "id": "NO_HARDCODED_HEX",
+      "status": "PASS",
+      "message": "No hardcoded hex colors found in tree styles"
+    },
+    {
+      "id": "NO_PLAIN_STRINGS",
+      "status": "PASS",
+      "message": "No plain e-gv-* strings found (all properly $$type-wrapped)"
+    },
+    {
+      "id": "FONT_NAMES_QUOTED",
+      "status": "PASS",
+      "message": "All multi-word font names are quoted or use gv variables"
+    },
+    {
+      "id": "BASE_VARIANT_NULL",
+      "status": "PASS",
+      "message": "All base variants have breakpoint: null"
+    },
+    {
+      "id": "TABLET_VARIANTS",
+      "status": "PASS",
+      "message": "All responsive elements have tablet variant"
+    },
+    {
+      "id": "BACKGROUND_COLOR_GC",
+      "status": "PASS",
+      "message": "All background.color props use global color variables"
+    },
+    {
+      "id": "IMAGE_SRC_FORMAT",
+      "status": "PASS",
+      "message": "All image-src objects have correct format (exactly-one-non-null, no url: null)"
+    },
+    {
+      "id": "BORDER_RADIUS_FORMAT",
+      "status": "PASS",
+      "message": "All border-radius properties use correct format"
+    },
+    {
+      "id": "NO_EMPTY_CONTAINERS",
+      "status": "PASS",
+      "message": "No empty containers found"
+    },
+    {
+      "id": "HEADING_HIERARCHY",
+      "status": "PASS",
+      "message": "Heading hierarchy is logical (no skips, single h1)"
+    },
+    {
+      "id": "ALT_TEXT_PRESENT",
+      "status": "WARN",
+      "severity": "warning",
+      "message": "4 e-image element(s) missing alt text (accessibility)",
+      "details": {
+        "missing": [
+          {
+            "nodeId": "nnmq7j5pd"
+          },
+          {
+            "nodeId": "qcha457al"
+          },
+          {
+            "nodeId": "tghrrv6yd"
+          },
+          {
+            "nodeId": "d5hzbujuc"
+          }
+        ]
+      }
+    },
+    {
+      "id": "DOM_DEPTH",
+      "status": "WARN",
+      "severity": "warning",
+      "message": "12 node(s) exceed max DOM depth of 6",
+      "details": {
+        "maxDepth": 6,
+        "deepNodes": [
+          {
+            "nodeId": "zswvjy9ln",
+            "widgetType": "e-heading",
+            "depth": 7
+          },
+          {
+            "nodeId": "oa4q8obko",
+            "widgetType": "e-flexbox",
+            "depth": 7
+          },
+          {
+            "nodeId": "h0eqbr8hb",
+            "widgetType": "e-heading",
+            "depth": 8
+          },
+          {
+            "nodeId": "xsjdwyqvx",
+            "widgetType": "e-heading",
+            "depth": 8
+          },
+          {
+            "nodeId": "how6icx8r",
+            "widgetType": "e-heading",
+            "depth": 7
+          },
+          {
+            "nodeId": "b9rm8gqaq",
+            "widgetType": "e-heading",
+            "depth": 7
+          },
+          {
+            "nodeId": "z8yaswny5",
+            "widgetType": "e-div-block",
+            "depth": 7
+          },
+          {
+            "nodeId": "qcha457al",
+            "widgetType": "e-image",
+            "depth": 8
+          },
+          {
+            "nodeId": "tghrrv6yd",
+            "widgetType": "e-image",
+            "depth": 8
+          },
+          {
+            "nodeId": "d5hzbujuc",
+            "widgetType": "e-image",
+            "depth": 8
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "status": "OK",
+    "reason": "All critical checks passed",
+    "action": "2 warning(s) to review (build allowed)"
+  }
+}

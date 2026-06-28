@@ -1,0 +1,191 @@
+{
+  "source": "test4.nick-webdesign.de",
+  "post_id": 1950,
+  "post_title": "E2E Test - Hero Section",
+  "extracted_via": "novamira/elementor-get-content element_id=wqlkylrf1",
+  "extracted_at": "2026-06-15",
+  "element_type": "e-flexbox (complex 28-element tree with grid, sticky, absolute, multiple headings + e-image + e-button)",
+  "element": {
+    "id": "wqlkylrf1",
+    "elType": "e-flexbox",
+    "widgetType": "e-flexbox",
+    "settings": {
+      "classes": { "$$type": "classes", "value": ["fenode0"] },
+      "tag": { "$$type": "string", "value": "section" },
+      "link": { "$$type": "link", "value": [] }
+    },
+    "styles": {
+      "fenode0": {
+        "id": "fenode0",
+        "type": "class",
+        "label": "local",
+        "variants": [
+          {
+            "meta": { "breakpoint": "desktop", "state": null },
+            "props": { "display": { "$$type": "string", "value": "flex" } },
+            "custom_css": null
+          }
+        ]
+      }
+    },
+    "elements": [
+      {
+        "id": "zlvhvcg7l",
+        "elType": "e-flexbox",
+        "widgetType": "e-flexbox",
+        "settings": {
+          "classes": { "$$type": "classes", "value": ["fenode1"] },
+          "tag": { "$$type": "string", "value": "div" },
+          "link": { "$$type": "link", "value": [] }
+        },
+        "styles": {
+          "fenode1": {
+            "id": "fenode1",
+            "type": "class",
+            "label": "local",
+            "variants": [
+              {
+                "meta": { "breakpoint": "desktop", "state": null },
+                "props": {
+                  "padding": {
+                    "$$type": "dimensions",
+                    "value": {
+                      "block-start": { "$$type": "size", "value": { "size": 151, "unit": "px" } },
+                      "block-end": { "$$type": "size", "value": { "size": 112, "unit": "px" } },
+                      "inline-start": { "$$type": "size", "value": { "size": 30, "unit": "px" } },
+                      "inline-end": { "$$type": "size", "value": { "size": 30, "unit": "px" } }
+                    }
+                  },
+                  "display": { "$$type": "string", "value": "flex" },
+                  "flex-direction": { "$$type": "string", "value": "column" }
+                },
+                "custom_css": null
+              }
+            ]
+          }
+        },
+        "elements": [
+          {
+            "id": "sukbr6qol",
+            "elType": "e-div-block",
+            "widgetType": "e-div-block",
+            "settings": {
+              "classes": { "$$type": "classes", "value": ["fenode3"] },
+              "tag": { "$$type": "string", "value": "div" },
+              "link": { "$$type": "link", "value": [] }
+            },
+            "styles": {
+              "fenode3": {
+                "id": "fenode3",
+                "type": "class",
+                "label": "local",
+                "variants": [
+                  {
+                    "meta": { "breakpoint": "desktop", "state": null },
+                    "props": {
+                      "display": { "$$type": "string", "value": "grid" },
+                      "grid-template-columns": { "$$type": "string", "value": "1fr 1fr 1fr" }
+                    },
+                    "custom_css": null
+                  }
+                ]
+              }
+            },
+            "elements": [
+              {
+                "id": "vu2lknt43",
+                "elType": "widget",
+                "widgetType": "e-button",
+                "settings": {
+                  "text": {
+                    "$$type": "html-v3",
+                    "value": {
+                      "content": { "$$type": "string", "value": "Get Free Estimate" },
+                      "children": []
+                    }
+                  },
+                  "link": {
+                    "$$type": "link",
+                    "value": {
+                      "href": { "$$type": "string", "value": "/contact" },
+                      "isTargetBlank": { "$$type": "boolean", "value": false },
+                      "tag": { "$$type": "string", "value": "a" }
+                    }
+                  },
+                  "classes": { "$$type": "classes", "value": ["fenode62"] },
+                  "tag": { "$$type": "string", "value": "button" }
+                },
+                "styles": {
+                  "fenode62": {
+                    "id": "fenode62",
+                    "type": "class",
+                    "label": "local",
+                    "variants": [
+                      {
+                        "meta": { "breakpoint": "desktop", "state": null },
+                        "props": {},
+                        "custom_css": null
+                      }
+                    ]
+                  }
+                },
+                "elements": []
+              },
+              {
+                "id": "nnmq7j5pd",
+                "elType": "widget",
+                "widgetType": "e-image",
+                "settings": {
+                  "classes": { "$$type": "classes", "value": ["fenode42"] },
+                  "image": {
+                    "$$type": "image",
+                    "value": {
+                      "src": {
+                        "$$type": "image-src",
+                        "value": {
+                          "url": { "$$type": "url", "value": "https://framerusercontent.com/images/HyjQ7oy5eU7zePWICby3Ukt2dk.png" }
+                        }
+                      },
+                      "size": { "$$type": "string", "value": "full" }
+                    }
+                  },
+                  "link": { "$$type": "link", "value": [] }
+                },
+                "styles": {
+                  "fenode42": {
+                    "id": "fenode42",
+                    "type": "class",
+                    "label": "local",
+                    "variants": [
+                      {
+                        "meta": { "breakpoint": "desktop", "state": null },
+                        "props": {
+                          "width": { "$$type": "size", "value": { "size": 620, "unit": "px" } },
+                          "height": { "$$type": "size", "value": { "size": 620, "unit": "px" } },
+                          "position": { "$$type": "string", "value": "absolute" }
+                        },
+                        "custom_css": null
+                      }
+                    ]
+                  }
+                },
+                "elements": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "schema_observations": {
+    "container_widgetType_redundancy": "Atomic containers (e-flexbox, e-div-block) sometimes have BOTH elType and widgetType set to the same value (e.g. elType: 'e-flexbox', widgetType: 'e-flexbox'). This appears to be a quirk of how Elementor persists atomic container nodes — both fields point to the container type. Headless e-flexbox, e-div-block, e-image etc.",
+    "e_button_link_wrapped_shape": "On 1950 the e-button link uses the full wrapped shape: { $$type: 'link', value: { href: { $$type: 'string', value: '/contact' }, isTargetBlank: { $$type: 'boolean', value: false }, tag: { $$type: 'string', value: 'a' } } }. This is the canonical/portable shape; the simplified string-only form (1953) is also accepted by Elementor but is less safe.",
+    "e_image_two_shapes": "e-image src can be either: (a) id-based { id: { $$type: 'image-attachment-id', value: 1184 }, url: null } (Invariant IV — no url key when id set) OR (b) url-based { url: { $$type: 'url', value: 'https://...' } } (no id key). The 'url: null' literal in the id-based shape is critical — elementor-add-element description says 'Invariant IV: url omitted when id is set' but the Elementor storage format actually keeps the key with a null value.",
+    "container_link_default": "Containers have settings.link: { $$type: 'link', value: [] } when not used (empty array inside value)",
+    "grid_layout": "display: grid is supported with grid-template-columns: '1fr 1fr 1fr' (3-column grid) — wraps correctly as string property",
+    "border_radius_complete_shape": "border-radius always uses all 4 corners: { start-start, start-end, end-end, end-start } — even when all four are equal to 0 (full object, not shorthand)",
+    "padding_dimensions": "padding uses 'dimensions' with block-start/block-end/inline-start/inline-end (logical properties, not top/right/bottom/left)",
+    "h1_h2_via_tag": "e-heading tag property controls h1-h6; default appears to be h1 if not set",
+    "framer_image_urls": "e-image with Framer-CDN-URLs works (no need to upload to WP first) — elementor-add-element description: 'Provide either image_id (from media library) or image_url'"
+  }
+}

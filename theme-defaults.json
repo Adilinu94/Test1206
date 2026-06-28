@@ -1,0 +1,40 @@
+{
+  "_meta": {
+    "description": "WP-Theme-Defaults fuer den RC-11-Fallback in convert-xml-to-v4.js",
+    "usage": "node wizard.js --theme-defaults theme-defaults.json",
+    "generated_by": "Manuell befuellen via: npx novamira-mcp get-theme-defaults --target solar-local",
+    "last_updated": null,
+    "site": null
+  },
+  "_instructions": "Dieses File mit echten Werten aus solar.local befuellen. Dazu MCP-Session starten und adrians-export-design-system aufrufen. Die Werte hier werden als letzter RC-11-Fallback verwendet wenn styleMap leer ist.",
+  "typography": {
+    "font_family_primary": null,
+    "font_family_secondary": null,
+    "font_size_base": null,
+    "font_size_h1": null,
+    "font_size_h2": null,
+    "font_size_h3": null,
+    "line_height_base": null,
+    "font_weight_normal": null,
+    "font_weight_bold": null
+  },
+  "colors": {
+    "primary": null,
+    "secondary": null,
+    "accent": null,
+    "text": null,
+    "background": null,
+    "border": null
+  },
+  "spacing": {
+    "section_padding_vertical": null,
+    "section_padding_horizontal": null,
+    "container_max_width": null,
+    "gap_default": null
+  },
+  "breakpoints": {
+    "mobile_max": 767,
+    "tablet_max": 1024,
+    "desktop_min": 1025
+  }
+}

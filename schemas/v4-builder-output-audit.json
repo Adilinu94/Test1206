@@ -1,0 +1,248 @@
+{
+  "generated_at": "2026-06-16T07:50:43.519Z",
+  "source_fixtures": [
+    "hero-only-v4-fixed.json",
+    "hero-only-v4.json",
+    "hero-phase4.json",
+    "hero-v4-tree-fixed.json",
+    "hero-v4-tree.json",
+    "homepage-v4-tree.json",
+    "token-mapping.json"
+  ],
+  "element_counts": {
+    "total": 276,
+    "per_widget_type": {
+      "e-flexbox": 116,
+      "e-div-block": 37,
+      "e-heading": 82,
+      "e-button": 1,
+      "e-image": 11,
+      "e-component": 29
+    },
+    "per_elType": {
+      "e-flexbox": 116,
+      "e-div-block": 37,
+      "widget": 123
+    }
+  },
+  "responsive": {
+    "breakpoints_observed": [
+      "desktop"
+    ],
+    "states_observed": []
+  },
+  "property_samples": {
+    "border-radius": [
+      "border-radius"
+    ],
+    "bottom": [
+      "size"
+    ],
+    "color": [
+      "color"
+    ],
+    "display": [
+      "string"
+    ],
+    "flex-direction": [
+      "unknown"
+    ],
+    "font-family": [
+      "string"
+    ],
+    "font-size": [
+      "size"
+    ],
+    "font-weight": [
+      "string"
+    ],
+    "grid-template-columns": [
+      "string"
+    ],
+    "height": [
+      "size"
+    ],
+    "left": [
+      "size"
+    ],
+    "max-width": [
+      "size"
+    ],
+    "padding": [
+      "dimensions"
+    ],
+    "position": [
+      "string"
+    ],
+    "right": [
+      "size"
+    ],
+    "top": [
+      "size"
+    ],
+    "width": [
+      "size"
+    ]
+  },
+  "class_id_samples": [
+    "feej9hrmt7x",
+    "fenode0",
+    "fenode02",
+    "fenode03",
+    "fenode1",
+    "fenode110",
+    "fenode12",
+    "fenode13",
+    "fenode14",
+    "fenode15",
+    "fenode16",
+    "fenode17",
+    "fenode18",
+    "fenode19",
+    "fenode2",
+    "fenode22",
+    "fenode23",
+    "fenode24",
+    "fenode25",
+    "fenode26",
+    "fenode27",
+    "fenode28",
+    "fenode3",
+    "fenode310",
+    "fenode311",
+    "fenode312",
+    "fenode313",
+    "fenode314",
+    "fenode315",
+    "fenode316",
+    "fenode32",
+    "fenode33",
+    "fenode34",
+    "fenode35",
+    "fenode36",
+    "fenode37",
+    "fenode38",
+    "fenode39",
+    "fenode4",
+    "fenode410",
+    "fenode411",
+    "fenode412",
+    "fenode413",
+    "fenode414",
+    "fenode415",
+    "fenode416",
+    "fenode417",
+    "fenode418",
+    "fenode419",
+    "fenode42",
+    "fenode420",
+    "fenode421",
+    "fenode422",
+    "fenode423",
+    "fenode424",
+    "fenode425",
+    "fenode426",
+    "fenode427",
+    "fenode428",
+    "fenode429",
+    "fenode43",
+    "fenode430",
+    "fenode431",
+    "fenode432",
+    "fenode44",
+    "fenode45",
+    "fenode46",
+    "fenode47",
+    "fenode48",
+    "fenode49",
+    "fenode5",
+    "fenode510",
+    "fenode511",
+    "fenode512",
+    "fenode513",
+    "fenode514",
+    "fenode515",
+    "fenode516",
+    "fenode517",
+    "fenode518",
+    "fenode519",
+    "fenode52",
+    "fenode520",
+    "fenode521",
+    "fenode522",
+    "fenode523",
+    "fenode524",
+    "fenode525",
+    "fenode526",
+    "fenode527",
+    "fenode528",
+    "fenode529",
+    "fenode53",
+    "fenode530",
+    "fenode531",
+    "fenode532",
+    "fenode533",
+    "fenode534",
+    "fenode535",
+    "fenode54",
+    "fenode55",
+    "fenode56",
+    "fenode57",
+    "fenode58",
+    "fenode59",
+    "fenode6",
+    "fenode62",
+    "fenode63",
+    "fenode64",
+    "fenode65",
+    "fenode66",
+    "fenode67",
+    "fenode7",
+    "fenode72",
+    "fenode73",
+    "fenode74",
+    "fenode75",
+    "fenode76",
+    "fenode77",
+    "fenode8",
+    "fenode82",
+    "fenode83",
+    "fenode84",
+    "fenode85",
+    "fenode86",
+    "fey8flrz93g"
+  ],
+  "invariant_violations": [],
+  "invariant_definitions": [
+    {
+      "id": "I",
+      "name": "local-class-id-resolved",
+      "severity": "warn"
+    },
+    {
+      "id": "III",
+      "name": "class-id-format",
+      "severity": "error"
+    },
+    {
+      "id": "IV",
+      "name": "image-src-id-vs-url",
+      "severity": "error"
+    },
+    {
+      "id": "fix-3-4",
+      "name": "html-v3-wrapper",
+      "severity": "error"
+    },
+    {
+      "id": "fix-5",
+      "name": "classes-object",
+      "severity": "error"
+    },
+    {
+      "id": "fix-2",
+      "name": "elType-vs-widgetType",
+      "severity": "error"
+    }
+  ]
+}

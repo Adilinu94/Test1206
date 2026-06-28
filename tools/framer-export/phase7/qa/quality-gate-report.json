@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "generated_at": "2026-06-15T16:40:08.257Z",
+    "tree": "tools/framer-export/phase7/hero-section.json",
+    "min_score": 85
+  },
+  "pipeline": {
+    "total_steps": 6,
+    "passed": 3,
+    "failed": 2,
+    "skipped": 1,
+    "blocked": true
+  },
+  "steps": [
+    {
+      "step": "pre-build-validate",
+      "passed": false,
+      "score": 0,
+      "report": null
+    },
+    {
+      "step": "quality-metrics",
+      "passed": true,
+      "report": null
+    },
+    {
+      "step": "structural-validation",
+      "passed": false,
+      "score": 83,
+      "report": "passed,score,threshold,blocked,mode"
+    },
+    {
+      "step": "build-binding",
+      "passed": true,
+      "report": null
+    },
+    {
+      "step": "section-compare",
+      "passed": null,
+      "skipped": true,
+      "report": null
+    },
+    {
+      "step": "auto-fix",
+      "passed": true,
+      "report": null
+    }
+  ],
+  "summary": {
+    "status": "BLOCKED",
+    "message": "Build blocked: Pre-build validation score 0% < 85%"
+  }
+}

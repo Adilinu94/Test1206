@@ -1,0 +1,235 @@
+{
+  "generated_at": "2026-06-16T07:50:43.515Z",
+  "source_fixtures": [
+    "post-1819-f97c4bb.json",
+    "post-1859-c1cd6ac.json",
+    "post-1938-hero-container.json",
+    "post-1950-wqlkylrf1.json",
+    "post-1953-full.json"
+  ],
+  "element_counts": {
+    "total": 20,
+    "per_widget_type": {
+      "e-heading": 5,
+      "e-paragraph": 2,
+      "e-flexbox": 2,
+      "e-div-block": 1,
+      "e-button": 2,
+      "e-image": 1
+    },
+    "per_elType": {
+      "e-div-block": 4,
+      "widget": 10,
+      "e-flexbox": 6
+    }
+  },
+  "responsive": {
+    "breakpoints_observed": [
+      "desktop",
+      "mobile"
+    ],
+    "states_observed": []
+  },
+  "property_samples": {
+    "align-items": [
+      "string"
+    ],
+    "align-self": [
+      "string"
+    ],
+    "background": [
+      "background"
+    ],
+    "color": [
+      "color"
+    ],
+    "display": [
+      "string"
+    ],
+    "flex-direction": [
+      "string"
+    ],
+    "font-size": [
+      "size"
+    ],
+    "grid-template-columns": [
+      "string"
+    ],
+    "height": [
+      "size"
+    ],
+    "inset-block-start": [
+      "size"
+    ],
+    "justify-content": [
+      "string"
+    ],
+    "max-width": [
+      "size"
+    ],
+    "min-height": [
+      "size"
+    ],
+    "min-width": [
+      "size"
+    ],
+    "padding": [
+      "dimensions"
+    ],
+    "position": [
+      "string"
+    ],
+    "scroll-margin-top": [
+      "size"
+    ],
+    "text-align": [
+      "string"
+    ],
+    "width": [
+      "size"
+    ],
+    "z-index": [
+      "number"
+    ]
+  },
+  "class_id_samples": [
+    "e-c1cd6ac-a8994ff",
+    "e-d409098-f7cf604",
+    "e-f97c4bb-d1ed80e",
+    "e-s-hero-actions-local",
+    "e-s-hero-content-local",
+    "e-s-hero-cta-local",
+    "e-s-hero-local",
+    "e-s-hero-subtitle-local",
+    "e-s-hero-title-local",
+    "fenode0",
+    "fenode1",
+    "fenode3",
+    "fenode42",
+    "fenode62",
+    "g-479cde0",
+    "g-5ff504c",
+    "g-74b73e5",
+    "g-8215a39",
+    "s-hero-container",
+    "s-hero-heading"
+  ],
+  "invariant_violations": [
+    {
+      "file": "post-1859-c1cd6ac.json",
+      "invariant": "I",
+      "name": "local-class-id-resolved",
+      "severity": "warn",
+      "missing": [
+        "e-c1cd6ac-a8994ff"
+      ],
+      "classes": [
+        "e-c1cd6ac-a8994ff"
+      ]
+    },
+    {
+      "file": "post-1953-full.json",
+      "invariant": "I",
+      "name": "local-class-id-resolved",
+      "severity": "warn",
+      "missing": [
+        "e-s-hero-local"
+      ],
+      "classes": [
+        "e-s-hero-local"
+      ]
+    },
+    {
+      "file": "post-1953-full.json",
+      "invariant": "I",
+      "name": "local-class-id-resolved",
+      "severity": "warn",
+      "missing": [
+        "e-s-hero-content-local"
+      ],
+      "classes": [
+        "e-s-hero-content-local"
+      ]
+    },
+    {
+      "file": "post-1953-full.json",
+      "invariant": "I",
+      "name": "local-class-id-resolved",
+      "severity": "warn",
+      "missing": [
+        "e-s-hero-title-local"
+      ],
+      "classes": [
+        "e-s-hero-title-local"
+      ]
+    },
+    {
+      "file": "post-1953-full.json",
+      "invariant": "I",
+      "name": "local-class-id-resolved",
+      "severity": "warn",
+      "missing": [
+        "e-s-hero-subtitle-local"
+      ],
+      "classes": [
+        "e-s-hero-subtitle-local"
+      ]
+    },
+    {
+      "file": "post-1953-full.json",
+      "invariant": "I",
+      "name": "local-class-id-resolved",
+      "severity": "warn",
+      "missing": [
+        "e-s-hero-actions-local"
+      ],
+      "classes": [
+        "e-s-hero-actions-local"
+      ]
+    },
+    {
+      "file": "post-1953-full.json",
+      "invariant": "I",
+      "name": "local-class-id-resolved",
+      "severity": "warn",
+      "missing": [
+        "e-s-hero-cta-local"
+      ],
+      "classes": [
+        "e-s-hero-cta-local"
+      ]
+    }
+  ],
+  "invariant_definitions": [
+    {
+      "id": "I",
+      "name": "local-class-id-resolved",
+      "severity": "warn"
+    },
+    {
+      "id": "III",
+      "name": "class-id-format",
+      "severity": "error"
+    },
+    {
+      "id": "IV",
+      "name": "image-src-id-vs-url",
+      "severity": "error"
+    },
+    {
+      "id": "fix-3-4",
+      "name": "html-v3-wrapper",
+      "severity": "error"
+    },
+    {
+      "id": "fix-5",
+      "name": "classes-object",
+      "severity": "error"
+    },
+    {
+      "id": "fix-2",
+      "name": "elType-vs-widgetType",
+      "severity": "error"
+    }
+  ]
+}
