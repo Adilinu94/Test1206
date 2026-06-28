@@ -19,6 +19,6 @@
     "noUnusedParameters": false,
     "noImplicitReturns": false
   },
-  "include": ["scripts/**/*.ts", "scripts/**/*.js", "wizard.js"],
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "scripts/**/*.js", "wizard.js"],
   "exclude": ["node_modules", "dist", "tests", "tools", "docs", "novamira-skill", "novamira-adrianv2", "novamira-ability-code-injector", "tasks", "FramerExport", "research"]
 }

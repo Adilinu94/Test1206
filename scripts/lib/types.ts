@@ -18,6 +18,12 @@ export interface PhaseRecord {
   error?: string;
 }
 
+export interface ArtifactRecord {
+  path: string;
+  hash: string;
+  timestamp: string;
+}
+
 export interface PipelineState {
   version: string;
   startedAt: string;
@@ -26,6 +32,7 @@ export interface PipelineState {
   framerUrl: string;
   postId: number | null;
   phases: Record<string, PhaseRecord>;
+  artifacts?: Record<string, ArtifactRecord>;
 }
 
 export interface CreateStateOptions {

@@ -17,7 +17,8 @@
 import fs from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
-import type { PipelineState, PhaseRecord, PhaseStatus, CreateStateOptions } from './types.js';
+import { createHash } from 'node:crypto';
+import type { PipelineState, PhaseRecord, PhaseStatus, CreateStateOptions, ArtifactRecord } from './types.js';
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
@@ -222,8 +223,201 @@ export function formatStateReport(state: PipelineState): string {
     }
   }
 
+  // ── Artifacts Section (UMBAUPLAN Phase 1.3) ─────────────────────────────
+  if (state.artifacts && Object.keys(state.artifacts).length > 0) {
+    lines.push('', '  Artifacts:');
+    for (const [key, artifact] of Object.entries(state.artifacts)) {
+      const shortHash = artifact.hash.slice(0, 12);
+      lines.push(`    📦 ${key}: ${artifact.path} (sha256:${shortHash}…)`);
+    }
+  }
+
   return lines.join('\n');
 }
+
+// ── Artifact Management (UMBAUPLAN Phase 1.3) ────────────────────────────────
+
+/**
+ * Compute SHA-256 hash of any JSON-serializable content.
+ * Used for artifact integrity verification.
+ */
+export function calculateHash(content: unknown): string {
+  return createHash('sha256')
+    .update(JSON.stringify(content ?? null))
+    .digest('hex');
+}
+
+/**
+ * Register an artifact in the pipeline state with SHA-256 integrity hash.
+ * Reads the file at `artifactPath`, hashes its content, and stores the
+ * path + hash + timestamp in `state.artifacts`.
+ *
+ * If `statePath` is provided, the updated state is persisted immediately.
+ */
+export async function addArtifact(
+  state: PipelineState,
+  key: string,
+  artifactPath: string,
+  statePath?: string,
+): Promise<PipelineState> {
+  const abs = path.resolve(artifactPath);
+
+  let content: string;
+  try {
+    content = await fs.readFile(abs, 'utf-8');
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`addArtifact: cannot read "${abs}": ${msg}`);
+  }
+
+  // Try to parse as JSON for structured hashing; fall back to raw string
+  let parsed: unknown = content;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    // Not JSON — hash the raw string
+  }
+
+  const hash = calculateHash(parsed);
+  const timestamp = new Date().toISOString();
+
+  const updated: PipelineState = {
+    ...state,
+    artifacts: {
+      ...(state.artifacts || {}),
+      [key]: { path: abs, hash, timestamp },
+    },
+  };
+
+  if (statePath) {
+    return saveState(updated, statePath);
+  }
+  return updated;
+}
+
+/**
+ * Result of a single artifact integrity check.
+ */
+export interface ArtifactVerificationResult {
+  key: string;
+  path: string;
+  valid: boolean;
+  expectedHash?: string;
+  actualHash?: string;
+  error?: string;
+}
+
+/**
+ * Verify integrity of all registered artifacts.
+ *
+ * Re-reads each artifact file, re-computes its SHA-256 hash,
+ * and compares against the stored hash. Returns a detailed
+ * result for each artifact.
+ *
+ * @returns { valid: boolean, results: ArtifactVerificationResult[] }
+ */
+export async function verifyArtifactIntegrity(
+  state: PipelineState,
+): Promise<{ valid: boolean; results: ArtifactVerificationResult[] }> {
+  const artifacts = state.artifacts || {};
+  const entries = Object.entries(artifacts);
+
+  if (entries.length === 0) {
+    return { valid: true, results: [] };
+  }
+
+  const results: ArtifactVerificationResult[] = [];
+
+  for (const [key, artifact] of entries) {
+    const result: ArtifactVerificationResult = {
+      key,
+      path: artifact.path,
+      valid: false,
+      expectedHash: artifact.hash,
+    };
+
+    try {
+      const content = await fs.readFile(artifact.path, 'utf-8');
+
+      let parsed: unknown = content;
+      try {
+        parsed = JSON.parse(content);
+      } catch {
+        // Not JSON — hash the raw string
+      }
+
+      const actualHash = calculateHash(parsed);
+      result.actualHash = actualHash;
+      result.valid = actualHash === artifact.hash;
+    } catch (err: unknown) {
+      result.error = err instanceof Error ? err.message : String(err);
+    }
+
+    results.push(result);
+  }
+
+  const valid = results.every(r => r.valid);
+  return { valid, results };
+}
+
+/**
+ * List all registered artifacts with their metadata.
+ */
+export function listArtifacts(
+  state: PipelineState,
+): Array<{ key: string } & ArtifactRecord> {
+  const artifacts = state.artifacts || {};
+  return Object.entries(artifacts).map(([key, record]) => ({
+    key,
+    ...record,
+  }));
+}
+
+/**
+ * Remove a single artifact from the state.
+ * If `statePath` is provided, the updated state is persisted immediately.
+ */
+export async function removeArtifact(
+  state: PipelineState,
+  key: string,
+  statePath?: string,
+): Promise<PipelineState> {
+  if (!state.artifacts || !state.artifacts[key]) {
+    return state; // nothing to remove
+  }
+
+  const { [key]: _removed, ...remaining } = state.artifacts;
+  const updated: PipelineState = {
+    ...state,
+    artifacts: remaining,
+  };
+
+  if (statePath) {
+    return saveState(updated, statePath);
+  }
+  return updated;
+}
+
+/**
+ * Remove all artifacts from the state.
+ * If `statePath` is provided, the updated state is persisted immediately.
+ */
+export async function clearArtifacts(
+  state: PipelineState,
+  statePath?: string,
+): Promise<PipelineState> {
+  const updated: PipelineState = {
+    ...state,
+    artifacts: {},
+  };
+
+  if (statePath) {
+    return saveState(updated, statePath);
+  }
+  return updated;
+}
+
+// ── State Cleanup ────────────────────────────────────────────────────────────
 
 /**
  * Delete the state file (e.g. after a successful full run, or via --clean).
