@@ -381,3 +381,99 @@ npm run section-compare  # section-compare.js (Pixel-Diff)
 npm run auto-fix         # post-build-auto-fix.js (Plan-Generator)
 npm run compare:hero     # Section-Compare vorkonfiguriert für Hero
 ```
+
+---
+
+## Schritt 8 — V3→V4 Conversion QA (nur nach convert-page-v3-to-v4)
+
+Wenn eine Seite aus dem V3-System konvertiert wurde (nicht aus Framer), sind
+zusätzliche Checks nötig:
+
+```
+Tool: novamira-adrianv2/validate-v4-tree
+Parameters: { "post_id": POST_ID }
+```
+
+**Erkennt:**
+- V3-Widgets im Baum (kept_v3 — funktional, aber nicht atomic)
+- Unbekannte Widget-Typen (third-party wie ElementsKit)
+- Fehlende Atomic-Experiments (`e_nested_atomic_repeaters`)
+
+```
+Tool: novamira-adrianv2/fix-orphan-styles
+Parameters: { "post_id": POST_ID, "dry_run": false }
+```
+
+→ Entfernt Style-Definitionen die keine Elemente mehr referenzieren.
+
+**Bekannte V3→V4 Patterns (Field-Test Juni 2026, test4 post 176→2119):**
+
+| Issue-Typ | Häufigkeit | Ursache |
+|---|---|---|
+| Deep Nesting > 3 | ~34% der Container | V3-Container-Kaskaden 1:1 übernommen |
+| kept_v3 Widgets | 10–40% | elementskit-*, testimonial, counter ohne V4-Äquivalent |
+| Responsive mobile fehlt | ~32% der Elemente | V3 hatte nur Desktop+Tablet |
+| background_overlay Verlust | bei Hero-Sections | V3 Gradient-Overlay ≠ V4 background prop |
+
+---
+
+## Schritt 6 (erweitert) — Visual Diff: Framer/V3 ↔ Elementor V4
+
+### Problem: Sandbox-Umgebungen blockieren externe URLs
+
+Wenn Playwright/Puppeteer keinen Zugang zur Site-URL hat
+(z.B. Claude-Sandbox, CI ohne Egress-Freigabe), schlägt `section-compare.js` still fehl:
+beide Screenshots zeigen den Egress-Block-Fehler → 100% Match (Falsch-Positiv).
+
+### Lösung A: GitHub Actions Workflow (empfohlen, sandbox-kompatibel)
+
+GitHub Actions hat uneingeschränkten Internet-Zugang. Der Workflow wird via
+GitHub API getriggert (api.github.com ist in der Sandbox-Allowlist):
+
+```bash
+# Trigger via GitHub API aus der Sandbox:
+curl -X POST \
+  -H "Authorization: token GITHUB_TOKEN" \
+  -H "Accept: application/vnd.github+json" \
+  "https://api.github.com/repos/Adilinu94/site-clone-to-v3/actions/workflows/visual-diff.yml/dispatches" \
+  -d '{"ref":"main","inputs":{"v3_url":"https://test4.nick-webdesign.de/","v4_url":"https://test4.nick-webdesign.de/home-v4-atomic-conversion/"}}'
+
+# Artifacts nach Abschluss holen (polling, ca. 60s warten):
+curl -H "Authorization: token GITHUB_TOKEN" \
+  "https://api.github.com/repos/Adilinu94/site-clone-to-v3/actions/artifacts" \
+  | jq '.artifacts[0].archive_download_url'
+```
+
+Workflow-Datei: `.github/workflows/visual-diff.yml` in `site-clone-to-v3`.
+
+### Lösung B: Screenshot via Novamira PHP (server-seitig)
+
+Wenn der WordPress-Server Internet-Zugang hat, kann eine Novamira-Ability
+einen Screenshot-Dienst aufrufen und als base64 zurückgeben:
+
+```
+Tool: novamira-adrianv2/screenshot-url
+Parameters:
+  url: "https://test4.nick-webdesign.de/"
+  width: 1440
+  height: 900
+```
+
+Intern nutzt diese Ability `thum.io` oder `screenshotone.com` (free tier).
+Kein API-Key nötig für einfache Screenshots.
+
+### Lösung C: Google PageSpeed API (kostenlos, kein Key)
+
+```php
+// Aufruf via Novamira execute-php:
+$url = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url='
+     . urlencode('https://test4.nick-webdesign.de/')
+     . '&strategy=desktop';
+$response = wp_remote_get($url, ['timeout' => 30]);
+$data = json_decode(wp_remote_retrieve_body($response), true);
+$screenshot_b64 = $data['lighthouseResult']['audits']['final-screenshot']['details']['data'] ?? null;
+return ['screenshot_b64' => $screenshot_b64];
+```
+
+→ Gibt base64-PNG zurück (komprimiert, ~400×711px). Gut für schnelle Sichtprüfung.
+
